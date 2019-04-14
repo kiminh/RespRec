@@ -1,6 +1,6 @@
 python run_unfair.py dataset/ml100k \
   --model CDAE \
-  --num_epochs 50
+  --num_epochs 40
 exit
 
 

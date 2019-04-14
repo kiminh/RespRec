@@ -99,6 +99,8 @@ if __name__ == '__main__':
       exit()
     model.build_network()
     model.execute(train_data, test_data)
+    print('Final: %04d; ' % (args.num_epochs), end='')
+    model.test()
     # save result
     with open(result_file, 'w') as fout:
       for u in model.test_users:

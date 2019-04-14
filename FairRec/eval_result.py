@@ -1,6 +1,8 @@
 from os import path
 
 import argparse
+import math
+import numpy as np
 import pandas as pd
 
 import read_data
@@ -11,24 +13,25 @@ def parse_args():
   parser.add_argument('result_file', type=str)
   return parser.parse_args()
 
-def precision_recall_ndcg_at_k(k, rankedlist, test_matrix):
-    idcg_k = 0
-    dcg_k = 0
-    n_k = k if len(test_matrix) > k else len(test_matrix)
-    for i in range(n_k):
-        idcg_k += 1 / math.log(i + 2, 2)
+def eval_prec(k, rank_list, test_item):
+  test_item = set(test_item)
+  count = 0.0
+  for i in range(k):
+    if rank_list[i] in test_item:
+      count += 1.0
+  return count / k
 
-    b1 = rankedlist
-    b2 = test_matrix
-    s2 = set(b2)
-    hits = [(idx, val) for idx, val in enumerate(b1) if val in s2]
-    count = len(hits)
-
-    for c in range(count):
-        dcg_k += 1 / math.log(hits[c][0] + 2, 2)
-
-    return float(count / k), float(count / len(test_matrix)), float(dcg_k / idcg_k)
-
+def eval_ndcg(k, rank_list, test_item):
+  test_item = set(test_item)
+  idcg = 0.0
+  ik = min(k, len(test_item))
+  for i in range(ik):
+    idcg += 1.0 / math.log(i + 2, 2)
+  dcg = 0.0
+  for i in range(k):
+    if rank_list[i] in test_item:
+      dcg += 1.0 / math.log(i + 2, 2)
+  return dcg / idcg
 
 if __name__ == '__main__':
   args = parse_args()
@@ -48,38 +51,32 @@ if __name__ == '__main__':
       rank_list = [int(i) for i in fields[1:]]
       result_data[u] = rank_list
 
+  prec_at_5_list = []
+  prec_at_10_list = []
+  ndcg_at_5_list = []
+  ndcg_at_10_list = []
   for u, test_item in test_data.items():
+    if u not in result_data:
+      print(u)
+      continue
     rank_list = result_data[u]
-    print(u)
-    print(test_item)
-    print(rank_list)
-    input()
-    # for u in self.test_users:
-    #     user_ids = []
-    #     user_neg_items = self.neg_items[u]
-    #     item_ids = []
-    #     # scores = []
-    #     for j in user_neg_items:
-    #         item_ids.append(j)
-    #         user_ids.append(u)
+    prec_at_5 = eval_prec(5, rank_list, test_item)
+    prec_at_5_list.append(prec_at_5)
+    prec_at_10 = eval_prec(10, rank_list, test_item)
+    prec_at_10_list.append(prec_at_10)
+    ndcg_at_5 = eval_ndcg(5, rank_list, test_item)
+    ndcg_at_5_list.append(ndcg_at_5)
+    ndcg_at_10 = eval_ndcg(10, rank_list, test_item)
+    ndcg_at_10_list.append(ndcg_at_10)
+  prec_at_5 = np.mean(prec_at_5_list)
+  prec_at_10 = np.mean(prec_at_10_list)
+  ndcg_at_5 = np.mean(ndcg_at_5_list)
+  ndcg_at_10 = np.mean(ndcg_at_10_list)
+  print('precision@5: %.6f' % (prec_at_5))
+  print('precision@10: %.6f' % (prec_at_10))
+  print('ndcg@5: %.6f' % (ndcg_at_5))
+  print('ndcg@10: %.6f' % (ndcg_at_10))
 
-    #     scores = self.predict(user_ids, item_ids)
-    #     neg_item_index = list(zip(item_ids, scores))
 
-    #     ranked_list[u] = sorted(neg_item_index, key=lambda tup: tup[1], reverse=True)
-    #     pred_ratings[u] = [r[0] for r in ranked_list[u]]
-    #     pred_ratings_5[u] = pred_ratings[u][:5]
-    #     pred_ratings_10[u] = pred_ratings[u][:10]
 
-    #     p_5, r_5, ndcg_5 = precision_recall_ndcg_at_k(5, pred_ratings_5[u], self.test_data[u])
-    #     p_at_5.append(p_5)
-    #     r_at_5.append(r_5)
-    #     ndcg_at_5.append(ndcg_5)
-    #     p_10, r_10, ndcg_10 = precision_recall_ndcg_at_k(10, pred_ratings_10[u], self.test_data[u])
-    #     p_at_10.append(p_10)
-    #     r_at_10.append(r_10)
-    #     ndcg_at_10.append(ndcg_10)
-    #     map_u, mrr_u, ndcg_u = map_mrr_ndcg(pred_ratings[u], self.test_data[u])
-    #     map.append(map_u)
-    #     mrr.append(mrr_u)
-    #     ndcg.append(ndcg_u)
+

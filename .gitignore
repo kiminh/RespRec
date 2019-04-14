@@ -1,4 +1,5 @@
 # RespRec
+*.DS_Store
 GitHub/
 # Dataset
 ml100k
