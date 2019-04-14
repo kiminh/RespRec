@@ -18,7 +18,7 @@ if not path.exists(out_dir):
 out_train_file = path.join(out_dir, 'train.data')
 out_test_file = path.join(out_dir, 'test.data')
 out_stat_file = path.join(out_dir, 'data.stat')
-out_user_file = path.join(out_dir, 'user.info')
+out_user_file = path.join(out_dir, 'user.attr')
 
 all_ratings = pd.read_csv(in_rating_file, sep='\t', names=['u', 'i', 'r', 't'])
 # all_ratings = all_ratings.sort_values(['t', 'i'])
