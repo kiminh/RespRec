@@ -8,6 +8,7 @@ import pandas as pd
 dnld_dir = path.expanduser('~/Downloads')
 in_dir = path.join(dnld_dir, 'ml-100k')
 in_rating_file = path.join(in_dir, 'u.data')
+in_user_file = path.join(in_dir, 'u.user')
 
 cur_dir = path.dirname(path.realpath(__file__))
 dataset = path.basename(__file__).split('.')[0]
@@ -17,10 +18,13 @@ if not path.exists(out_dir):
 out_train_file = path.join(out_dir, 'train.data')
 out_test_file = path.join(out_dir, 'test.data')
 out_stat_file = path.join(out_dir, 'data.stat')
+out_user_file = path.join(out_dir, 'user.info')
 
 all_ratings = pd.read_csv(in_rating_file, sep='\t', names=['u', 'i', 'r', 't'])
 # all_ratings = all_ratings.sort_values(['t', 'i'])
 all_ratings = utils.shuffle(all_ratings)
+all_ratings.u = all_ratings.u - 1
+all_ratings.i = all_ratings.i - 1
 num_users = all_ratings.u.unique().shape[0]
 num_items = all_ratings.i.unique().shape[0]
 
@@ -43,6 +47,10 @@ with open(out_stat_file, 'w') as fout:
   fout.write('#test=%d\n' % (test_size))
 
 
+user_info = pd.read_csv(in_user_file, sep='|', names=['u', 'a', 'g', 'o', 'c'])
+user_info.u = user_info.u - 1
+kwargs['columns'] = ['u', 'g']
+user_info.to_csv(out_user_file, **kwargs)
 
 
 

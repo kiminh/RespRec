@@ -1,8 +1,9 @@
 # RespRec
 GitHub/
-
 # Dataset
 ml100k
+# Result
+*.tmp
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
