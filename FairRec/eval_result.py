@@ -22,6 +22,7 @@ def eval_prec(k, rank_list, test_item):
   return count / k
 
 def eval_ndcg(k, rank_list, test_item):
+  assert len(test_item) > 0
   test_item = set(test_item)
   idcg = 0.0
   ik = min(k, len(test_item))
@@ -60,8 +61,10 @@ if __name__ == '__main__':
   ndcg_at_5_dict = {}
   ndcg_at_10_dict = {}
   for u, test_item in test_data.items():
+    if len(test_item) == 0:
+      continue
     if u not in result_data:
-      print('user %d does not exist on test data' % (u))
+      print('user %d does not exist on result data' % (u))
       continue
     rank_list = result_data[u]
     prec_at_5 = eval_prec(5, rank_list, test_item)

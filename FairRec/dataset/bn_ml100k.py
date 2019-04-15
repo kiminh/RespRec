@@ -2,6 +2,7 @@ from os import path
 from sklearn import utils
 
 import math
+import numpy as np
 import os
 import pandas as pd
 
@@ -127,9 +128,16 @@ for attr in attr_list:
   print('%s #users=%d #ratings=%d average=%.2f' % (p_data))
 
 all_ratings = all_ratings[all_ratings.u.isin(m_set.union(f_set))]
+user_list = sorted(all_ratings.u.unique())
+user_dict = {u: i for i, u in enumerate(user_list)}
+item_list = sorted(all_ratings.i.unique())
+item_dict = {i: j for j, i in enumerate(item_list)}
+all_ratings.u = all_ratings.u.map(user_dict)
+all_ratings.i = all_ratings.i.map(item_dict)
 
 num_users = all_ratings.u.unique().shape[0]
 num_items = all_ratings.i.unique().shape[0]
+all_ratings = all_ratings.reindex(np.random.permutation(all_ratings.index))
 num_ratings = all_ratings.shape[0]
 train_size = math.ceil(0.8 * num_ratings)
 kwargs = {'sep': '\t', 'header': False, 'index':False}
@@ -148,11 +156,30 @@ with open(out_stat_file, 'w') as fout:
   fout.write('#train=%d\n' % (train_size))
   fout.write('#test=%d\n' % (test_size))
 
-
-user_info = pd.read_csv(in_user_file, sep='|', names=['u', 'a', 'g', 'o', 'c'])
-user_info.u = user_info.u - 1
+user_attr = pd.read_csv(in_user_file, sep='|', names=['u', 'a', 'g', 'o', 'c'])
+user_attr.u = user_attr.u - 1
+user_attr = user_attr[user_attr.u.isin(m_set.union(f_set))]
+user_attr.u = user_attr.u.map(user_dict)
 kwargs['columns'] = ['u', 'g']
-user_info.to_csv(out_user_file, **kwargs)
+user_attr.to_csv(out_user_file, **kwargs)
+
+user_attr = user_attr.set_index('u').to_dict()['g']
+m_train_size = 0
+f_train_size = 0
+for row in train_ratings.itertuples():
+  attr = user_attr[row.u]
+  if attr == 'M':
+    m_train_size += 1
+  elif attr == 'F':
+    f_train_size += 1
+  else:
+    raise Exception('unknown attribute %s' % (attr))
+d_train_size = abs(m_train_size - f_train_size)
+print('train m=%d f=%d d=%d' % (m_train_size, f_train_size, d_train_size))
+
+
+
+
 
 
 

@@ -47,10 +47,10 @@ with open(out_stat_file, 'w') as fout:
   fout.write('#test=%d\n' % (test_size))
 
 
-user_info = pd.read_csv(in_user_file, sep='|', names=['u', 'a', 'g', 'o', 'c'])
-user_info.u = user_info.u - 1
+user_attr = pd.read_csv(in_user_file, sep='|', names=['u', 'a', 'g', 'o', 'c'])
+user_attr.u = user_attr.u - 1
 kwargs['columns'] = ['u', 'g']
-user_info.to_csv(out_user_file, **kwargs)
+user_attr.to_csv(out_user_file, **kwargs)
 
 
 
