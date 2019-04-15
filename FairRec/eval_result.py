@@ -37,8 +37,7 @@ if __name__ == '__main__':
   args = parse_args()
   num_users, num_items, test_data = read_data.read_test(args.data_dir)
   user_file = path.join(args.data_dir, 'user.attr')
-  user_info = pd.read_csv(user_file, sep='\t', names=['u', 'g'])
-  user_info = user_info.set_index('u').to_dict()['g']
+  user_attr = read_data.read_attr(user_file)
 
   result_data = {}
   with open(args.result_file, 'r') as fin:
@@ -69,7 +68,7 @@ if __name__ == '__main__':
     prec_at_10 = eval_prec(10, rank_list, test_item)
     ndcg_at_5 = eval_ndcg(5, rank_list, test_item)
     ndcg_at_10 = eval_ndcg(10, rank_list, test_item)
-    attr = user_info[u]
+    attr = user_attr[u]
     attr_set.add(attr)
     prec_at_5_list.append(prec_at_5)
     prec_at_10_list.append(prec_at_10)
@@ -88,17 +87,44 @@ if __name__ == '__main__':
   prec_at_10 = np.mean(prec_at_10_list)
   ndcg_at_5 = np.mean(ndcg_at_5_list)
   ndcg_at_10 = np.mean(ndcg_at_10_list)
-  print(' prec@5: %.6f' % (prec_at_5))
-  print('prec@10: %.6f' % (prec_at_10))
-  print(' ndcg@5: %.6f' % (ndcg_at_5))
-  print('ndcg@10: %.6f' % (ndcg_at_10))
+  # print(' prec@5: %.6f' % (prec_at_5))
+  # print('prec@10: %.6f' % (prec_at_10))
+  # print(' ndcg@5: %.6f' % (ndcg_at_5))
+  # print('ndcg@10: %.6f' % (ndcg_at_10))
 
+  min_attr = None
+  min_prec_at_5 = 1.0
+  min_prec_at_10 = 1.0
+  min_ndcg_at_5 = 1.0
+  min_ndcg_at_10 = 1.0
+  for attr in sorted(attr_set):
+    prec_at_10 = np.mean(prec_at_10_dict[attr])
+    if prec_at_10 < min_prec_at_10:
+      min_attr = attr
+      min_prec_at_5 = np.mean(prec_at_5_dict[attr])
+      min_prec_at_10 = np.mean(prec_at_10_dict[attr])
+      min_ndcg_at_5 = np.mean(ndcg_at_5_dict[attr])
+      min_ndcg_at_10 = np.mean(ndcg_at_10_dict[attr])
+
+  print(path.basename(args.result_file))
   for attr in sorted(attr_set):
     print('%s' % (attr))
-    print('\t', ' prec@5: %.6f' % (np.mean(prec_at_5_dict[attr])))
-    print('\t', 'prec@10: %.6f' % (np.mean(prec_at_10_dict[attr])))
-    print('\t', ' ndcg@5: %.6f' % (np.mean(ndcg_at_5_dict[attr])))
-    print('\t', 'ndcg@10: %.6f' % (np.mean(ndcg_at_10_dict[attr])))
-
-
-
+    if attr == min_attr:
+      print('\t', ' prec@5: %.6f' % (np.mean(prec_at_5_dict[attr])))
+      print('\t', 'prec@10: %.6f' % (np.mean(prec_at_10_dict[attr])))
+      print('\t', ' ndcg@5: %.6f' % (np.mean(ndcg_at_5_dict[attr])))
+      print('\t', 'ndcg@10: %.6f' % (np.mean(ndcg_at_10_dict[attr])))
+    else:
+      prec_at_5 = np.mean(prec_at_5_dict[attr])
+      prec_at_5_pct = (prec_at_5 - min_prec_at_5) / min_prec_at_5 * 100
+      print('\t', ' prec@5: %.6f (%.2f%%)' % (prec_at_5, prec_at_5_pct))
+      prec_at_10 = np.mean(prec_at_10_dict[attr])
+      prec_at_10_pct = (prec_at_10 - min_prec_at_10) / min_prec_at_10 * 100
+      print('\t', 'prec@10: %.6f (%.2f%%)' % (prec_at_10, prec_at_10_pct))
+      ndcg_at_5 = np.mean(ndcg_at_5_dict[attr])
+      ndcg_at_5_pct = (ndcg_at_5 - min_ndcg_at_5) / min_ndcg_at_5 * 100
+      print('\t', ' ndcg@5: %.6f (%.2f%%)' % (ndcg_at_5, ndcg_at_5_pct))
+      ndcg_at_10 = np.mean(ndcg_at_10_dict[attr])
+      ndcg_at_10_pct = (ndcg_at_10 - min_ndcg_at_10) / min_ndcg_at_10 * 100
+      print('\t', 'ndcg@10: %.6f (%.2f%%)' % (ndcg_at_10, ndcg_at_10_pct))
+  print('')

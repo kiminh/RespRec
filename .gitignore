@@ -2,7 +2,8 @@
 *.DS_Store
 GitHub/
 # Dataset
-ml100k
+ml100k/
+bn_ml100k/
 # Result
 *.tmp
 

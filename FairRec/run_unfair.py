@@ -28,7 +28,7 @@ def parse_args():
   parser.add_argument('--model', choices=choices, default=choices[0])
   parser.add_argument('--num_epochs', type=int, default=1000)
   parser.add_argument('--num_factors', type=int, default=10)
-  parser.add_argument('--display_step', type=int, default=1000)
+  parser.add_argument('--display_step', type=int, default=2)
   parser.add_argument('--batch_size', type=int, default=1024)
   parser.add_argument('--learning_rate', type=float, default=1e-3)
   parser.add_argument('--reg_rate', type=float, default=0.1)
@@ -78,7 +78,8 @@ if __name__ == '__main__':
       train_data = train_list
     # train model
     model = None
-    kwargs = {'epoch': args.num_epochs}
+    kwargs = {'epoch': args.num_epochs,
+              'T': args.display_step}
     if args.model == 'BPRMF':
       model = BPRMF(sess, num_users, num_items, **kwargs)
     if args.model == 'CDAE':
