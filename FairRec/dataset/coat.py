@@ -67,6 +67,35 @@ with open(out_test_file, 'w') as fout:
   for u, i in zip(test_users, test_items):
     fout.write('%d\t%d\t%d\n' % (u, i, test_mat[u, i]))
 
+all_mat = train_mat + test_mat
+all_users, all_items = all_mat.nonzero()
+num_all = np.count_nonzero(all_mat)
+train_size = int(0.8 * num_all) + 1
+indexes = np.random.permutation(num_all)
+with open(out_train_file, 'w') as fout:
+  for j in range(train_size):
+    j = indexes[j]
+    u = all_users[j]
+    i = all_items[j]
+    if train_mat[u, i] > 0:
+      fout.write('%d\t%d\t%d\n' % (u, i, train_mat[u, i]))
+    else:
+      assert test_mat[u, i] > 0
+      fout.write('%d\t%d\t%d\n' % (u, i, test_mat[u, i]))
+with open(out_test_file, 'w') as fout:
+  for j in range(test_size, num_all):
+    j = indexes[j]
+    u = all_users[j]
+    i = all_items[j]
+    if train_mat[u, i] > 0:
+      fout.write('%d\t%d\t%d\n' % (u, i, train_mat[u, i]))
+    else:
+      assert test_mat[u, i] > 0
+      fout.write('%d\t%d\t%d\n' % (u, i, test_mat[u, i]))
+
+
+
+
 
 
 
