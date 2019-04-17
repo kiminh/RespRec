@@ -1,4 +1,20 @@
 num_epochs=128
+display_step=8
+echo ----------
+for model in BPRMF # CDAE # CML GMF JRL MLP NeuMF
+do
+  python run_unfair.py dataset/coat \
+    --model ${model} \
+    --num_epochs ${num_epochs} \
+    --num_factors 40 \
+    --learning_rate 0.01 \
+    --reg_rate 0.01 \
+    --display_step ${display_step}
+done
+echo ----------
+exit
+
+num_epochs=128
 display_step=4
 echo ----------
 for model in BPRMF CDAE # CML GMF JRL MLP NeuMF

@@ -79,7 +79,9 @@ if __name__ == '__main__':
     # train model
     model = None
     kwargs = {'epoch': args.num_epochs,
-              'T': args.display_step}
+              'T': args.display_step,
+              'learning_rate': args.learning_rate,
+              'reg_rate': args.reg_rate}
     if args.model == 'BPRMF':
       model = BPRMF(sess, num_users, num_items, **kwargs)
     if args.model == 'CDAE':
@@ -98,7 +100,7 @@ if __name__ == '__main__':
       model = NeuMF(sess, num_users, num_items, **kwargs)
     if model is None:
       exit()
-    model.build_network()
+    model.build_network(num_factor=args.num_factors)
     model.execute(train_data, test_data)
     print('Final: %04d; ' % (args.num_epochs), end='')
     model.test()
