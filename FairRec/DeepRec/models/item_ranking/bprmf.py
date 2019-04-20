@@ -91,9 +91,9 @@ class BPRMF():
       item_random_neg.append(neg_i[s])
       attr = self.user_attr[u]
       if attr == 'M':
-        weight_random.append(0.01)
+        weight_random.append(0.001)
       elif attr == 'F':
-        weight_random.append(1.00)
+        weight_random.append(1.000)
       else:
         raise Exception('unknown attribute %s' % (attr))
 
