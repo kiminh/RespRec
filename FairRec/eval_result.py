@@ -5,7 +5,7 @@ import math
 import numpy as np
 import pandas as pd
 
-import read_data
+from data_utils import *
 
 def parse_args():
   parser = argparse.ArgumentParser()
@@ -36,9 +36,9 @@ def eval_ndcg(k, rank_list, test_item):
 
 if __name__ == '__main__':
   args = parse_args()
-  num_users, num_items, test_data = read_data.read_test(args.data_dir)
+  num_users, num_items, test_data = read_test(args.data_dir)
   user_file = path.join(args.data_dir, 'user.attr')
-  user_attr = read_data.read_attr(user_file)
+  user_attr = read_attr(user_file)
 
   result_data = {}
   with open(args.result_file, 'r') as fin:

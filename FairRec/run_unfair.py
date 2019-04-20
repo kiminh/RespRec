@@ -4,7 +4,8 @@ resprec_dir = os.path.expanduser('~/Projects/resprec')
 deeprec_dir = os.path.join(resprec_dir, 'GitHub/DeepRec')
 sys.path.append(deeprec_dir)
 
-from models.item_ranking.bprmf import BPRMF
+from DeepRec.models.item_ranking.bprmf import BPRMF
+# from models.item_ranking.bprmf import BPRMF
 from models.item_ranking.cdae import ICDAE
 from models.item_ranking.cml import CML
 from models.item_ranking.gmf import GMF
@@ -19,7 +20,7 @@ import pandas as pd
 import tensorflow as tf
 import time
 
-import read_data
+from data_utils import *
 
 def parse_args():
   choices = ['BPRMF', 'CDAE', 'CML', 'GMF', 'JRL', 'LRML', 'MLP', 'NeuMF']
@@ -36,6 +37,8 @@ def parse_args():
 
 if __name__ == '__main__':
   args = parse_args()
+  train_file = os.path.join(args.data_dir, 'train.data')
+  user_file = path.join(args.data_dir, 'user.attr')
   result_file = os.path.basename(args.data_dir)
   result_file += '_%s' % (args.model)
   result_file += '_num_epochs_%d' % (args.num_factors)
@@ -55,9 +58,8 @@ if __name__ == '__main__':
   config.gpu_options.allow_growth = True
   with tf.Session(config=config) as sess:
     # load data
-    train_file = os.path.join(args.data_dir, 'train.data')
     names = ['u', 'i', 'r', 't']
-    num_users, num_items, test_data = read_data.read_test(args.data_dir)
+    num_users, num_items, test_data = read_test(args.data_dir)
     train_data = pd.read_csv(train_file, sep='\t', names=names)
     train_users = []
     train_items = []
@@ -68,6 +70,7 @@ if __name__ == '__main__':
       train_ratings.append(1.0)
     train_data = csr_matrix((train_ratings, (train_users, train_items)),
                             shape=(num_users, num_items))
+    user_attr = read_attr(user_file)
     if args.model == 'CDAE':
       all_items = set(np.arange(num_items))
       neg_items = {}
@@ -101,9 +104,9 @@ if __name__ == '__main__':
     if model is None:
       exit()
     model.build_network(num_factor=args.num_factors)
-    model.execute(train_data, test_data)
-    print('Final: %04d; ' % (args.num_epochs), end='')
-    model.test()
+    model.execute(train_data, test_data, user_attr)
+    # print('Final: %04d; ' % (args.num_epochs), end='')
+    # model.test()
     # save result
     with open(result_file, 'w') as fout:
       for u in model.test_users:
