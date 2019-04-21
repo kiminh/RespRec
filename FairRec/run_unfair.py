@@ -42,20 +42,21 @@ if __name__ == '__main__':
   args = parse_args()
   train_file = os.path.join(args.data_dir, 'train.data')
   user_file = path.join(args.data_dir, 'user.attr')
-  result_file = os.path.basename(args.data_dir)
-  result_file += '_%s' % (args.model)
-  result_file += '_num_epochs_%d' % (args.num_factors)
-  result_file += '_reg_rate_%f' % (args.reg_rate)
-  result_file += '_num_epochs_%d' % (args.num_epochs)
-  result_file += '_learning_rate_%f' % (args.learning_rate)
-  result_file += '_batch_size_%d' % (args.batch_size)
-  result_file += '_%d' % (int(round(time.time() * 1000)))
-  result_file += '.tmp'
+  file_base = os.path.basename(args.data_dir)
+  file_base += '_%s' % (args.model)
+  file_base += '_num_epochs_%d' % (args.num_factors)
+  file_base += '_reg_rate_%f' % (args.reg_rate)
+  file_base += '_num_epochs_%d' % (args.num_epochs)
+  file_base += '_learning_rate_%f' % (args.learning_rate)
+  file_base += '_batch_size_%d' % (args.batch_size)
+  file_base += '_%d' % (int(round(time.time() * 1000)))
+  rec_file = file_base + '.rec'
+  log_file = file_base + '.log'
   result_dir = 'result'
   if not os.path.exists(result_dir):
     os.makedirs(result_dir)
-  result_file = os.path.join(result_dir, result_file)
-  # input(result_file)
+  rec_file = os.path.join(result_dir, rec_file)
+  log_file = os.path.join(result_dir, log_file)
 
   config = tf.ConfigProto()
   config.gpu_options.allow_growth = True
@@ -87,7 +88,8 @@ if __name__ == '__main__':
     kwargs = {'epoch': args.num_epochs,
               'T': args.display_step,
               'learning_rate': args.learning_rate,
-              'reg_rate': args.reg_rate}
+              'reg_rate': args.reg_rate,
+              'log_file': log_file}
     if args.model == 'BPRMF':
       model = BPRMF(sess, num_users, num_items, **kwargs)
     if args.model == 'CDAE':
@@ -111,7 +113,7 @@ if __name__ == '__main__':
     # print('Final: %04d; ' % (args.num_epochs), end='')
     # model.test()
     # save result
-    with open(result_file, 'w') as fout:
+    with open(rec_file, 'w') as fout:
       for u in model.test_users:
         user_ids = []
         item_ids = []

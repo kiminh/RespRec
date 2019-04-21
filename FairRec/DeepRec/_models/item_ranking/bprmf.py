@@ -27,7 +27,8 @@ class BPRMF():
       batch_size=1024,
       verbose=False,
       T=5,
-      display_step=1000):
+      display_step=1000,
+      log_file=None):
     self.learning_rate = learning_rate
     self.epochs = epoch
     self.batch_size = batch_size
@@ -38,7 +39,7 @@ class BPRMF():
     self.verbose = verbose
     self.T = T
     self.display_step = display_step
-    input('xiaojie')
+    self.log_file = log_file
 
   def build_network(self, num_factor=30):
     self.user_id = tf.placeholder(tf.int32, shape=[None], name='user_id')
@@ -92,9 +93,9 @@ class BPRMF():
       item_random_neg.append(neg_i[s])
       attr = self.user_attr[u]
       if attr == 'M':
-        weight_random.append(0.001)
+        weight_random.append(0.1)
       elif attr == 'F':
-        weight_random.append(1.000)
+        weight_random.append(1.0)
       else:
         raise Exception('unknown attribute %s' % (attr))
 
@@ -131,7 +132,7 @@ class BPRMF():
     print('M=%.8f F=%.8f (%.2f)' % (m_loss, f_loss, mf_pct))
 
   def test(self):
-    evaluate(self)
+    return evaluate(self)
 
   def execute(self, train_data, test_data, user_attr):
     self.prepare_data(train_data, test_data, user_attr)
@@ -139,13 +140,48 @@ class BPRMF():
     init = tf.global_variables_initializer()
     self.sess.run(init)
 
+    if self.log_file != None:
+      fout = open(self.log_file, 'w')
+      attr_set = set(self.user_attr.values())
+      attr_list = sorted(attr_set)
+      fout.write('Epoch')
+      for i in range(len(attr_list)):
+        attr = attr_list[i]
+        fout.write('\tMAP (%s)' % (attr))
+        fout.write('\tMRR (%s)' % (attr))
+        fout.write('\tNDCG (%s)' % (attr))
+        fout.write('\tP@5 (%s)' % (attr))
+        fout.write('\tR@5 (%s)' % (attr))
+        fout.write('\tNDCG@5 (%s)' % (attr))
+        fout.write('\tP@10 (%s)' % (attr))
+        fout.write('\tR@10 (%s)' % (attr))
+        fout.write('\tNDCG@10 (%s)' % (attr))
+        if i == len(attr_list) - 1:
+          fout.write('\n')
     for epoch in range(self.epochs):
       # continue
       self.train()
       if (epoch) % self.T == 0:
-        continue
         print('Epoch: %04d; ' % (epoch), end='')
-        self.test()
+        map, mrr, ndcg, p_at_5, r_at_5, ndcg_at_5, p_at_10, r_at_10, ndcg_at_10 = self.test()
+        if self.log_file != None:
+          fout.write('%d' % (epoch + 1))
+          for i in range(len(attr_list)):
+            attr = attr_list[i]
+            fout.write('\t%.8f' % (map[attr]))
+            fout.write('\t%.8f' % (mrr[attr]))
+            fout.write('\t%.8f' % (ndcg[attr]))
+            fout.write('\t%.8f' % (p_at_5[attr]))
+            fout.write('\t%.8f' % (r_at_5[attr]))
+            fout.write('\t%.8f' % (ndcg_at_5[attr]))
+            fout.write('\t%.8f' % (p_at_10[attr]))
+            fout.write('\t%.8f' % (r_at_10[attr]))
+            fout.write('\t%.8f' % (ndcg_at_10[attr]))
+            if i == len(attr_list) - 1:
+              fout.write('\n')
+            fout.flush()
+    if self.log_file != None:
+      fout.close()
 
     print('Epoch: %04d; ' % (self.epochs), end='')
     self.test()

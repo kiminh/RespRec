@@ -1,5 +1,5 @@
 num_epochs=200
-display_step=5
+display_step=10
 echo ----------
 for model in BPRMF # CDAE CML GMF JRL MLP NeuMF
 do

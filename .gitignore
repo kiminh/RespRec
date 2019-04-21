@@ -7,6 +7,8 @@ bn_ml100k/
 ub_ml100k/
 coat/
 # Result
+*.log
+*.rec
 *.tmp
 
 # Byte-compiled / optimized / DLL files
