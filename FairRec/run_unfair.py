@@ -36,6 +36,7 @@ def parse_args():
   parser.add_argument('--batch_size', type=int, default=1024)
   parser.add_argument('--learning_rate', type=float, default=1e-3)
   parser.add_argument('--reg_rate', type=float, default=0.1)
+  parser.add_argument('--male_weight', type=float, default=1.0)
   return parser.parse_args()
 
 if __name__ == '__main__':
@@ -49,6 +50,7 @@ if __name__ == '__main__':
   file_base += '_num_epochs_%d' % (args.num_epochs)
   file_base += '_learning_rate_%f' % (args.learning_rate)
   file_base += '_batch_size_%d' % (args.batch_size)
+  file_base += '_male_weight_%f' % (args.male_weight)
   file_base += '_%d' % (int(round(time.time() * 1000)))
   rec_file = file_base + '.rec'
   log_file = file_base + '.log'
@@ -89,6 +91,7 @@ if __name__ == '__main__':
               'T': args.display_step,
               'learning_rate': args.learning_rate,
               'reg_rate': args.reg_rate,
+              'male_weight': args.male_weight,
               'log_file': log_file}
     if args.model == 'BPRMF':
       model = BPRMF(sess, num_users, num_items, **kwargs)

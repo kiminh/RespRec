@@ -1,12 +1,16 @@
-num_epochs=200
-display_step=10
+num_epochs=300
+display_step=15
 echo ----------
 for model in BPRMF # CDAE CML GMF JRL MLP NeuMF
 do
-  python run_unfair.py dataset/ml100k \
-    --model ${model} \
-    --num_epochs ${num_epochs} \
-    --display_step ${display_step} # > result/ml100k_${model}.tmp
+  for male_weight in 1e-5 1e-4 1e-3 1e-2 1e-1 1e0
+  do
+    python run_unfair.py dataset/ml100k \
+      --model ${model} \
+      --num_epochs ${num_epochs} \
+      --display_step ${display_step} \
+      --male_weight ${male_weight} # > result/ml100k_${model}.tmp
+  done
 done
 echo ----------
 exit

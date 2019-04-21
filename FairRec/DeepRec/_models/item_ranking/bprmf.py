@@ -28,6 +28,7 @@ class BPRMF():
       verbose=False,
       T=5,
       display_step=1000,
+      male_weight=1.0,
       log_file=None):
     self.learning_rate = learning_rate
     self.epochs = epoch
@@ -39,6 +40,7 @@ class BPRMF():
     self.verbose = verbose
     self.T = T
     self.display_step = display_step
+    self.male_weight = male_weight
     self.log_file = log_file
 
   def build_network(self, num_factor=30):
@@ -93,7 +95,7 @@ class BPRMF():
       item_random_neg.append(neg_i[s])
       attr = self.user_attr[u]
       if attr == 'M':
-        weight_random.append(0.1)
+        weight_random.append(self.male_weight)
       elif attr == 'F':
         weight_random.append(1.0)
       else:
@@ -161,7 +163,7 @@ class BPRMF():
     for epoch in range(self.epochs):
       # continue
       self.train()
-      if (epoch) % self.T == 0:
+      if (epoch + 1) % self.T == 0:
         print('Epoch: %04d; ' % (epoch), end='')
         map, mrr, ndcg, p_at_5, r_at_5, ndcg_at_5, p_at_10, r_at_10, ndcg_at_10 = self.test()
         if self.log_file != None:
