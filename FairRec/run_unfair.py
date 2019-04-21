@@ -1,11 +1,14 @@
 import os
 import sys
 resprec_dir = os.path.expanduser('~/Projects/resprec')
+_deeprec_dir = os.path.join(resprec_dir, 'FairRec/DeepRec')
+sys.path.append(_deeprec_dir)
 deeprec_dir = os.path.join(resprec_dir, 'GitHub/DeepRec')
 sys.path.append(deeprec_dir)
 
-from DeepRec.models.item_ranking.bprmf import BPRMF
-# from models.item_ranking.bprmf import BPRMF
+from _models.item_ranking.bprmf import BPRMF
+
+
 from models.item_ranking.cdae import ICDAE
 from models.item_ranking.cml import CML
 from models.item_ranking.gmf import GMF

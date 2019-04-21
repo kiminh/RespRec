@@ -7,7 +7,7 @@ import tensorflow as tf
 import time
 import numpy as np
 
-from utils.evaluation.RankingMetrics import *
+from _utils.evaluation.RankingMetrics import *
 
 __author__ = "Shuai Zhang"
 __copyright__ = "Copyright 2018, The DeepRec Project"
@@ -38,6 +38,7 @@ class BPRMF():
     self.verbose = verbose
     self.T = T
     self.display_step = display_step
+    input('xiaojie')
 
   def build_network(self, num_factor=30):
     self.user_id = tf.placeholder(tf.int32, shape=[None], name='user_id')
