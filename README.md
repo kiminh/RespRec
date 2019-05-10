@@ -1,5 +1,5 @@
 # RespRec
-Responsible Recommendation: Build Fairness and Interpretability into Recommender Systems  
+Responsible Recommendation: Build Fairness into Recommender Systems on Biased Dataset  
 
 CPU xiaojie@10.100.229.246  
 GPU xiaojie@10.100.228.232  
