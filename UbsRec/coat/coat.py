@@ -34,7 +34,7 @@ def save_dataset(ratings, out_file):
   n_rating = len(ratings)
   with open(out_file, 'w') as fout:
     for user, item, rating in ratings:
-      fout.write('%d %d %d\n' % (user, item, rating))
+      fout.write('%d\t%d\t%d\n' % (user, item, rating))
   print('save %d ratings to %s' % (n_rating, out_file))
 
 def split_dataset(data_dir):
