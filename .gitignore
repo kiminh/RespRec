@@ -1,15 +1,9 @@
 # RespRec
-*.DS_Store
 GitHub/
-# Dataset
-ml100k/
-bn_ml100k/
-ub_ml100k/
-coat/
-# Result
 *.log
 *.rec
 *.tmp
+*.DS_Store
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
