@@ -4,6 +4,10 @@ import numpy as np
 import os
 import random
 
+class Dataset(object):
+  def __init__(self, arg):
+    self.arg = arg
+
 def maybe_download(data_dir):
   coat_url = 'https://www.cs.cornell.edu/~schnabts/mnar/coat.zip'
 
@@ -34,7 +38,7 @@ def save_dataset(ratings, out_file):
   n_rating = len(ratings)
   with open(out_file, 'w') as fout:
     for user, item, rating in ratings:
-      fout.write('%d\t%d\t%d\n' % (user, item, rating))
+      fout.write('%d\t%d\t%d\n' % (rating, user, item))
   print('save %d ratings to %s' % (n_rating, out_file))
 
 def split_dataset(data_dir):
@@ -70,8 +74,8 @@ def split_dataset(data_dir):
 def main():
   data_dir = path.expanduser('~/Downloads/data/coat')
   maybe_download(data_dir)
-
   split_dataset(data_dir)
 
 if __name__ == '__main__':
   main()
+

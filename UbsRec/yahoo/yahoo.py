@@ -6,7 +6,7 @@ import pandas as pd
 def main():
   data_dir = path.expanduser('~/Downloads/data/Webscope_R3')
   if not path.exists(data_dir):
-    raise Exception('Please download the yahoo dataset')
+    raise Exception('Please download the yahoo dataset.')
 
   biased_file = path.join(data_dir, 'ydata-ymusic-rating-study-v1_0-train.txt')
   unbiased_file = path.join(data_dir, 'ydata-ymusic-rating-study-v1_0-test.txt')
@@ -27,7 +27,8 @@ def main():
   train_file = path.join(data_dir, 'train.dta')
   valid_file = path.join(data_dir, 'valid.dta')
   test_file = path.join(data_dir, 'test.dta')
-  to_kwargs = {'sep': '\t', 'header': False, 'index':False}
+  to_kwargs = {'sep': '\t', 'header': False, 'index': False, 
+               'columns': ['rating', 'user', 'item']}
   train_ratings = biased_ratings
   n_valid = int(valid_ratio * n_unbiased)
   valid_ratings = unbiased_ratings[:n_valid]
