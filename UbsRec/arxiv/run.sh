@@ -1,27 +1,29 @@
 data_dir=~/Downloads/data/coat
-n_epoch=200
 verbose=1
 
-batch_norm=0
 all_reg=0.001
+batch_norm=0
 batch_size=128
-keep_probs='[0.6]'
 hid_layers='[]'
-n_factor=128
+keep_probs='[0.6]'
 lrn_rate=0.01
-python -W ignore srrec.py \
+model_name=fm
+n_epoch=200
+n_factor=128
+opt_type=adagrad
+python -W ignore train.py \
     --data_dir ${data_dir} \
     --verbose ${verbose} \
-    --opt_type adagrad \
-    --hid_layers ${hid_layers} \
-    --model_name fm \
-    --n_epoch ${n_epoch} \
-    --batch_norm ${batch_norm} \
     --all_reg ${all_reg} \
+    --batch_norm ${batch_norm} \
     --batch_size ${batch_size} \
+    --hid_layers ${hid_layers} \
     --keep_probs ${keep_probs} \
+    --lrn_rate ${lrn_rate} \
+    --model_name ${model_name} \
+    --n_epoch ${n_epoch} \
     --n_factor ${n_factor} \
-    --lrn_rate ${lrn_rate}
+    --opt_type ${opt_type}
 exit
 # 0.7557  0.988
 # 0.7516  0.9888

@@ -144,12 +144,14 @@ class SrRec(utils.BsRec):
           f_data = (epoch, batch, mae, mse)
           fout.write('%s %s %s %s\n' % f_data)
 
-if __name__ == '__main__':
+
+def main():
   description = 'Run a single robust model.'
   args = utils.parse_args(description)
   data = utils.Dataset(args.base_dir)
 
   model = SrRec(args, data)
-  # for var in tf.trainable_variables():
-  #   logging.info('%s=%s' % (var.name, var.shape))
   model.train()
+
+if __name__ == '__main__':
+  main()
