@@ -76,10 +76,10 @@ def main():
                                       b_: weights})
 
       if (epoch + 1) % 10 == 0:
-        mae = sess.run(mae_, feed_dict={f_: test_set.features,
-                                        r_: test_set.ratings,
-                                        p_: no_dropout})
-        print(mae)
+        mae, mse = sess.run([mae_, mse_], feed_dict={f_: test_set.features,
+                                                     r_: test_set.ratings,
+                                                     p_: no_dropout})
+        print('%.4f %.4f' % (mae, mse))
       #   if verbose > 1.0:
       #     if (batch + 1) % (num_batches // verbose) == 0:
       #       self.valid(epoch, batch, start)

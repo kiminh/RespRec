@@ -31,6 +31,7 @@ def load_dataset(in_file):
   users, items = dns_ratings.nonzero()
   for user, item in zip(users, items):
     rating = dns_ratings[user, item]
+    item += n_user # crucial
     coo_ratings.append((user, item, rating))
   return n_user, n_item, coo_ratings
 
