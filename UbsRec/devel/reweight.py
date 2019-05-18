@@ -78,8 +78,8 @@ def rwt_autodiff(f_, r_, f_vd_, r_vd_, p_, tf_flags, train_set, valid_set):
   grads_vd = tf.gradients(loss_vd, [weights])[0]
   weights = - grads_vd
 
-  # weights = tf.sigmoid(weights)
-  weights_plus = tf.maximum(weights, 0.0)
+  weights = tf.sigmoid(weights)
+  # weights_plus = tf.maximum(weights, 0.0)
 
   weights_sum = tf.reduce_sum(weights_plus)
   weights_sum += tf.to_float(tf.equal(weights_sum, 0.0))
