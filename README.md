@@ -11,6 +11,9 @@ S: N0030589256
 P: P311157  
 
 ### :GitHub
+git clone git@github.com:xiaojiew1/DRREC.git  
+drrec/mar/coat_fm_fml.sh  
+
 git clone git@github.com:lucfra/ExperimentManager.git  
 conda create -n py36 python=3.6  
 pip install ipython matplotlib seaborn scipy tensorflow  
