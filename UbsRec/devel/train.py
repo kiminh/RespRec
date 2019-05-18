@@ -19,6 +19,7 @@ flags.DEFINE_string('hid_layers', '[]', '')
 flags.DEFINE_string('keep_probs', '[0.6]', '')
 flags.DEFINE_string('model_name', 'fm', '')
 flags.DEFINE_string('opt_type', 'adagrad', '')
+flags.DEFINE_string('rwt_type', 'uniform', '')
 tf_flags = tf.flags.FLAGS
 tf_flags.hid_layers = eval(tf_flags.hid_layers)
 tf_flags.keep_probs = eval(tf_flags.keep_probs)
@@ -47,6 +48,7 @@ def run(datasets):
   lrn_rate = tf_flags.lrn_rate
   n_epoch = tf_flags.n_epoch
   opt_type = tf_flags.opt_type
+  rwt_type = tf_flags.rwt_type
   verbose = tf_flags.verbose
   no_dropout = np.ones_like(tf_flags.keep_probs)
   with tf.Graph().as_default(), tf.Session() as sess:
@@ -74,10 +76,14 @@ def run(datasets):
       mse_ = tf.keras.metrics.MSE(r_, pred_e)
     # [print(var) for var in tf.trainable_variables()]
 
-    # w_mt_ = reweight.rwt_uniform(batch_size)
-    w_mt_ = reweight.rwt_autodiff(f_, r_, f_vd_, r_vd_, p_, tf_flags, train_set)
-    sess.run(tf.global_variables_initializer())
+    if rwt_type == 'uniform':
+      w_mt_ = reweight.rwt_uniform(batch_size)
+    elif rwt_type == 'autodiff':
+      w_mt_ = reweight.rwt_autodiff(f_, r_, f_vd_, r_vd_, p_, tf_flags, train_set)
+    else:
+      raise Exception('unknown rwt_type %s' % (rwt_type))
 
+    sess.run(tf.global_variables_initializer())
     for epoch in range(n_epoch):
       # print('#epoch=%d' % (epoch))
       train_set.shuffle_in_unison()

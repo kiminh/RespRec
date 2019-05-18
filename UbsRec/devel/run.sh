@@ -12,6 +12,7 @@ model_name=fm
 n_epoch=500
 n_factor=128
 opt_type=adagrad
+rwt_type=uniform
 python -W ignore train.py \
     --data_dir ${data_dir} \
     --verbose ${verbose} \
@@ -25,19 +26,15 @@ python -W ignore train.py \
     --n_epoch ${n_epoch} \
     --n_factor ${n_factor} \
     --n_trial ${n_trial} \
-    --opt_type ${opt_type}
+    --opt_type ${opt_type} \
+    --rwt_type ${rwt_type}
 exit
-# 0.7557  0.9880
-# 0.7516  0.9888
-# 0.7555  0.9901
-# 0.7557  0.9935
-# 0.755   0.9939
-# 0.7453  0.9944
-# 0.7758  0.9994
-# 0.7566  0.9998
-# 0.7642  1.0004
-# 0.7459  1.0029
-
+# uniform
+# mae=0.741 (0.004)
+# mse=0.989 (0.010)
+# autodiff
+# mae=0.778 (0.009)
+# mse=0.995 (0.006)
 
 
 
