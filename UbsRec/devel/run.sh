@@ -1,5 +1,5 @@
 data_dir=~/Downloads/data/coat
-verbose=0
+verbose=1
 n_trial=4
 
 all_reg=0.001
