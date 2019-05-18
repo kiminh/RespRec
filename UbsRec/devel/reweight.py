@@ -55,6 +55,35 @@ def get_model(features, ratings, keep_probs, weights, tf_flags, train_set,
                                 tf.reduce_sum(tf.square(gb)))
   return w_dict, loss, predictions
 
-def rwt_uniform(tf_flags):
-  weights = tf.ones((tf_flags.batch_size), tf.float32)
+def rwt_uniform(batch_size):
+  weights = tf.ones((batch_size), tf.float32)
   return weights
+
+def rwt_autodiff(f_, r_, f_vd_, r_vd_, p_, tf_flags, train_set):
+  batch_size = tf_flags.batch_size
+  weights = tf.zeros([batch_size], tf.float32)
+  weights_vd = tf.ones([batch_size], tf.float32) / float(batch_size)
+  w_dict, loss, _ = get_model(f_, r_, p_, weights, tf_flags, train_set,
+                              w_dict=None,
+                              reuse=True)
+  var_names = w_dict.keys()
+  var_list = [w_dict[key] for key in var_names]
+  grads = tf.gradients(loss, var_list)
+  var_list_vd = [vv - gg for gg, vv in zip(grads, var_list)]
+  w_dict_vd = dict(zip(var_names, var_list_vd))
+  _, loss_vd, _ = get_model(f_vd_, r_vd_, p_, weights_vd, tf_flags, train_set,
+                            w_dict=w_dict_vd,
+                            reuse=True)
+  grads_vd = tf.gradients(loss_vd, [weights])[0]
+  weights = - grads_vd
+  weights_plus = tf.maximum(weights, 0.0)
+  weights_sum = tf.reduce_sum(weights_plus)
+  weights_sum += tf.to_float(tf.equal(weights_sum, 0.0))
+  weights = weights_plus / weights_sum * batch_size
+  return weights
+
+
+
+
+
+

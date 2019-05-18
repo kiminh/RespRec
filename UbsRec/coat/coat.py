@@ -59,8 +59,6 @@ def split_dataset(data_dir):
   n_valid = int(valid_ratio * n_unbiased)
   valid_ratings = unbiased_ratings[:n_valid]
   test_ratings = unbiased_ratings[n_valid:]
-  valid_ratings = unbiased_ratings
-  test_ratings = unbiased_ratings
 
   n_train = len(train_ratings)
   n_valid = len(valid_ratings)

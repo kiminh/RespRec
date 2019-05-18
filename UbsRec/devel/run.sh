@@ -1,5 +1,6 @@
 data_dir=~/Downloads/data/coat
-verbose=1
+verbose=0
+n_trial=10
 
 all_reg=0.001
 batch_norm=0
@@ -8,7 +9,7 @@ hid_layers='[]'
 keep_probs='[0.6]'
 lrn_rate=0.01
 model_name=fm
-n_epoch=200
+n_epoch=500
 n_factor=128
 opt_type=adagrad
 python -W ignore train.py \
@@ -23,6 +24,7 @@ python -W ignore train.py \
     --model_name ${model_name} \
     --n_epoch ${n_epoch} \
     --n_factor ${n_factor} \
+    --n_trial ${n_trial} \
     --opt_type ${opt_type}
 exit
 # 0.7557  0.9880
