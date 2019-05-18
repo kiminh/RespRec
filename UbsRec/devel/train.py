@@ -79,7 +79,7 @@ def run(datasets):
     if rwt_type == 'uniform':
       w_mt_ = reweight.rwt_uniform(batch_size)
     elif rwt_type == 'autodiff':
-      w_mt_ = reweight.rwt_autodiff(f_, r_, f_vd_, r_vd_, p_, tf_flags, train_set)
+      w_mt_ = reweight.rwt_autodiff(f_, r_, f_vd_, r_vd_, p_, tf_flags, train_set, valid_set)
     else:
       raise Exception('unknown rwt_type %s' % (rwt_type))
 
@@ -87,11 +87,11 @@ def run(datasets):
     for epoch in range(n_epoch):
       # print('#epoch=%d' % (epoch))
       train_set.shuffle_in_unison()
-      valid_set.shuffle_in_unison()
+      # valid_set.shuffle_in_unison()
       n_batch = train_set.data_size // batch_size + 1
       for batch in range(n_batch):
         features, ratings = train_set.next_batch(batch_size)
-        features_vd, ratings_vd = valid_set.next_batch(batch_size)
+        features_vd, ratings_vd = valid_set.next_batch(valid_set.data_size)
         weights = sess.run(w_mt_, feed_dict={f_: features,
                                              r_: ratings,
                                              f_vd_: features_vd,

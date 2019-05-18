@@ -59,10 +59,11 @@ def rwt_uniform(batch_size):
   weights = tf.ones((batch_size), tf.float32)
   return weights
 
-def rwt_autodiff(f_, r_, f_vd_, r_vd_, p_, tf_flags, train_set):
+def rwt_autodiff(f_, r_, f_vd_, r_vd_, p_, tf_flags, train_set, valid_set):
   batch_size = tf_flags.batch_size
+  data_size = valid_set.data_size
   weights = tf.zeros([batch_size], tf.float32)
-  weights_vd = tf.ones([batch_size], tf.float32) / float(batch_size)
+  weights_vd = tf.ones([data_size], tf.float32) / float(data_size)
   w_dict, loss, _ = get_model(f_, r_, p_, weights, tf_flags, train_set,
                               w_dict=None,
                               reuse=True)
@@ -76,7 +77,10 @@ def rwt_autodiff(f_, r_, f_vd_, r_vd_, p_, tf_flags, train_set):
                             reuse=True)
   grads_vd = tf.gradients(loss_vd, [weights])[0]
   weights = - grads_vd
+
+  # weights = tf.sigmoid(weights)
   weights_plus = tf.maximum(weights, 0.0)
+
   weights_sum = tf.reduce_sum(weights_plus)
   weights_sum += tf.to_float(tf.equal(weights_sum, 0.0))
   weights = weights_plus / weights_sum * batch_size
