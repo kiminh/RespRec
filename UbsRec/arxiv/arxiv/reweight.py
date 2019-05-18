@@ -1,3 +1,65 @@
+import tensorflow as tf
+
+def get_model(features, ratings, keep_probs, weights, tf_flags, train_set,
+              w_dict=None,
+              reuse=False):
+  if w_dict is None:
+    w_dict = dict()
+
+  def _get_var(name, shape, initializer):
+    key = tf.get_variable_scope().name + '/' + name
+    if key in w_dict:
+      return w_dict[key]
+    else:
+      var = tf.get_variable(name, shape, tf.float32, initializer=initializer)
+      w_dict[key] = var
+      return var
+
+  t_feature = train_set.t_feature
+  n_factor = tf_flags.n_factor
+  with tf.variable_scope('Model', reuse=reuse):
+    w_init = tf.random_normal_initializer(mean=0.0, stddev=0.01)
+    fe = _get_var('fe', (t_feature, n_factor), initializer=w_init)
+
+    b_init = tf.constant_initializer(0.0)
+    fb = _get_var('fb', (t_feature), initializer=b_init)
+    gb = _get_var('gb', (), initializer=b_init)
+
+    if tf_flags.model_name == 'fm':
+      nnz_embedding = tf.nn.embedding_lookup(fe, features)
+      sum_embedding = tf.reduce_sum(nnz_embedding, axis=1)
+      # batch_size * n_factor
+      sqr_sum_embedding = tf.square(sum_embedding)
+      sqr_embedding = tf.square(nnz_embedding)
+      # batch_size * n_factor
+      sum_sqr_embedding = tf.reduce_sum(sqr_embedding, axis=1)
+      fm_embedding = 0.5 * tf.subtract(sqr_sum_embedding, sum_sqr_embedding)
+      fm_embedding = tf.nn.dropout(fm_embedding, keep_probs[-1])
+      # batch_size
+      predictions = tf.reduce_sum(fm_embedding, axis=1)
+
+      # batch_size * n_feature
+      feature_bias = tf.nn.embedding_lookup(fb, features)
+      # batch_size
+      feature_bias = tf.reduce_sum(feature_bias, axis=1)
+      # batch_size
+      global_bias = gb * tf.ones_like(feature_bias)
+
+      predictions = tf.add_n([predictions, feature_bias, global_bias])
+    else:
+      raise Exception('to implement')
+    errors = ratings - predictions
+    loss = 0.5 * tf.reduce_sum(tf.multiply(weights, tf.square(errors)))
+    loss += tf_flags.all_reg * (tf.reduce_sum(tf.square(fe)) +
+                                tf.reduce_sum(tf.square(fb)) +
+                                tf.reduce_sum(tf.square(gb)))
+  return w_dict, loss, predictions
+
+def rwt_uniform(tf_flags):
+  weights = tf.ones((tf_flags.batch_size), tf.float32)
+  return weights
+
+'''
 from sklearn import metrics
 from sys import stdout
 from tensorflow.contrib.layers.python.layers import batch_norm
@@ -484,107 +546,8 @@ class BsRec(object):
     else:
       raise Exception('unknown activation %s' % (activation_func))
     return activation_function
+'''
 
 
-class Dataset(object):
-  def __init__(self, base_dir):
-    self.offset = 2
-    self.train_file = base_dir + '.train'
-    self.valid_file = base_dir + '.valid'
-    self.test_file = base_dir + '.test'
-    self.num_features = self.count_num_feature()
-    self.nnz_features = self.count_nnz_feature()
-    self.train_data, self.valid_data, self.test_data = self.load_data()
-    self.train_size = len(self.train_data[fkey])
 
-    user_feat_file = base_dir + '.user'
-    item_feat_file = base_dir + '.item'
-    self.user_features = self.load_feature(user_feat_file)
-    self.item_features = self.load_feature(item_feat_file)
-
-    self.num_users = len(self.user_features)
-    self.num_items = len(self.item_features)
-
-  def count_num_feature(self):
-    features = set()
-    fin = open(self.train_file)
-    line = fin.readline()
-    while line:
-      fields = line.strip().split()
-      for feature in fields[1:]:
-        features.add(feature)
-      line = fin.readline()
-    fin.close()
-    return len(features)
-
-  def count_nnz_feature(self):
-    offset = self.offset
-    fin = open(self.train_file)
-    line = fin.readline()
-    fields = line.strip().split()
-    fin.close()
-    return len(fields) - offset
-
-  def load_data(self):
-    train_data = self.read_data(self.train_file)
-    valid_data = self.read_data(self.valid_file)
-    test_data = self.read_data(self.test_file)
-    return train_data, valid_data, test_data
-
-  def read_data(self, file):
-    offset = self.offset
-    features = []
-    ratings = []
-    fin = open(file)
-    line = fin.readline()
-    while line:
-      fields = line.strip().split()
-      features.append([int(feature) for feature in fields[offset:]])
-      ratings.append(1.0 * float(fields[0]))
-      line = fin.readline()
-    fin.close()
-    self.min_value = min(ratings)
-    self.max_value = max(ratings)
-    data = {fkey: features, rkey: ratings}
-    return data
-
-  def load_feature(self, file):
-    features = []
-    fin = open(file)
-    line = fin.readline()
-    while line:
-      features.append([int(feature) for feature in line.strip().split()])
-      line = fin.readline()
-    return features
-
-
-def parse_args(description):
-  parser = argparse.ArgumentParser(description=description)
-  parser.add_argument('--base_dir', type=str, default='data/coat/coat')
-
-  parser.add_argument('--pretrain_epochs', type=int, default=100)
-  parser.add_argument('--interact_epochs', type=int, default=10)
-  parser.add_argument('--num_impt_epochs', type=int, default=20)
-  parser.add_argument('--num_mis_epochs', type=int, default=10)
-  parser.add_argument('--num_obs_epochs', type=int, default=10)
-  parser.add_argument('--pred_learning_rate', type=float, default=0.005)
-  parser.add_argument('--impt_learning_rate', type=float, default=0.01)
-  parser.add_argument('--pred_model_name', default='fm', help='nfm|fm')
-  parser.add_argument('--impt_model_name', default='fm', help='nfm|fm')
-
-  parser.add_argument('--verbose', type=float, default=1.0)
-  parser.add_argument('--all_reg_coeff', type=float, default=0.001)
-  parser.add_argument('--batch_norm', type=int, default=0, help='0|1')
-  parser.add_argument('--batch_size', type=int, default=32)
-  parser.add_argument('--num_factors', type=int, default=128)
-  parser.add_argument('--keep_probs', type=str, default='[0.2,0.5]')
-  parser.add_argument('--layer_sizes', type=str, default='[]')
-  parser.add_argument('--activation_func', default='relu',
-                 help='identity|relu|sigmoid|tanh')
-  parser.add_argument('--optimizer_type', default='adagrad',
-                 help='adagrad|adam|sgd|rmsprop')
-
-  parser.add_argument('--log_training', type=int, default=0, help='0|1')
-
-  return parser.parse_args()
 
