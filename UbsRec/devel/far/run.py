@@ -66,7 +66,8 @@ with tf.name_scope('errors'):
   val_loss = 0.5 * tf.reduce_sum(tf.square(y - out))
 accuracy = tf.keras.metrics.mean_squared_error(y, out)
 
-lr = far.get_hyperparameter('lr', 0.01)
+# lr = far.get_hyperparameter('lr', 0.01)
+lr = tf.constant(0.01, name='lr')
 io_optim = far.GradientDescentOptimizer(lr)  # for training error minimization an optimizer from far_ho is needed
 oo_optim = tf.train.AdamOptimizer()  # for outer objective optimizer all optimizers from tf are valid
 
