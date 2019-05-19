@@ -81,7 +81,7 @@ run = farho.minimize(val_loss, oo_optim, tr_loss, io_optim,
 print('Variables (or tensors) that will store the values of the hypergradients')
 print(*far.hypergradients(), sep='\n')
 
-T = 10
+T = 1
 tr_supplier = datasets.train.create_supplier(x, y)
 val_supplier = datasets.valid.create_supplier(x, y)
 te_supplier = datasets.test.create_supplier(x, y)
@@ -93,7 +93,7 @@ print('-' * 50)
 
 tr_accs = []
 te_accs = []
-for _ in range(100):
+for _ in range(1000):
   run(T, inner_objective_feed_dicts=tr_supplier, outer_objective_feed_dicts=val_supplier)
   tr_accs.append(accuracy.eval(tr_supplier()))
   te_accs.append(accuracy.eval(te_supplier()))
