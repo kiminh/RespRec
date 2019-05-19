@@ -60,14 +60,17 @@ with tf.variable_scope('inital_weight_model'):
 weights = far.get_hyperparameter('ex_weights', tf.zeros(datasets.train.num_examples))
 
 with tf.name_scope('errors'):
-  tr_loss = tf.reduce_mean(tf.sigmoid(weights) * tf.losses.mean_squared_error(y, out))
-  val_loss = tf.reduce_mean(tf.losses.mean_squared_error(y, out))
+  # tr_loss = tf.reduce_mean(tf.sigmoid(weights) * tf.losses.mean_squared_error(y, out))
+  # val_loss = tf.reduce_mean(tf.losses.mean_squared_error(y, out))
   tr_loss = 0.5 * tf.reduce_sum(tf.sigmoid(weights) * tf.square(y - out))
+  tr_loss += 0.001 * tf.reduce_sum(tf.square(fe))
+  tr_loss += 0.001 * tf.reduce_sum(tf.square(fb))
   val_loss = 0.5 * tf.reduce_sum(tf.square(y - out))
+  val_loss += 0.001 * tf.reduce_sum(tf.square(weights))
 accuracy = tf.keras.metrics.mean_squared_error(y, out)
 
-# lr = far.get_hyperparameter('lr', 0.01)
-lr = tf.constant(0.01, name='lr')
+lr = far.get_hyperparameter('lr', 0.01)
+# lr = tf.constant(0.01, name='lr')
 io_optim = far.GradientDescentOptimizer(lr)  # for training error minimization an optimizer from far_ho is needed
 oo_optim = tf.train.AdamOptimizer()  # for outer objective optimizer all optimizers from tf are valid
 
@@ -81,7 +84,7 @@ run = farho.minimize(val_loss, oo_optim, tr_loss, io_optim,
 print('Variables (or tensors) that will store the values of the hypergradients')
 print(*far.hypergradients(), sep='\n')
 
-T = 1
+T = 10
 tr_supplier = datasets.train.create_supplier(x, y)
 val_supplier = datasets.valid.create_supplier(x, y)
 te_supplier = datasets.test.create_supplier(x, y)
@@ -93,7 +96,7 @@ print('-' * 50)
 
 tr_accs = []
 te_accs = []
-for _ in range(1000):
+for _ in range(100):
   run(T, inner_objective_feed_dicts=tr_supplier, outer_objective_feed_dicts=val_supplier)
   tr_accs.append(accuracy.eval(tr_supplier()))
   te_accs.append(accuracy.eval(te_supplier()))
