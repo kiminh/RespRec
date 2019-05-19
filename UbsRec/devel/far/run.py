@@ -64,7 +64,7 @@ with tf.name_scope('errors'):
   val_loss = tf.reduce_mean(tf.losses.mean_squared_error(y, out))
   tr_loss = 0.5 * tf.reduce_sum(tf.sigmoid(weights) * tf.square(y - out))
   val_loss = 0.5 * tf.reduce_sum(tf.square(y - out))
-accuracy = tf.keras.metrics.MSE(y, out)
+accuracy = tf.keras.metrics.mean_squared_error(y, out)
 
 lr = far.get_hyperparameter('lr', 0.01)
 io_optim = far.GradientDescentOptimizer(lr)  # for training error minimization an optimizer from far_ho is needed
