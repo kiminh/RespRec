@@ -58,15 +58,19 @@ def shuffle_data(in_dir, data_dir):
   save_dataset(unbiased_data, unbiased_file)
 
 def main():
-  # parser = argparse.ArgumentParser()
-  # parser.add_argument('out_format', type=str)
-  # parser.add_argument('ubs_ratio', type=float)
-  # args = parser.parse_args()
-
   in_dir = path.expanduser('~/Downloads/data/coat')
   maybe_download(in_dir)
   data_dir = 'data'
   shuffle_data(in_dir, data_dir)
+
+  parser = argparse.ArgumentParser()
+  parser.add_argument('out_format', choices=['lib', 'resp'])
+  parser.add_argument('ubs_ratio', type=float)
+  args = parser.parse_args()
+  out_format = args.out_format
+  ubs_ratio = args.ubs_ratio
+  if out_format == 'lib':
+    out_dir = path.expanduser('')
 
 if __name__ == '__main__':
   main()
