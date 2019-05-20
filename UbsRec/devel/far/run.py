@@ -63,11 +63,11 @@ with tf.name_scope('errors'):
   # tr_loss = tf.reduce_mean(tf.sigmoid(weights) * tf.losses.mean_squared_error(y, out))
   # val_loss = tf.reduce_mean(tf.losses.mean_squared_error(y, out))
   tr_loss = 0.5 * tf.reduce_sum(tf.sigmoid(weights) * tf.square(y - out))
-  tr_loss += 0.001 * tf.reduce_sum(tf.square(fe))
-  tr_loss += 0.001 * tf.reduce_sum(tf.square(fb))
+  tr_loss += 0.01 * tf.reduce_sum(tf.square(fe))
+  tr_loss += 0.01 * tf.reduce_sum(tf.square(fb))
   val_loss = 0.5 * tf.reduce_sum(tf.square(y - out))
-  val_loss += 0.001 * tf.reduce_sum(tf.square(weights))
-accuracy = tf.keras.metrics.mean_squared_error(y, out)
+  val_loss += 0.01 * tf.reduce_sum(tf.square(weights))
+accuracy = tf.keras.metrics.mean_squared_error(y, tf.clip_by_value(out, 1.0, 5.0))
 
 lr = far.get_hyperparameter('lr', 0.01)
 # lr = tf.constant(0.01, name='lr')
@@ -84,7 +84,7 @@ run = farho.minimize(val_loss, oo_optim, tr_loss, io_optim,
 print('Variables (or tensors) that will store the values of the hypergradients')
 print(*far.hypergradients(), sep='\n')
 
-T = 10
+T = 20
 tr_supplier = datasets.train.create_supplier(x, y)
 val_supplier = datasets.valid.create_supplier(x, y)
 te_supplier = datasets.test.create_supplier(x, y)
@@ -96,7 +96,7 @@ print('-' * 50)
 
 tr_accs = []
 te_accs = []
-for _ in range(100):
+for _ in range(80):
   run(T, inner_objective_feed_dicts=tr_supplier, outer_objective_feed_dicts=val_supplier)
   tr_accs.append(accuracy.eval(tr_supplier()))
   te_accs.append(accuracy.eval(te_supplier()))
@@ -105,6 +105,7 @@ for _ in range(100):
   print('learning rate', lr.eval())
   print('norm of examples weight', tf.norm(weights).eval())
   print('-' * 50)
+print(min(te_accs))
 
 
 

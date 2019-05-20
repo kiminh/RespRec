@@ -1,6 +1,19 @@
 import numpy as np
 import tensorflow as tf
 
+t = tf.constant([[1, 2], [3, 4], [5, 6]], tf.float32)
+f = tf.constant([0, 1], tf.int32)
+e = tf.nn.embedding_lookup(t, f)
+# f = tf.constant([[0, 0], [1, 1]], tf.int32)
+# e = tf.gather_nd(t, f)
+l = tf.reduce_sum(e)
+s = tf.Session()
+g = tf.gradients(l, t)[0]
+d = g.to_dense()
+print(d)
+print(s.run(d))
+# print(s.run(g))
+exit()
 
 t = tf.constant([1, 2, 3], tf.float32)
 p = tf.placeholder(tf.float32, (3,))
