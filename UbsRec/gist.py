@@ -1,6 +1,16 @@
 import numpy as np
 import tensorflow as tf
 
+np.random.seed(0)
+l = np.arange(10)
+print(l)
+np.random.shuffle(l)
+print(l)
+g = np.array([2, 8, 4, 9, 1, 6, 7, 3, 0, 5], np.int32)
+for gi, li in zip(g, l):
+  assert gi == li
+exit()
+
 t = tf.constant([[1, 2], [3, 4], [5, 6]], tf.float32)
 f = tf.constant([0, 1], tf.int32)
 e = tf.nn.embedding_lookup(t, f)

@@ -23,7 +23,7 @@ def main():
   n_unbiased = unbiased_ratings.shape[0]
   print('#biased=%d #unbiased=%d' % (n_biased, n_unbiased))
 
-  valid_ratio = 0.10
+  valid_ratio = 0.1
   train_file = path.join(data_dir, 'train.dta')
   valid_file = path.join(data_dir, 'valid.dta')
   test_file = path.join(data_dir, 'test.dta')
