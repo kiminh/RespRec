@@ -1,5 +1,6 @@
 from os import path
 
+import argparse
 import numpy as np
 import os
 
@@ -75,6 +76,11 @@ def split_dataset(in_dir, out_dir):
   save_dataset(test_ratings, test_file)
 
 def main():
+  parser = argparse.ArgumentParser()
+  parser.add_argument('out_format', type=str)
+  parser.add_argument('ubs_ratio', type=float)
+  args = parser.parse_args()
+
   in_dir = path.expanduser('~/Downloads/data/coat')
   maybe_download(in_dir)
   out_dir = 'data'
