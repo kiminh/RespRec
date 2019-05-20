@@ -15,7 +15,7 @@ def main():
   biased_ratings = pd.read_csv(biased_file, **read_kwargs)
   unbiased_ratings = pd.read_csv(unbiased_file, **read_kwargs)
   print('original: ', unbiased_ratings[:3])
-  unbiased_ratings = unbiased_ratings.sample(frac=1)
+  unbiased_ratings = unbiased_ratings.sample(frac=1, random_state=0)
   print('shuffled: ', unbiased_ratings[:3])
 
   n_user = biased_ratings.user.unique().shape[0]
