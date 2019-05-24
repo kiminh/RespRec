@@ -4,59 +4,80 @@ import numpy as np
 import pandas as pd
 
 class Dataset(object):
-  def __init__(self, features, ratings):
-    self._features = features
-    self._ratings = ratings
-    self._data_size, self._n_feature = features.shape
-    self._t_feature = (features.max(axis=0) + 1).sum()
+  def __init__(self, inputs, outputs, disc_inputs):
+    self._inputs = inputs
+    self._outputs = outputs
+    self._disc_inputs = disc_inputs
+    self._nnz_input = inputs.shape[1]
+    self._nnz_disc_input = disc_inputs.shape[1]
+    self._data_size = outputs.shape[0]
+    self._tot_input = inputs.max() + 1
+    self._tot_disc_input = disc_inputs.max() + 1
     self._start = 0
 
   @property
-  def features(self):
-    return self._features
+  def inputs(self):
+    return self._inputs
   
   @property
-  def ratings(self):
-    return self._ratings
+  def outputs(self):
+    return self._outputs
+
+  @property
+  def disc_inputs(self):
+    return self._disc_inputs
+
+  @property
+  def nnz_input(self):
+    return self._nnz_input
+
+  @property
+  def nnz_disc_input(self):
+    return self._nnz_disc_input
 
   @property
   def data_size(self):
     return self._data_size
-
-  @property
-  def n_feature(self):
-    return self._n_feature
   
   @property
-  def t_feature(self):
-    return self._t_feature
+  def tot_input(self):
+    return self._tot_input
 
-  def shuffle_in_unison(self):
-    rnd_state = np.random.get_state()
-    np.random.shuffle(self.features)
-    np.random.set_state(rnd_state)
-    np.random.shuffle(self.ratings)
+  @property
+  def tot_disc_input(self):
+    return self._tot_disc_input
+
+  def shuffle_data(self):
+    indexes = np.arange(self.data_size)
+    indexes = np.random.permutation(indexes)
+    self._inputs = self.inputs[indexes]
+    self._outputs = self.outputs[indexes]
+    self._disc_inputs = self.disc_inputs[indexes]
 
   def next_batch(self, batch_size):
     stop = self._start + batch_size
     if stop < self.data_size:
-      _features = self.features[self._start:stop, :]
-      _ratings = self.ratings[self._start:stop]
+      _inputs = self.inputs[self._start:stop, :]
+      _outputs = self.outputs[self._start:stop]
+      _disc_inputs = self.disc_inputs[self._start:stop, :]
     else:
       stop = stop - self.data_size
-      _features = np.concatenate((self.features[self._start:self.data_size, :],
-                                  self.features[:stop, :]))
-      _ratings = np.concatenate((self.ratings[self._start:self.data_size],
-                                 self.ratings[:stop]))
+      _inputs = np.concatenate((self.inputs[self._start:self.data_size, :],
+                                  self.inputs[:stop, :]))
+      _outputs = np.concatenate((self.outputs[self._start:self.data_size],
+                                 self.outputs[:stop]))
+      _disc_inputs = np.concatenate((self.disc_inputs[self._start:self.data_size, :],
+                                     self.disc_inputs[:stop, :]))
     # input([self._start, stop])
     self._start = stop
-    return _features, _ratings
+    return _inputs, _outputs, _disc_inputs
 
 def get_dataset(data_file):
-  ratings = pd.read_csv(data_file, sep='\t', header=None)
-  features = ratings.values[:, 1:].astype(int)
-  ratings = np.squeeze(ratings.values[:, :1]).astype(float)
-  dataset = Dataset(features, ratings)
+  dataset = pd.read_csv(data_file, sep='\t', header=None)
+  inputs = dataset.values[:, 0:2].astype(int)
+  outputs = dataset.values[:, -1].astype(float)
+  disc_inputs = dataset.values[:, 0:-1].astype(int)
+  dataset = Dataset(inputs, outputs, disc_inputs)
   return dataset
 
 def get_datasets(data_dir):
