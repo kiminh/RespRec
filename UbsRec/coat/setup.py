@@ -1,0 +1,248 @@
+'''Separate a small portion of unbiased data as the valid set
+excl/incl: exclude/include the valid set from/into the train set
+'''
+from os import path
+
+import argparse
+import math
+import numpy as np
+import os
+import pandas as pd
+
+def maybe_download(in_dir):
+  if path.exists(in_dir):
+    return
+  in_dir = path.dirname(in_dir)
+  if not path.exists(in_dir):
+    os.makedirs(in_dir)
+  coat_url = 'https://www.cs.cornell.edu/~schnabts/mnar/coat.zip'
+  coat_zip = path.join(in_dir, 'data.zip')
+  os.system('wget %s -O %s' % (coat_url, coat_zip))
+  os.system('unzip %s -d %s' % (coat_zip, in_dir))
+  os.system('rm -f %s' % (coat_zip))
+
+def load_data_set(data_file):
+  dense_data = np.loadtxt(data_file, dtype=np.int32)
+  n_user, n_item = dense_data.shape
+  coo_data = []
+  users, items = dense_data.nonzero()
+  for user, item in zip(users, items):
+    rating = dense_data[user, item]
+    coo_data.append((user, item, rating))
+  return n_user, n_item, coo_data
+
+def save_data_set(data_set, out_file):
+  n_rating = len(data_set)
+  with open(out_file, 'w') as fout:
+    for user, item, rating in data_set:
+      fout.write('%d\t%d\t%d\n' % (user, item, rating))
+  print('Save %d ratings to %s' % (n_rating, out_file))
+
+def shuffle_data(in_dir):
+  data_dir = 'data'
+  if path.exists(data_dir):
+    return
+  biased_file = path.join(in_dir, 'train.ascii')
+  unbiased_file = path.join(in_dir, 'test.ascii')
+  n_user, n_item, biased_set = load_data_set(biased_file)
+  n_user, n_item, unbiased_set = load_data_set(unbiased_file)
+  print('#user=%d #item=%d' % (n_user, n_item))
+  n_biased = len(biased_set)
+  n_unbiased = len(unbiased_set)
+  print('#biased=%d #unbiased=%d' % (n_biased, n_unbiased))
+  np.random.seed(0)
+  np.random.shuffle(biased_set)
+  np.random.shuffle(unbiased_set)
+  os.makedirs(data_dir)
+  biased_file = path.join(data_dir, 'biased.dta')
+  unbiased_file = path.join(data_dir, 'unbiased.dta')
+  save_data_set(biased_set, biased_file)
+  save_data_set(unbiased_set, unbiased_file)
+
+def load_data_sets(ubs_ratio):
+  data_dir = 'data'
+  biased_file = path.join(data_dir, 'biased.dta')
+  unbiased_file = path.join(data_dir, 'unbiased.dta')
+  names = ['user', 'item', 'rating']
+  biased_set = pd.read_csv(biased_file, sep='\t', names=names)
+  unbiased_set = pd.read_csv(unbiased_file, sep='\t', names=names)
+
+  train_set = biased_set
+  n_unbiased = len(unbiased_set.index)
+  n_valid = math.ceil(ubs_ratio * n_unbiased)
+  valid_set = unbiased_set[:n_valid]
+  test_set = unbiased_set[n_valid:]
+  return train_set, valid_set, test_set
+
+def stringify(number):
+  string = '%f' % (number)
+  string = string.rstrip('0')
+  string = string[:-1] if string.endswith('.') else string
+  return string
+
+def to_lib_once(ubs_ratio, inc_valid):
+  def _to_lib_once(ratings, out_dir):
+    kwargs = {'sep': '\t', 'header': False, 'index':False}
+    os.makedirs(out_dir)
+    out_file = path.join(out_dir, 'ratings.txt')
+    n_rating = len(ratings.index)
+    print('Save %d ratings to %s' % (n_rating, out_file))
+    ratings.to_csv(out_file, **kwargs)
+
+  base_dir = path.expanduser('~/Projects/librec/data')
+  dir_name = 'coat'
+  dir_name += '_incl' if inc_valid else '_excl'
+  dir_name += '_%s' % (stringify(ubs_ratio))
+  out_dir = path.join(base_dir, dir_name)
+  if path.exists(out_dir):
+    return
+  os.makedirs(out_dir)
+
+  train_set, valid_set, test_set = load_data_sets(ubs_ratio)
+  if inc_valid:
+    train_set = pd.concat([train_set, valid_set])
+
+  train_dir = path.join(out_dir, 'train')
+  test_dir = path.join(out_dir, 'test')
+  _to_lib_once(train_set, train_dir)
+  _to_lib_once(test_set, test_dir)
+
+def to_lib_many(ubs_ratio):
+  to_lib_once(ubs_ratio, False)
+  to_lib_once(ubs_ratio, True)
+
+def load_disc_feat(feat_file):
+  disc_feats = []
+  dense_data = np.loadtxt(feat_file, dtype=np.int32)
+  for i in range(dense_data.shape[0]):
+    feature = dense_data[i].nonzero()[0]
+    assert len(feature) == 4
+    disc_feats.append(feature)
+  disc_feats = np.asarray(disc_feats)
+  return disc_feats
+
+def load_disc_feats():
+  in_dir = path.expanduser('~/Downloads/data/coat')
+  feat_dir = path.join(in_dir, 'user_item_features')
+  user_file = path.join(feat_dir, 'user_features.ascii')
+  item_file = path.join(feat_dir, 'item_features.ascii')
+  user_disc_feats = load_disc_feat(user_file)
+  item_disc_feats = load_disc_feat(item_file)
+  return user_disc_feats, item_disc_feats
+
+def load_cont_feats(train_set):
+  '''Continuous feature engineering
+  item and user features
+    0: number of ratings
+    1: number of rating=1
+    ...
+    5: number of rating=5
+    6: average rating
+  '''
+  n_cont_feat = 7
+  n_user = train_set.user.unique().shape[0]
+  n_item = train_set.item.unique().shape[0]
+  user_cont_feats = np.zeros((n_user, n_cont_feat))
+  item_cont_feats = np.zeros((n_item, n_cont_feat))
+  for row in train_set.itertuples():
+    user = row.user
+    item = row.item
+    rating = row.rating
+    user_cont_feats[user, 0] += 1
+    user_cont_feats[user, rating] += 1
+    user_cont_feats[user, -1] += rating
+    item_cont_feats[item, 0] += 1
+    item_cont_feats[item, rating] += 1
+    item_cont_feats[item, -1] += rating
+  for user in range(n_user):
+    user_cont_feats[user, -1] /= user_cont_feats[user, 0]
+  for item in range(n_item):
+    item_cont_feats[item, -1] /= item_cont_feats[item, 0]
+  return user_cont_feats, item_cont_feats
+
+def to_coat_once(ubs_ratio, inc_valid):
+  def _to_coat_once(data_set, out_file):
+    with open(out_file, 'w') as fout:
+      for row in data_set.itertuples():
+        user = user_ids[row.user]
+        item = item_ids[row.item]
+        fout.write('%d\t%d' % (user, item))
+
+        for user_disc_feat in user_disc_feats[row.user]:
+          fout.write('\t%d' % (user_feat_ids[user_disc_feat]))
+        for item_disc_feat in item_disc_feats[row.item]:
+          fout.write('\t%d' % (item_feat_ids[item_disc_feat]))
+
+        for user_cont_feat in user_cont_feats[row.user]:
+          fout.write('\t%f' % (user_cont_feat))
+        for item_cont_feat in item_cont_feats[row.item]:
+          fout.write('\t%f' % (item_cont_feat))
+
+        fout.write('\t%d\n' % (row.rating))
+    n_rating = len(data_set.index)
+    print('Save %d ratings to %s' % (n_rating, out_file))
+
+  base_dir = path.expanduser('~/Downloads/data')
+  dir_name = 'coat'
+  dir_name += '_incl' if inc_valid else '_excl'
+  dir_name += '_%s' % (stringify(ubs_ratio))
+  out_dir = path.join(base_dir, dir_name)
+  # if path.exists(out_dir):
+  #   return
+  if not path.exists(out_dir):
+    os.makedirs(out_dir)
+
+  train_set, valid_set, test_set = load_data_sets(ubs_ratio)
+  if inc_valid:
+    train_set = pd.concat([train_set, valid_set])
+  user_disc_feats, item_disc_feats = load_disc_feats()
+  user_cont_feats, item_cont_feats = load_cont_feats(train_set)
+
+  global_id = 0
+  user_ids = dict()
+  for user in sorted(train_set.user.unique()):
+    user_ids[user] = global_id
+    global_id += 1
+  item_ids = dict()
+  for item in sorted(train_set.item.unique()):
+    item_ids[item] = global_id
+    global_id += 1
+  user_feat_ids = dict()
+  for user_disc_feat in sorted(np.unique(user_disc_feats)):
+    user_feat_ids[user_disc_feat] = global_id
+    global_id += 1
+  item_feat_ids = dict()
+  for item_disc_feat in sorted(np.unique(item_disc_feats)):
+    item_feat_ids[item_disc_feat] = global_id
+    global_id += 1
+
+  train_file = path.join(out_dir, 'train.dta')
+  valid_file = path.join(out_dir, 'valid.dta')
+  test_file = path.join(out_dir, 'test.dta')
+  _to_coat_once(train_set, train_file)
+  _to_coat_once(valid_set, valid_file)
+  _to_coat_once(test_set, test_file)
+
+def to_resp_many(ubs_ratio):
+  to_coat_once(ubs_ratio, False)
+  to_coat_once(ubs_ratio, True)
+
+def main():
+  in_dir = path.expanduser('~/Downloads/data/coat')
+  maybe_download(in_dir)
+  shuffle_data(in_dir)
+
+  parser = argparse.ArgumentParser()
+  parser.add_argument('out_format', choices=['lib', 'resp'])
+  parser.add_argument('ubs_ratio', type=float)
+  args = parser.parse_args()
+  out_format = args.out_format
+  ubs_ratio = args.ubs_ratio
+  if out_format == 'lib':
+    to_lib_many(ubs_ratio)
+  if out_format == 'resp':
+    to_resp_many(ubs_ratio)
+
+if __name__ == '__main__':
+  main()
+

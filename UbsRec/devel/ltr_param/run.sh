@@ -1,4 +1,4 @@
-data_dir=~/Downloads/data/coat+vd+ft_0.1
+data_dir=~/Downloads/data/coat_incl_0.1
 verbose=1
 n_trial=1
 

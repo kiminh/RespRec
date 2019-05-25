@@ -40,6 +40,7 @@ def run(datasets):
   train_set, valid_set, test_set = datasets
   nnz_input = train_set.nnz_input
   nnz_disc_input = train_set.nnz_disc_input
+  tot_cont_input = train_set.tot_cont_input
   batch_size = tf_flags.batch_size
   lrn_rate = tf_flags.lrn_rate
   n_epoch = tf_flags.n_epoch
@@ -55,8 +56,10 @@ def run(datasets):
     ubs_outputs_ = tf.placeholder(tf.float32, shape=(None))
 
     disc_inputs_ = tf.placeholder(tf.int32, shape=(None, nnz_disc_input))
+    cont_inputs_ = tf.placeholder(tf.float32, shape=(None, tot_cont_input))
     with tf.name_scope('Weighting'):
-      props, prop_dict = model.get_prop_model(disc_inputs_, tf_flags, train_set,
+      props, prop_dict = model.get_prop_model(disc_inputs_, cont_inputs_,
+                            tf_flags, train_set,
                              reuse=False)
 
     with tf.name_scope('Training'):
@@ -85,7 +88,8 @@ def run(datasets):
       # out_weights_ = model.build_autodiff(inputs_, outputs_, ubs_inputs_, ubs_outputs_,
       #                                     tf_flags, train_set, valid_set)
       out_weights_, prop_train_op = model.devel_autodiff(inputs_, outputs_, 
-                        ubs_inputs_, ubs_outputs_, disc_inputs_, prop_optimizer,
+                        ubs_inputs_, ubs_outputs_, disc_inputs_, cont_inputs_,
+                         prop_optimizer,
                                           tf_flags, train_set, valid_set)
     else:
       raise Exception('unknown prop_type %s' % (prop_type))
@@ -97,14 +101,15 @@ def run(datasets):
       # valid_set.shuffle_data()
       n_batch = train_set.data_size // batch_size + 1
       for batch in range(n_batch):
-        inputs, outputs, disc_inputs = train_set.next_batch(batch_size)
-        ubs_inputs, ubs_outputs, _ = valid_set.next_batch(valid_set.data_size)
+        inputs, outputs, disc_inputs, cont_inputs = train_set.next_batch(batch_size)
+        ubs_inputs, ubs_outputs, _, _ = valid_set.next_batch(valid_set.data_size)
 
         feed_dict = {inputs_: inputs,
                      outputs_: outputs,
                      ubs_inputs_: ubs_inputs,
                      ubs_outputs_: ubs_outputs,
-                     disc_inputs_: disc_inputs}
+                     disc_inputs_: disc_inputs,
+                     cont_inputs_: cont_inputs}
         weights, _ = sess.run([out_weights_, prop_train_op], feed_dict=feed_dict)
         # input(weights.mean())
         feed_dict = {inputs_: inputs,
