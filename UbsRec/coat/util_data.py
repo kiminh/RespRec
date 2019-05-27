@@ -74,34 +74,7 @@ class IpsData(object):
     self._start = stop
     return _inputs, _outputs, _weights
 
-def get_ips_data(tf_flags):
-  def _get_ips_data(file_base):
-    data_file = file_base + '.dta'
-    data_df = pd.read_csv(data_file, sep='\t', header=None)
-    inputs = data_df.values[:, i_input].astype(int)
-    outputs = data_df.values[:, -1].astype(float)
-
-    weight_file = file_base + '.wt'
-    weight_df = pd.read_csv(weight_file, sep='\t', header=None)
-    weights = weight_df.values[:, 0].astype(float)
-    weights = 1.0 / weights
-  
-    data_set = IpsData(inputs, outputs, weights)
-    return data_set
-
-  data_dir = tf_flags.data_dir
-  i_input = parse_index(tf_flags.i_input)
-
-  train_base = path.join(data_dir, 'train')
-  valid_base = path.join(data_dir, 'valid')
-  test_base = path.join(data_dir, 'test')
-  train_set = _get_ips_data(train_base)
-  valid_set = _get_ips_data(valid_base)
-  test_set = _get_ips_data(test_base)
-  return train_set, valid_set, test_set
-
-'''
-class Dataset(object):
+class LtrData(object):
   def __init__(self, inputs, outputs, disc_inputs, cont_inputs):
     self._inputs = inputs
     self._outputs = outputs
@@ -140,6 +113,10 @@ class Dataset(object):
     return self._tot_input
 
   @property
+  def data_size(self):
+    return self._data_size
+
+  @property
   def nnz_disc_input(self):
     return self._nnz_disc_input
 
@@ -151,16 +128,13 @@ class Dataset(object):
   def tot_cont_input(self):
     return self._tot_cont_input
 
-  @property
-  def data_size(self):
-    return self._data_size
-  
   def shuffle_data(self):
     indexes = np.arange(self.data_size)
     indexes = np.random.permutation(indexes)
     self._inputs = self.inputs[indexes]
     self._outputs = self.outputs[indexes]
     self._disc_inputs = self.disc_inputs[indexes]
+    self._cont_inputs = self.cont_inputs[indexes]
 
   def next_batch(self, batch_size):
     stop = self._start + batch_size
@@ -179,32 +153,58 @@ class Dataset(object):
                                      self.disc_inputs[:stop, :]))
       _cont_inputs = np.concatenate((self.cont_inputs[self._start:self.data_size, :],
                                      self.cont_inputs[:stop, :]))
-    # input([self._start, stop])
     self._start = stop
     return _inputs, _outputs, _disc_inputs, _cont_inputs
 
-def get_dataset(data_file):
-  dataset = pd.read_csv(data_file, sep='\t', header=None)
-  inputs = dataset.values[:, 0:2].astype(int)
-  outputs = dataset.values[:, -1].astype(float)
-  disc_inputs = dataset.values[:, 0:10].astype(int)
-  disc_inputs = dataset.values[:, 0:2].astype(int)
+def get_ips_data(tf_flags):
+  def _get_ips_data(file_base):
+    data_file = file_base + '.dta'
+    data_df = pd.read_csv(data_file, sep='\t', header=None)
+    inputs = data_df.values[:, i_input].astype(int)
+    outputs = data_df.values[:, -1].astype(float)
 
-  cont_inputs = dataset.values[:, 10:].astype(float)
-  cont_inputs = dataset.values[:, [10,16,17,23,24]]
+    weight_file = file_base + '.wt'
+    weight_df = pd.read_csv(weight_file, sep='\t', header=None)
+    weights = weight_df.values[:, 0].astype(float)
+    weights = 1.0 / weights
+  
+    data_set = IpsData(inputs, outputs, weights)
+    return data_set
 
-  min_cont = cont_inputs.min(axis=0)
-  max_cont = cont_inputs.max(axis=0)
-  cont_inputs = (cont_inputs - min_cont) / (max_cont - min_cont)
-  dataset = Dataset(inputs, outputs, disc_inputs, cont_inputs)
-  return dataset
+  data_dir = tf_flags.data_dir
+  i_input = parse_index(tf_flags.i_input)
 
-def get_datasets(data_dir):
+  train_base = path.join(data_dir, 'train')
+  valid_base = path.join(data_dir, 'valid')
+  test_base = path.join(data_dir, 'test')
+  train_set = _get_ips_data(train_base)
+  valid_set = _get_ips_data(valid_base)
+  test_set = _get_ips_data(test_base)
+  return train_set, valid_set, test_set
+
+def get_ltr_data(tf_flags):
+  def _get_ltr_data(data_file):
+    data_df = pd.read_csv(data_file, sep='\t', header=None)
+    inputs = data_df.values[:, i_input].astype(int)
+    outputs = data_df.values[:, -1].astype(float)
+    disc_inputs = data_df.values[:, i_disc_input].astype(int)
+    cont_inputs = data_df.values[:, i_cont_input].astype(float)
+    min_cont = cont_inputs.min(axis=0)
+    max_cont = cont_inputs.max(axis=0)
+    cont_inputs = (cont_inputs - min_cont) / (max_cont - min_cont)
+    data_set = LtrData(inputs, outputs, disc_inputs, cont_inputs)
+    return data_set
+
+  data_dir = tf_flags.data_dir
+  i_input = parse_index(tf_flags.i_input)
+  i_disc_input = parse_index(tf_flags.i_disc_input)
+  i_cont_input = parse_index(tf_flags.i_cont_input)
+
   train_file = path.join(data_dir, 'train.dta')
   valid_file = path.join(data_dir, 'valid.dta')
   test_file = path.join(data_dir, 'test.dta')
-  train_set = get_dataset(train_file)
-  valid_set = get_dataset(valid_file)
-  test_set = get_dataset(test_file)
+  train_set = _get_ltr_data(train_file)
+  valid_set = _get_ltr_data(valid_file)
+  test_set = _get_ltr_data(test_file)
   return train_set, valid_set, test_set
-'''
+

@@ -45,14 +45,14 @@ def run_once(data_sets):
     train_op = optimizer.minimize(loss)
   [print(var) for var in tf.trainable_variables()]
 
-  with tf.name_scope('Evaluate'):
+  with tf.name_scope('evaluating'):
     _, _, outputs = util_model.get_rating(inputs_, outputs_, weights_,
                                           tf_flags, train_set,
                                           params=None,
                                           reuse=True)
     outputs = tf.clip_by_value(outputs, 1.0, 5.0)
-    mae_ = tf.keras.metrics.MAE(outputs_, outputs)
-    mse_ = tf.keras.metrics.MSE(outputs_, outputs)
+    _mae = tf.keras.metrics.MAE(outputs_, outputs)
+    _mse = tf.keras.metrics.MSE(outputs_, outputs)
 
   mae_mse_list = []
   with tf.Session() as sess:
@@ -69,7 +69,7 @@ def run_once(data_sets):
       if (epoch + 1) % eval_freq == 0:
         feed_dict = {inputs_: test_set.inputs,
                      outputs_: test_set.outputs}
-        mae, mse = sess.run([mae_, mse_], feed_dict=feed_dict)
+        mae, mse = sess.run([_mae, _mse], feed_dict=feed_dict)
         if verbose:
           print('mae=%.3f mse=%.3f' % (mae, mse))
         mae_mse_list.append((mae, mse, epoch))

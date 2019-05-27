@@ -130,7 +130,7 @@ def load_disc_feats():
   item_disc_feats = load_disc_feat(item_file)
   return user_disc_feats, item_disc_feats
 
-def engr_cont_feats(train_set):
+def engr_cont_feats(train_set, n_cont_feat):
   '''Continuous feature engineering
   item and user features
     0: number of ratings
@@ -139,7 +139,6 @@ def engr_cont_feats(train_set):
     5: number of rating=5
     6: average rating
   '''
-  n_cont_feat = 7
   n_user = train_set.user.unique().shape[0]
   n_item = train_set.item.unique().shape[0]
   user_cont_feats = np.zeros((n_user, n_cont_feat))
@@ -164,33 +163,60 @@ def to_coat_once(ubs_ratio, inc_valid):
   def _to_coat_once(data_set, file_base):
     data_file = file_base + '.dta'
     weight_file = file_base + '.wt'
+    is_first = True
+    disc_indexes = []
+    cont_indexes = []
     with open(data_file, 'w') as fdta, \
         open(weight_file, 'w') as fwt:
       for row in data_set.itertuples():
-        index = 0
+        if is_first:
+          index = 0
+          disc_indexes.append(index)
         user = user_ids[row.user]
-        index += 1
         item = item_ids[row.item]
-        index += 1
+        if is_first:
+          index += 2
+          disc_indexes.append(index)
         fdta.write('%d\t%d' % (user, item))
         for user_disc_feat in user_disc_feats[row.user]:
           fdta.write('\t%d' % (user_feat_ids[user_disc_feat]))
-          index += 1
+          if is_first:
+            index += 1
         for item_disc_feat in item_disc_feats[row.item]:
           fdta.write('\t%d' % (item_feat_ids[item_disc_feat]))
-          index += 1
-        for user_cont_feat in user_cont_feats[row.user]:
+          if is_first:
+            index += 1
+        if is_first:
+          disc_indexes.append(index)
+          cont_indexes.append(index)
+        for i in range(n_cont_feat):
+          user_cont_feat = user_cont_feats[row.user][i]
+          item_cont_feat = item_cont_feats[row.item][i]
           fdta.write('\t%f' % (user_cont_feat))
-          index += 1
-        for item_cont_feat in item_cont_feats[row.item]:
           fdta.write('\t%f' % (item_cont_feat))
-          index += 1
+          if is_first:
+            index += 2
+            if (i < 1) or (i > 4):
+              cont_indexes.append(index)
         fdta.write('\t%d\n' % (row.rating))
-        index += 1
+        if is_first:
+          index += 1
+          cont_indexes.append(index)
+        is_first = False
 
         fwt.write('%f\n' % (weights[row.user, row.item]))
+
     index_file = file_base + '.ind'
-        
+    with open(index_file, 'w') as find:
+      find.write('disc.')
+      for index in disc_indexes:
+        find.write('\t%d' % (index))
+      find.write('\n')
+      find.write('cont.')
+      for index in cont_indexes:
+        find.write('\t%d' % (index))
+      find.write('\n')
+
     n_rating = len(data_set.index)
     print('Save %d ratings to %s' % (n_rating, data_file))
 
@@ -213,7 +239,8 @@ def to_coat_once(ubs_ratio, inc_valid):
   if inc_valid:
     train_set = pd.concat([train_set, valid_set])
   user_disc_feats, item_disc_feats = load_disc_feats()
-  user_cont_feats, item_cont_feats = engr_cont_feats(train_set)
+  n_cont_feat = 7
+  user_cont_feats, item_cont_feats = engr_cont_feats(train_set, n_cont_feat)
 
   global_id = 0
   user_ids = dict()
