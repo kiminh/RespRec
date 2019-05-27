@@ -70,8 +70,10 @@ def run_once(data_sets):
                                           params=None,
                                           reuse=True)
     outputs = tf.clip_by_value(outputs, 1.0, 5.0)
-    _mae = tf.keras.metrics.MAE(outputs_, outputs)
-    _mse = tf.keras.metrics.MSE(outputs_, outputs)
+    # _mae = tf.keras.metrics.MAE(outputs_, outputs)
+    # _mse = tf.keras.metrics.MSE(outputs_, outputs)
+    _mae = tf.keras.metrics.mean_absolute_error(outputs_, outputs)
+    _mse = tf.keras.metrics.mean_squared_error(outputs_, outputs)
 
   if verbose:
     for var in tf.trainable_variables():
