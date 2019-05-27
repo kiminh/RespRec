@@ -49,7 +49,8 @@ def get_pred_model(inputs_, outputs_, weights_,
     else:
       raise Exception('to implement')
     errors = outputs_ - outputs
-    loss = 0.5 * tf.reduce_sum(tf.multiply(weights_, tf.square(errors)))
+    # loss = 0.5 * tf.reduce_sum(tf.multiply(weights_, tf.square(errors)))
+    loss = 0.5 * tf.reduce_sum(tf.div(tf.square(errors), weights_))
     loss += tf_flags.all_reg * (tf.reduce_sum(tf.square(fe)) +
                                 tf.reduce_sum(tf.square(fb)) +
                                 tf.reduce_sum(tf.square(gb)))
@@ -125,6 +126,15 @@ def devel_autodiff(inputs, outputs, ubs_inputs, ubs_outputs,
                                    tf_flags, train_set,
                                    w_dict=None,
                                    reuse=True)
+
+  prop_var_names = prop_w_dict.keys()
+  prop_var_list = [prop_w_dict[key] for key in prop_var_names]
+  # mean_weight = tf.reduce_sum(weights_)
+  # loss += 0.001 * tf.reduce_sum(tf.square(weights_ - mean_weight))
+  for var in prop_var_list:
+    loss += 0.0 * tf.reduce_sum(tf.square(var))
+    # loss += 0.01 * tf.reduce_sum(tf.square(var))
+
   var_names = w_dict.keys()
   var_list = [w_dict[key] for key in var_names]
   grads = tf.gradients(loss, var_list)
@@ -134,14 +144,12 @@ def devel_autodiff(inputs, outputs, ubs_inputs, ubs_outputs,
                                  tf_flags, train_set,
                                  w_dict=w_dict_vd,
                                  reuse=True)
-  prop_var_names = prop_w_dict.keys()
-  prop_var_list = [prop_w_dict[key] for key in prop_var_names]
   grads_vd = tf.gradients(loss_vd, prop_var_list)
 
   grads_and_vars = list(zip(grads_vd, prop_var_list))
   train_op = prop_optimizer.apply_gradients(grads_and_vars)
 
-  # weights_ = (0.5 * batch_size) * weights_  / tf.reduce_sum(weights_)
+  # weights_ = (0.4 * batch_size) * weights_  / tf.reduce_sum(weights_)
 
   return weights_, train_op
 

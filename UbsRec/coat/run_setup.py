@@ -130,7 +130,7 @@ def load_disc_feats():
   item_disc_feats = load_disc_feat(item_file)
   return user_disc_feats, item_disc_feats
 
-def load_cont_feats(train_set):
+def engr_cont_feats(train_set):
   '''Continuous feature engineering
   item and user features
     0: number of ratings
@@ -161,26 +161,38 @@ def load_cont_feats(train_set):
   return user_cont_feats, item_cont_feats
 
 def to_coat_once(ubs_ratio, inc_valid):
-  def _to_coat_once(data_set, out_file):
-    with open(out_file, 'w') as fout:
+  def _to_coat_once(data_set, file_base):
+    data_file = file_base + '.dta'
+    weight_file = file_base + '.wt'
+    with open(data_file, 'w') as fdta, \
+        open(weight_file, 'w') as fwt:
       for row in data_set.itertuples():
+        index = 0
         user = user_ids[row.user]
+        index += 1
         item = item_ids[row.item]
-        fout.write('%d\t%d' % (user, item))
-
+        index += 1
+        fdta.write('%d\t%d' % (user, item))
         for user_disc_feat in user_disc_feats[row.user]:
-          fout.write('\t%d' % (user_feat_ids[user_disc_feat]))
+          fdta.write('\t%d' % (user_feat_ids[user_disc_feat]))
+          index += 1
         for item_disc_feat in item_disc_feats[row.item]:
-          fout.write('\t%d' % (item_feat_ids[item_disc_feat]))
-
+          fdta.write('\t%d' % (item_feat_ids[item_disc_feat]))
+          index += 1
         for user_cont_feat in user_cont_feats[row.user]:
-          fout.write('\t%f' % (user_cont_feat))
+          fdta.write('\t%f' % (user_cont_feat))
+          index += 1
         for item_cont_feat in item_cont_feats[row.item]:
-          fout.write('\t%f' % (item_cont_feat))
+          fdta.write('\t%f' % (item_cont_feat))
+          index += 1
+        fdta.write('\t%d\n' % (row.rating))
+        index += 1
 
-        fout.write('\t%d\n' % (row.rating))
+        fwt.write('%f\n' % (weights[row.user, row.item]))
+    index_file = file_base + '.ind'
+        
     n_rating = len(data_set.index)
-    print('Save %d ratings to %s' % (n_rating, out_file))
+    print('Save %d ratings to %s' % (n_rating, data_file))
 
   base_dir = path.expanduser('~/Downloads/data')
   dir_name = 'coat'
@@ -193,10 +205,15 @@ def to_coat_once(ubs_ratio, inc_valid):
     os.makedirs(out_dir)
 
   train_set, valid_set, test_set = load_data_sets(ubs_ratio)
+
+  in_dir = path.expanduser('~/Downloads/data/coat')
+  weight_file = path.join(in_dir, 'propensities.ascii')
+  weights = np.loadtxt(weight_file, dtype=np.float32)
+
   if inc_valid:
     train_set = pd.concat([train_set, valid_set])
   user_disc_feats, item_disc_feats = load_disc_feats()
-  user_cont_feats, item_cont_feats = load_cont_feats(train_set)
+  user_cont_feats, item_cont_feats = engr_cont_feats(train_set)
 
   global_id = 0
   user_ids = dict()
@@ -216,12 +233,12 @@ def to_coat_once(ubs_ratio, inc_valid):
     item_feat_ids[item_disc_feat] = global_id
     global_id += 1
 
-  train_file = path.join(out_dir, 'train.dta')
-  valid_file = path.join(out_dir, 'valid.dta')
-  test_file = path.join(out_dir, 'test.dta')
-  _to_coat_once(train_set, train_file)
-  _to_coat_once(valid_set, valid_file)
-  _to_coat_once(test_set, test_file)
+  train_base = path.join(out_dir, 'train')
+  valid_base = path.join(out_dir, 'valid')
+  test_base = path.join(out_dir, 'test')
+  _to_coat_once(train_set, train_base)
+  _to_coat_once(valid_set, valid_base)
+  _to_coat_once(test_set, test_base)
 
 def to_resp_many(ubs_ratio):
   to_coat_once(ubs_ratio, False)

@@ -1,24 +1,22 @@
 import tensorflow as tf
 
-def get_pred_model(inputs_, outputs_, weights_,
-                   tf_flags, train_set,
-                   w_dict=None,
-                   reuse=False):
-  if w_dict is None:
-    w_dict = dict()
-
+def get_rating(inputs_, outputs_, weights_, tf_flags, train_set,
+               params=None,
+               reuse=False):
   def _get_var(name, shape, initializer):
     key = tf.get_variable_scope().name + '/' + name
-    if key in w_dict:
-      return w_dict[key]
+    if key in params:
+      return params[key]
     else:
       var = tf.get_variable(name, shape, tf.float32, initializer=initializer)
-      w_dict[key] = var
+      params[key] = var
       return var
 
-  tot_input = train_set.tot_input
+  if params is None:
+    params = dict()
   n_factor = tf_flags.n_factor
-  with tf.variable_scope('Prediction', reuse=reuse):
+  tot_input = train_set.tot_input
+  with tf.variable_scope('rating', reuse=reuse):
     n_init = tf.random_normal_initializer(mean=0.0, stddev=0.01)
     z_init = tf.constant_initializer(0.0)
 
@@ -37,14 +35,12 @@ def get_pred_model(inputs_, outputs_, weights_,
       fm_embedding = 0.5 * tf.subtract(sqr_sum_embedding, sum_sqr_embedding)
       # batch_size
       outputs = tf.reduce_sum(fm_embedding, axis=1)
-
       # batch_size * n_feature
       feature_bias = tf.nn.embedding_lookup(fb, inputs_)
       # batch_size
       feature_bias = tf.reduce_sum(feature_bias, axis=1)
       # batch_size
       global_bias = gb * tf.ones_like(feature_bias)
-
       outputs = tf.add_n([outputs, feature_bias, global_bias])
     else:
       raise Exception('to implement')
@@ -53,18 +49,34 @@ def get_pred_model(inputs_, outputs_, weights_,
     loss += tf_flags.all_reg * (tf.reduce_sum(tf.square(fe)) +
                                 tf.reduce_sum(tf.square(fb)) +
                                 tf.reduce_sum(tf.square(gb)))
-  return w_dict, loss, outputs
+  return params, loss, outputs
 
+def get_optimizer(opt_type, initial_lr):
+  if opt_type == 'adagrad':
+    optimizer = tf.train.AdagradOptimizer(learning_rate=initial_lr,
+                                          initial_accumulator_value=1e-8)
+  elif opt_type == 'adam':
+    optimizer = tf.train.AdamOptimizer(learning_rate=initial_lr)
+  elif opt_type == 'sgd':
+    optimizer = tf.train.GradientDescentOptimizer(learning_rate=initial_lr)
+  elif opt_type == 'rmsprop':
+    optimizer = tf.train.RMSPropOptimizer(learning_rate=initial_lr)
+  else:
+    raise Exception('unknown opt_type %s' % (opt_type))
+  return optimizer
+
+
+'''
 def get_prop_model(disc_inputs_, cont_inputs_, tf_flags, train_set, reuse=False):
-  w_dict = dict()
+  params = dict()
 
   def _get_var(name, shape, initializer):
     key = tf.get_variable_scope().name + '/' + name
-    if key in w_dict:
-      return w_dict[key]
+    if key in params:
+      return params[key]
     else:
       var = tf.get_variable(name, shape, tf.float32, initializer=initializer)
-      w_dict[key] = var
+      params[key] = var
       return var
 
   with tf.variable_scope('Prediction', reuse=reuse):
@@ -75,7 +87,7 @@ def get_prop_model(disc_inputs_, cont_inputs_, tf_flags, train_set, reuse=False)
     embedding = tf.nn.embedding_lookup(disc_w, disc_inputs_)
     cont = tf.reduce_sum(tf.multiply(cont_inputs_, cont_w), axis=1)
     weights = tf.nn.sigmoid(tf.add(tf.reduce_sum(embedding, axis=1) + cont, b))
-  return weights, w_dict
+  return weights, params
 
 def build_uniform(batch_size):
   weights_ = tf.ones((batch_size), tf.float32)
@@ -87,18 +99,18 @@ def build_autodiff(inputs, outputs, ubs_inputs, ubs_outputs,
   data_size = valid_set.data_size
   weights_ = tf.zeros([batch_size], tf.float32)
   weights__vd = tf.ones([data_size], tf.float32) / float(data_size)
-  w_dict, loss, _ = get_pred_model(inputs, outputs, weights_,
+  params, loss, _ = get_pred_model(inputs, outputs, weights_,
                                    tf_flags, train_set,
-                                   w_dict=None,
+                                   params=None,
                                    reuse=True)
-  var_names = w_dict.keys()
-  var_list = [w_dict[key] for key in var_names]
+  var_names = params.keys()
+  var_list = [params[key] for key in var_names]
   grads = tf.gradients(loss, var_list)
   var_list_vd = [vv - gg for gg, vv in zip(grads, var_list)]
   w_dict_vd = dict(zip(var_names, var_list_vd))
   _, loss_vd, _ = get_pred_model(ubs_inputs, ubs_outputs, weights__vd, 
                                  tf_flags, train_set,
-                                 w_dict=w_dict_vd,
+                                 params=w_dict_vd,
                                  reuse=True)
   grads_vd = tf.gradients(loss_vd, [weights_])[0]
   weights_ = - grads_vd
@@ -121,18 +133,18 @@ def devel_autodiff(inputs, outputs, ubs_inputs, ubs_outputs,
   batch_size = tf_flags.batch_size
   data_size = valid_set.data_size
   weights__vd = tf.ones([data_size], tf.float32) / float(data_size)
-  w_dict, loss, _ = get_pred_model(inputs, outputs, weights_,
+  params, loss, _ = get_pred_model(inputs, outputs, weights_,
                                    tf_flags, train_set,
-                                   w_dict=None,
+                                   params=None,
                                    reuse=True)
-  var_names = w_dict.keys()
-  var_list = [w_dict[key] for key in var_names]
+  var_names = params.keys()
+  var_list = [params[key] for key in var_names]
   grads = tf.gradients(loss, var_list)
   var_list_vd = [vv - gg for gg, vv in zip(grads, var_list)]
   w_dict_vd = dict(zip(var_names, var_list_vd))
   _, loss_vd, _ = get_pred_model(ubs_inputs, ubs_outputs, weights__vd, 
                                  tf_flags, train_set,
-                                 w_dict=w_dict_vd,
+                                 params=w_dict_vd,
                                  reuse=True)
   prop_var_names = prop_w_dict.keys()
   prop_var_list = [prop_w_dict[key] for key in prop_var_names]
@@ -144,7 +156,7 @@ def devel_autodiff(inputs, outputs, ubs_inputs, ubs_outputs,
   # weights_ = (0.5 * batch_size) * weights_  / tf.reduce_sum(weights_)
 
   return weights_, train_op
-
+'''
 
 
 

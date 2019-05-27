@@ -47,7 +47,7 @@ def run(datasets):
   opt_type = tf_flags.opt_type
   prop_type = tf_flags.prop_type
   verbose = tf_flags.verbose
-  interval = 2
+  interval = 10
   with tf.Graph().as_default(), tf.Session() as sess:
     inputs_ = tf.placeholder(tf.int32, shape=(None, nnz_input))
     outputs_ = tf.placeholder(tf.float32, shape=(None))
@@ -81,7 +81,7 @@ def run(datasets):
       mse_ = tf.keras.metrics.MSE(outputs_, outputs)
     # [print(var) for var in tf.trainable_variables()]
 
-    prop_optimizer = get_optimizer(opt_type, lrn_rate)
+    prop_optimizer = get_optimizer(opt_type, 0.01)
     if prop_type == 'uniform':
       out_weights_ = model.build_uniform(batch_size)
     elif prop_type == 'autodiff':
@@ -100,6 +100,7 @@ def run(datasets):
       train_set.shuffle_data()
       # valid_set.shuffle_data()
       n_batch = train_set.data_size // batch_size + 1
+      epoch_weights = []
       for batch in range(n_batch):
         inputs, outputs, disc_inputs, cont_inputs = train_set.next_batch(batch_size)
         ubs_inputs, ubs_outputs, _, _ = valid_set.next_batch(valid_set.data_size)
@@ -111,18 +112,20 @@ def run(datasets):
                      disc_inputs_: disc_inputs,
                      cont_inputs_: cont_inputs}
         weights, _ = sess.run([out_weights_, prop_train_op], feed_dict=feed_dict)
-        # input(weights.mean())
+        epoch_weights.append(1.0 / weights)
         feed_dict = {inputs_: inputs,
                      outputs_: outputs,
                      in_weights_: weights}
         sess.run(train_op, feed_dict=feed_dict)
+      epoch_weights = np.concatenate(epoch_weights)
 
       if (epoch + 1) % interval == 0:
         feed_dict = {inputs_: test_set.inputs,
                      outputs_: test_set.outputs}
         mae, mse = sess.run([mae_, mse_], feed_dict=feed_dict)
         if verbose:
-          print('mae=%.3f mse=%.3f' % (mae, mse))
+          var = np.var(epoch_weights)
+          print('mae=%.3f mse=%.3f var=%.4f' % (mae, mse, var))
         mae_list.append(mae)
         mse_list.append(mse)
   epoch = mse_list.index(min(mse_list))

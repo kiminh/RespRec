@@ -3,6 +3,104 @@ from os import path
 import numpy as np
 import pandas as pd
 
+def parse_index(i_str):
+  if ':' in i_str:
+    i_list = []
+    for i_range in i_str.split(','):
+      i_range = i_range.split(':')
+      start = int(i_range[0])
+      stop = int(i_range[1])
+      for i in range(start, stop):
+        i_list.append(i)
+  else:
+    i_list = eval(i_str)
+  return i_list
+
+class IpsData(object):
+  def __init__(self, inputs, outputs, weights):
+    self._inputs = inputs
+    self._outputs = outputs
+    self._weights = weights
+    self._nnz_input = inputs.shape[1]
+    self._tot_input = inputs.max() + 1
+    self._data_size = outputs.shape[0]
+    self._start = 0
+
+  @property
+  def inputs(self):
+    return self._inputs
+  
+  @property
+  def outputs(self):
+    return self._outputs
+  
+  @property
+  def weights(self):
+    return self._weights
+
+  @property
+  def nnz_input(self):
+    return self._nnz_input
+
+  @property
+  def tot_input(self):
+    return self._tot_input
+
+  @property
+  def data_size(self):
+    return self._data_size
+
+  def shuffle_data(self):
+    indexes = np.arange(self.data_size)
+    indexes = np.random.permutation(indexes)
+    self._inputs = self.inputs[indexes]
+    self._outputs = self.outputs[indexes]
+    self._weights = self.weights[indexes]
+
+  def next_batch(self, batch_size):
+    stop = self._start + batch_size
+    if stop < self.data_size:
+      _inputs = self.inputs[self._start:stop, :]
+      _outputs = self.outputs[self._start:stop]
+      _weights = self.weights[self._start:stop]
+    else:
+      stop = stop - self.data_size
+      _inputs = np.concatenate((self.inputs[self._start:self.data_size, :],
+                                self.inputs[:stop, :]))
+      _outputs = np.concatenate((self.outputs[self._start:self.data_size],
+                                 self.outputs[:stop]))
+      _weights = np.concatenate((self.weights[self._start:self.data_size],
+                                 self.weights[:stop]))
+    self._start = stop
+    return _inputs, _outputs, _weights
+
+def get_ips_data(tf_flags):
+  def _get_ips_data(file_base):
+    data_file = file_base + '.dta'
+    data_df = pd.read_csv(data_file, sep='\t', header=None)
+    inputs = data_df.values[:, i_input].astype(int)
+    outputs = data_df.values[:, -1].astype(float)
+
+    weight_file = file_base + '.wt'
+    weight_df = pd.read_csv(weight_file, sep='\t', header=None)
+    weights = weight_df.values[:, 0].astype(float)
+    weights = 1.0 / weights
+  
+    data_set = IpsData(inputs, outputs, weights)
+    return data_set
+
+  data_dir = tf_flags.data_dir
+  i_input = parse_index(tf_flags.i_input)
+
+  train_base = path.join(data_dir, 'train')
+  valid_base = path.join(data_dir, 'valid')
+  test_base = path.join(data_dir, 'test')
+  train_set = _get_ips_data(train_base)
+  valid_set = _get_ips_data(valid_base)
+  test_set = _get_ips_data(test_base)
+  return train_set, valid_set, test_set
+
+'''
 class Dataset(object):
   def __init__(self, inputs, outputs, disc_inputs, cont_inputs):
     self._inputs = inputs
@@ -109,3 +207,4 @@ def get_datasets(data_dir):
   valid_set = get_dataset(valid_file)
   test_set = get_dataset(test_file)
   return train_set, valid_set, test_set
+'''
