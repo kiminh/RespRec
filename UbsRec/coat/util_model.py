@@ -93,6 +93,7 @@ def get_weight(disc_inputs_, cont_inputs_, tf_flags, train_set,
       disc = tf.reduce_sum(tf.nn.embedding_lookup(dw, disc_inputs_), axis=1)
       cont = tf.reduce_sum(tf.multiply(cont_inputs_, cw), axis=1)
       weights = tf.nn.sigmoid(disc + cont + gb)
+  # weights = 1.0 / weights
   return weights, params
 
 def ltr_param(inputs_, outputs_, 

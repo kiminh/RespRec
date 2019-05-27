@@ -73,6 +73,14 @@ def run_once(data_sets):
         if verbose:
           print('mae=%.3f mse=%.3f' % (mae, mse))
         mae_mse_list.append((mae, mse, epoch))
+    average = dict()
+    for weight, output in zip(train_set.weights, train_set.outputs):
+      if output not in average:
+        average[output] = []
+      average[output].append(weight)
+    average = {k: sum(v) / len(v) for k, v in average.items()}
+    for output in sorted(average.keys()):
+      print('output=%d weight=%.4f' % (output, average[output]))
   mae_mse_list = sorted(mae_mse_list, key=lambda t: (t[1], t[0]))
   mae, mse, epoch = mae_mse_list[0]
   print('epoch=%d mae=%.3f mse=%.3f' % (epoch + 1, mae, mse))
