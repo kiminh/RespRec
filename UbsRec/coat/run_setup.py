@@ -168,8 +168,7 @@ def to_coat_once(ubs_ratio, inc_valid):
     cont_indexes = []
     with open(data_file, 'w') as fdta, \
         open(weight_file, 'w') as fwt:
-      for row_id, row in data_set.iterrows():
-        input([row_id, type(row)])
+      for row_id, row in enumerate(data_set.itertuples()):
         if is_first:
           index = 0
           disc_indexes.append(index)

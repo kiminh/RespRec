@@ -18,7 +18,7 @@ flags.DEFINE_integer('verbose', 1, '')
 flags.DEFINE_string('data_dir', 'coat', '')
 flags.DEFINE_string('i_input', '0:2', '')
 flags.DEFINE_string('i_disc_input', '0:10', '')
-flags.DEFINE_string('i_cont_input', '10:12,22:25', '')
+flags.DEFINE_string('i_cont_input', '11:13,23:26', '')
 flags.DEFINE_string('model_name', 'fm', '')
 flags.DEFINE_string('ltr_type', 'batch', 'batch|naive|param')
 flags.DEFINE_string('opt_type', 'adagrad', '')
@@ -58,11 +58,12 @@ def run_once(data_sets):
     optimizer = util_model.get_optimizer(opt_type, initial_lr)
     train_op = optimizer.minimize(loss)
 
+    # input([ltr_type, type(ltr_type), ltr_type == 'naive'])
     if ltr_type == 'batch':
       _weights = util_model.ltr_batch(inputs_, outputs_, 
                                       ubs_inputs_, ubs_outputs_, 
                                       tf_flags, data_sets)
-    elif ltr_type == 'param':
+    elif (ltr_type == 'naive') or (ltr_type == 'param'):
       weights, wt_params = util_model.get_weight(disc_inputs_, cont_inputs_, 
                                                  tf_flags, train_set,
                                                  reuse=False)
@@ -109,7 +110,7 @@ def run_once(data_sets):
                      cont_inputs_: cont_inputs}
         if ltr_type == 'batch':
           weights = sess.run(_weights, feed_dict=feed_dict)
-        elif ltr_type == 'param':
+        elif (ltr_type == 'naive') or (ltr_type == 'param'):
           weights, _ = sess.run([_weights, wt_train_op], feed_dict=feed_dict)
         else:
           raise Exception('unknown ltr_type %s' % (ltr_type))

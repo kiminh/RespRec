@@ -76,15 +76,23 @@ def get_weight(disc_inputs_, cont_inputs_, tf_flags, train_set,
       params[key] = var
       return var
 
+  ltr_type = tf_flags.ltr_type
   params = dict()
   with tf.variable_scope('weight', reuse=reuse):
     z_init = tf.constant_initializer(0.0)
-    dw = _get_var('dw', (train_set.tot_disc_input), z_init)
-    cw = _get_var('cw', (train_set.tot_cont_input), z_init)
-    gb = _get_var('gb', (), z_init)
-    disc = tf.reduce_sum(tf.nn.embedding_lookup(dw, disc_inputs_), axis=1)
-    cont = tf.reduce_sum(tf.multiply(cont_inputs_, cw), axis=1)
-    weights = tf.nn.sigmoid(disc + cont + gb)
+    tot_disc_input = train_set.tot_disc_input
+    # input(tot_disc_input)
+    dw = _get_var('dw', (tot_disc_input), z_init)
+    if ltr_type == 'naive':
+      disc = tf.reduce_sum(tf.nn.embedding_lookup(dw, disc_inputs_), axis=1)
+      weights = tf.nn.sigmoid(disc)
+    elif ltr_type == 'param':
+      tot_cont_input = train_set.tot_cont_input
+      cw = _get_var('cw', (tot_cont_input), z_init)
+      gb = _get_var('gb', (), z_init)
+      disc = tf.reduce_sum(tf.nn.embedding_lookup(dw, disc_inputs_), axis=1)
+      cont = tf.reduce_sum(tf.multiply(cont_inputs_, cw), axis=1)
+      weights = tf.nn.sigmoid(disc + cont + gb)
   return weights, params
 
 def ltr_param(inputs_, outputs_, 

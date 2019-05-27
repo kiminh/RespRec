@@ -192,6 +192,7 @@ def get_ltr_data(tf_flags):
     min_cont = cont_inputs.min(axis=0)
     max_cont = cont_inputs.max(axis=0)
     cont_inputs = (cont_inputs - min_cont) / (max_cont - min_cont)
+    # input([disc_inputs.shape, cont_inputs.shape])
     data_set = LtrData(inputs, outputs, disc_inputs, cont_inputs)
     return data_set
 
@@ -199,6 +200,7 @@ def get_ltr_data(tf_flags):
   i_input = parse_index(tf_flags.i_input)
   i_disc_input = parse_index(tf_flags.i_disc_input)
   i_cont_input = parse_index(tf_flags.i_cont_input)
+  # input([i_disc_input, i_cont_input])
 
   train_file = path.join(data_dir, 'train.dta')
   valid_file = path.join(data_dir, 'valid.dta')
