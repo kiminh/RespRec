@@ -20,6 +20,7 @@ flags.DEFINE_string('i_input', '0:2', '')
 flags.DEFINE_string('i_disc_input', '0:10', '')
 flags.DEFINE_string('i_cont_input', '10:12,22:25', '')
 flags.DEFINE_string('model_name', 'fm', '')
+flags.DEFINE_string('ltr_type', 'batch', 'batch|naive|param')
 flags.DEFINE_string('opt_type', 'adagrad', '')
 tf_flags = tf.flags.FLAGS
 
@@ -28,6 +29,7 @@ def run_once(data_sets):
   eval_freq = tf_flags.eval_freq
   initial_lr = tf_flags.initial_lr
   n_epoch = tf_flags.n_epoch
+  ltr_type = tf_flags.ltr_type
   opt_type = tf_flags.opt_type
   verbose = tf_flags.verbose
 
@@ -53,16 +55,26 @@ def run_once(data_sets):
                                        tf_flags, train_set,
                                        params=None,
                                        reuse=False)
-    r_optimizer = util_model.get_optimizer(opt_type, initial_lr)
-    train_r = r_optimizer.minimize(loss)
+    optimizer = util_model.get_optimizer(opt_type, initial_lr)
+    train_op = optimizer.minimize(loss)
 
-    util_model.get_weight(disc_inputs_, cont_inputs_, tf_flags, train_set,
-                          reuse=False)
-    w_optimizer = util_model.get_optimizer(opt_type, initial_lr)
-    _weights, train_w = util_model.get_autodiff(inputs_, outputs_, 
+    if ltr_type == 'batch':
+      _weights = util_model.ltr_batch(inputs_, outputs_, 
                                       ubs_inputs_, ubs_outputs_, 
-                                      disc_inputs_, cont_inputs_,
-                                      w_optimizer, tf_flags, data_sets)
+                                      tf_flags, data_sets)
+    elif ltr_type == 'param':
+      weights, wt_params = util_model.get_weight(disc_inputs_, cont_inputs_, 
+                                                 tf_flags, train_set,
+                                                 reuse=False)
+      _weights, grads_and_vars = util_model.ltr_param(inputs_, outputs_, 
+                                                      ubs_inputs_, ubs_outputs_, 
+                                                      disc_inputs_, cont_inputs_,
+                                                      weights, wt_params,
+                                                      tf_flags, data_sets)
+      wt_optimizer = util_model.get_optimizer(opt_type, initial_lr)
+      wt_train_op = wt_optimizer.apply_gradients(grads_and_vars)
+    else:
+      raise Exception('unknown ltr_type %s' % (ltr_type))
 
   with tf.name_scope('evaluating'):
     _, _, outputs = util_model.get_rating(inputs_, outputs_, weights_,
@@ -95,11 +107,16 @@ def run_once(data_sets):
                      ubs_outputs_: ubs_outputs,
                      disc_inputs_: disc_inputs,
                      cont_inputs_: cont_inputs}
-        weights, _ = sess.run([_weights, train_w], feed_dict=feed_dict)
+        if ltr_type == 'batch':
+          weights = sess.run(_weights, feed_dict=feed_dict)
+        elif ltr_type == 'param':
+          weights, _ = sess.run([_weights, wt_train_op], feed_dict=feed_dict)
+        else:
+          raise Exception('unknown ltr_type %s' % (ltr_type))
         feed_dict = {inputs_: inputs,
                      outputs_: outputs,
                      weights_: weights}
-        sess.run(train_r, feed_dict=feed_dict)
+        sess.run(train_op, feed_dict=feed_dict)
 
       if (epoch + 1) % eval_freq == 0:
         feed_dict = {inputs_: test_set.inputs,

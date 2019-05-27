@@ -1,3 +1,11 @@
+for ubs_ratio in 0.01 0.05 0.1 0.5; do
+  # python run_setup.py lib ${ubs_ratio}
+  python run_setup.py resp ${ubs_ratio}
+  break
+done
+exit
+
+
 data_dir=~/Downloads/data/coat_incl_0.1
 all_reg=0.001
 batch_norm=0
@@ -10,7 +18,8 @@ initial_lr=0.01
 model_name=fm
 n_epoch=200
 n_factor=128
-n_trial=10
+n_trial=1 #0
+ltr_type=naive #batch #param
 opt_type=adagrad
 verbose=1
 python -W ignore run_ltr.py \
@@ -24,15 +33,11 @@ python -W ignore run_ltr.py \
     --n_epoch ${n_epoch} \
     --n_factor ${n_factor} \
     --n_trial ${n_trial} \
+    --ltr_type ${ltr_type} \
     --opt_type ${opt_type} \
     --verbose ${verbose}
-exit
-
-
-for ubs_ratio in 0.01 0.05 0.1 0.5; do
-  python run_setup.py lib ${ubs_ratio}
-  python run_setup.py resp ${ubs_ratio}
-done
+# mae=0.735 (0.005)
+# mse=0.957 (0.007)
 exit
 
 

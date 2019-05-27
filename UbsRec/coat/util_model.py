@@ -87,42 +87,71 @@ def get_weight(disc_inputs_, cont_inputs_, tf_flags, train_set,
     weights = tf.nn.sigmoid(disc + cont + gb)
   return weights, params
 
-def get_autodiff(inputs_, outputs_, 
+def ltr_param(inputs_, outputs_, 
                  ubs_inputs_, ubs_outputs_, 
                  disc_inputs_, cont_inputs_,
-                 w_optimizer, tf_flags, data_sets):
+                 weights, wt_params,
+                 tf_flags, data_sets):
   batch_size = tf_flags.batch_size
   train_set, valid_set, test_set = data_sets
   data_size = valid_set.data_size
 
-  t_weights, w_params = get_weight(disc_inputs_, cont_inputs_,
-                                   tf_flags, train_set,
-                                   reuse=True)
-  v_weights = tf.ones([data_size], tf.float32) / float(data_size)
-  t_r_params, t_loss, _ = get_rating(inputs_, outputs_, t_weights,
-                                     tf_flags, train_set,
-                                     params=None,
-                                     reuse=True)
-  r_var_names = t_r_params.keys()
-  r_var_list = [t_r_params[key] for key in r_var_names]
-  r_grads = tf.gradients(t_loss, r_var_list)
-  v_var_list = [vv - gg for gg, vv in zip(r_grads, r_var_list)]
-  v_r_params = dict(zip(r_var_names, v_var_list))
-  _, v_loss, _ = get_rating(ubs_inputs_, ubs_outputs_, v_weights, 
-                            tf_flags, train_set,
-                            params=v_r_params,
-                            reuse=True)
-  w_var_names = w_params.keys()
-  w_var_list = [w_params[key] for key in w_var_names]
-  w_grads = tf.gradients(v_loss, w_var_list)
-  grads_and_vars = list(zip(w_grads, w_var_list))
-  train_w = w_optimizer.apply_gradients(grads_and_vars)
+  ubs_weights = tf.ones([data_size], tf.float32) / float(data_size)
+  params, loss, _ = get_rating(inputs_, outputs_, weights,
+                               tf_flags, train_set,
+                               params=None,
+                               reuse=True)
+  var_names = params.keys()
+  var_list = [params[key] for key in var_names]
+  gradients = tf.gradients(loss, var_list)
+  ubs_var_list = [vv - gg for gg, vv in zip(gradients, var_list)]
+  ubs_params = dict(zip(var_names, ubs_var_list))
+  _, ubs_loss, _ = get_rating(ubs_inputs_, ubs_outputs_, ubs_weights, 
+                              tf_flags, train_set,
+                              params=ubs_params,
+                              reuse=True)
+  wt_var_names = wt_params.keys()
+  wt_var_list = [wt_params[key] for key in wt_var_names]
+  wt_gradients = tf.gradients(ubs_loss, wt_var_list)
+  grads_and_vars = list(zip(wt_gradients, wt_var_list))
 
   ## heuristic weight normalization
-  # t_weights = (0.5 * batch_size) * t_weights  / tf.reduce_sum(t_weights)
+  # weights = (0.5 * batch_size) * weights  / tf.reduce_sum(weights)
 
-  return t_weights, train_w
+  return weights, grads_and_vars
 
+def ltr_batch(inputs_, outputs_, 
+              ubs_inputs_, ubs_outputs_,
+              tf_flags, data_sets):
+  batch_size = tf_flags.batch_size
+  train_set, valid_set, test_set = data_sets
+  data_size = valid_set.data_size
+
+  weights = tf.zeros([batch_size], tf.float32)
+  ubs_weights = tf.ones([data_size], tf.float32) / float(data_size)
+  params, loss, _ = get_rating(inputs_, outputs_, weights,
+                               tf_flags, train_set,
+                               params=None,
+                               reuse=True)
+  var_names = params.keys()
+  var_list = [params[key] for key in var_names]
+  gradients = tf.gradients(loss, var_list)
+  ubs_var_list = [vv - gg for gg, vv in zip(gradients, var_list)]
+  ubs_params = dict(zip(var_names, ubs_var_list))
+  _, ubs_loss, _ = get_rating(ubs_inputs_, ubs_outputs_, ubs_weights, 
+                              tf_flags, train_set,
+                              params=ubs_params,
+                              reuse=True)
+  wt_gradients = tf.gradients(ubs_loss, [weights])[0]
+  weights = - wt_gradients
+
+  plus_weights = tf.sigmoid(weights)
+  # plus_weights = tf.maximum(weights, 0.0)
+
+  sum_weights = tf.reduce_sum(plus_weights)
+  sum_weights += tf.to_float(tf.equal(sum_weights, 0.0))
+  weights = plus_weights / sum_weights * batch_size
+  return weights
 
 
 
