@@ -1,3 +1,9 @@
+for ubs_ratio in 0.01 0.05 0.1 0.5; do
+  python set_up.py lib ${ubs_ratio}
+  python set_up.py resp ${ubs_ratio}
+done
+exit
+
 
 data_dir=~/Downloads/data/coat_incl_0.1
 all_reg=0.001
@@ -74,19 +80,4 @@ python -W ignore run_ips.py \
 # mae=0.758 (0.007)
 # mse=0.971 (0.011)
 exit
-
-
-
-for ubs_ratio in 0.01 0.05 0.1 0.5; do
-  python set_up.py lib ${ubs_ratio}
-  python set_up.py resp ${ubs_ratio}
-done
-exit
-
-
-
-
-
-
-
 
