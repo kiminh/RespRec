@@ -31,12 +31,12 @@ def load_data_set(data_file):
     coo_data.append((user, item, rating))
   return n_user, n_item, coo_data
 
-def save_data_set(data_set, out_file):
+def save_data_set(data_set, data_file):
   n_rating = len(data_set)
-  with open(out_file, 'w') as fout:
+  with open(data_file, 'w') as fout:
     for user, item, rating in data_set:
       fout.write('%d\t%d\t%d\n' % (user, item, rating))
-  print('Save %d ratings to %s' % (n_rating, out_file))
+  print('Save %d ratings to %s' % (n_rating, data_file))
 
 def shuffle_data(in_dir):
   data_dir = 'data'
@@ -84,10 +84,10 @@ def to_lib_once(ubs_ratio, inc_valid):
   def _to_lib_once(ratings, out_dir):
     kwargs = {'sep': '\t', 'header': False, 'index':False}
     os.makedirs(out_dir)
-    out_file = path.join(out_dir, 'ratings.txt')
+    data_file = path.join(out_dir, 'ratings.txt')
     n_rating = len(ratings.index)
-    print('Save %d ratings to %s' % (n_rating, out_file))
-    ratings.to_csv(out_file, **kwargs)
+    print('Save %d ratings to %s' % (n_rating, data_file))
+    ratings.to_csv(data_file, **kwargs)
 
   base_dir = path.expanduser('~/Projects/librec/data')
   dir_name = 'coat'
