@@ -1,6 +1,7 @@
 from os import path
 
 import argparse
+import math
 import numpy as np
 import os
 import pandas as pd
@@ -47,15 +48,190 @@ def shuffle_data(in_dir):
   save_data_set(biased_set, biased_file)
   save_data_set(unbiased_set, unbiased_file)
 
+def stringify(number):
+  string = '%f' % (number)
+  string = string.rstrip('0')
+  string = string[:-1] if string.endswith('.') else string
+  return string
+
+def load_data_sets(ubs_ratio):
+  data_dir = 'data'
+  biased_file = path.join(data_dir, 'biased.dta')
+  unbiased_file = path.join(data_dir, 'unbiased.dta')
+  names = ['user', 'item', 'rating']
+  biased_set = pd.read_csv(biased_file, sep='\t', names=names)
+  unbiased_set = pd.read_csv(unbiased_file, sep='\t', names=names)
+
+  train_set = biased_set
+  n_unbiased = len(unbiased_set.index)
+  n_valid = math.ceil(ubs_ratio * n_unbiased)
+  valid_set = unbiased_set[:n_valid]
+  test_set = unbiased_set[n_valid:]
+  return train_set, valid_set, test_set
+
 def to_lib_once(ubs_ratio, inc_valid):
-  pass
+  def _to_lib_once(ratings, out_dir):
+    kwargs = {'sep': '\t', 'header': False, 'index':False}
+    if not path.exists(out_dir):
+      os.makedirs(out_dir)
+    data_file = path.join(out_dir, 'ratings.txt')
+    n_rating = len(ratings.index)
+    print('Save %d ratings to %s' % (n_rating, data_file))
+    ratings.to_csv(data_file, **kwargs)
+
+  base_dir = path.expanduser('~/Projects/librec/data')
+  dir_name = 'music'
+  dir_name += '_incl' if inc_valid else '_excl'
+  dir_name += '_%s' % (stringify(ubs_ratio))
+  out_dir = path.join(base_dir, dir_name)
+  if not path.exists(out_dir):
+    os.makedirs(out_dir)
+
+  train_set, valid_set, test_set = load_data_sets(ubs_ratio)
+  if inc_valid:
+    train_set = pd.concat([train_set, valid_set])
+
+  train_dir = path.join(out_dir, 'train')
+  test_dir = path.join(out_dir, 'test')
+  _to_lib_once(train_set, train_dir)
+  _to_lib_once(test_set, test_dir)
 
 def to_lib_many(ubs_ratio):
   to_lib_once(ubs_ratio, False)
   to_lib_once(ubs_ratio, True)
 
+def marginalize(data_set):
+  n_rating = data_set.rating.unique().shape[0]
+  p_data = np.zeros((n_rating))
+  for rating in data_set.rating:
+    p_data[rating - 1] += 1
+  p_data = p_data / p_data.sum()
+  return p_data
+
+def engr_cont_feats(train_set, n_cont_feat):
+  '''Continuous feature engineering
+  item and user features
+    0: number of ratings
+    1: number of rating=1
+    ...
+    5: number of rating=5
+    6: average rating
+  '''
+  n_user = train_set.user.unique().shape[0]
+  n_item = train_set.item.unique().shape[0]
+  user_cont_feats = np.zeros((n_user, n_cont_feat))
+  item_cont_feats = np.zeros((n_item, n_cont_feat))
+  for row in train_set.itertuples():
+    user = row.user
+    item = row.item
+    rating = row.rating
+    user_cont_feats[user, 0] += 1
+    user_cont_feats[user, rating] += 1
+    user_cont_feats[user, -1] += rating
+    item_cont_feats[item, 0] += 1
+    item_cont_feats[item, rating] += 1
+    item_cont_feats[item, -1] += rating
+  for user in range(n_user):
+    user_cont_feats[user, -1] /= user_cont_feats[user, 0]
+  for item in range(n_item):
+    item_cont_feats[item, -1] /= item_cont_feats[item, 0]
+  return user_cont_feats, item_cont_feats
+
 def to_coat_once(ubs_ratio, inc_valid):
-  pass
+  def _to_coat_once(data_set, file_base):
+    data_file = file_base + '.dta'
+    weight_file = file_base + '.wt'
+    is_first = True
+    disc_indexes = []
+    cont_indexes = []
+    with open(data_file, 'w') as fdta, \
+        open(weight_file, 'w') as fwt:
+      for row_id, row in enumerate(data_set.itertuples()):
+        if is_first:
+          index = 0
+          disc_indexes.append(index)
+        user = user_ids[row.user]
+        item = item_ids[row.item]
+        fdta.write('%d\t%d' % (user, item))
+        if is_first:
+          index += 2
+          disc_indexes.append(index)
+        fdta.write('\t%d' % (row_id))
+        index += 1
+        if is_first:
+          disc_indexes.append(index)
+          cont_indexes.append(index)
+        for i in range(n_cont_feat):
+          user_cont_feat = user_cont_feats[row.user][i]
+          item_cont_feat = item_cont_feats[row.item][i]
+          fdta.write('\t%f' % (user_cont_feat))
+          fdta.write('\t%f' % (item_cont_feat))
+          if is_first:
+            index += 2
+            if (i < 1) or (i > 4):
+              cont_indexes.append(index)
+        fdta.write('\t%d\n' % (row.rating))
+        if is_first:
+          index += 1
+          cont_indexes.append(index)
+        is_first = False
+
+        fwt.write('%f\n' % (weights[row.rating - 1]))
+
+    index_file = file_base + '.ind'
+    with open(index_file, 'w') as find:
+      find.write('disc.')
+      for index in disc_indexes:
+        find.write('\t%d' % (index))
+      find.write('\n')
+      find.write('cont.')
+      for index in cont_indexes:
+        find.write('\t%d' % (index))
+      find.write('\n')
+
+    n_rating = len(data_set.index)
+    print('Save %d ratings to %s' % (n_rating, data_file))
+
+  base_dir = path.expanduser('~/Downloads/data')
+  dir_name = 'music'
+  dir_name += '_incl' if inc_valid else '_excl'
+  dir_name += '_%s' % (stringify(ubs_ratio))
+  out_dir = path.join(base_dir, dir_name)
+  if not path.exists(out_dir):
+    os.makedirs(out_dir)
+
+  train_set, valid_set, test_set = load_data_sets(ubs_ratio)
+
+  n_user = train_set.user.unique().shape[0]
+  n_item = train_set.item.unique().shape[0]
+  p_obs = len(train_set.index) / (n_user * n_item)
+  p_train = marginalize(train_set)
+  p_valid = marginalize(valid_set)
+  weights = 1.0 / (p_obs * p_train / p_valid)
+
+  in_dir = path.expanduser('~/Downloads/data/coat')
+  if inc_valid:
+    train_set = pd.concat([train_set, valid_set])
+
+  n_cont_feat = 7
+  user_cont_feats, item_cont_feats = engr_cont_feats(train_set, n_cont_feat)
+
+  global_id = 0
+  user_ids = dict()
+  for user in sorted(train_set.user.unique()):
+    user_ids[user] = global_id
+    global_id += 1
+  item_ids = dict()
+  for item in sorted(train_set.item.unique()):
+    item_ids[item] = global_id
+    global_id += 1
+
+  train_base = path.join(out_dir, 'train')
+  valid_base = path.join(out_dir, 'valid')
+  test_base = path.join(out_dir, 'test')
+  _to_coat_once(train_set, train_base)
+  _to_coat_once(valid_set, valid_base)
+  _to_coat_once(test_set, test_base)
 
 def to_resp_many(ubs_ratio):
   to_coat_once(ubs_ratio, False)
