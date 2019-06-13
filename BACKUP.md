@@ -1,9 +1,4 @@
-  in_dir = path.expanduser('~/Downloads/data/Webscope_R3')
-  if not path.exists(in_dir):
-    raise Exception('Please download the yahoo dataset.')
 
-  biased_file = path.join(in_dir, 'ydata-ymusic-rating-study-v1_0-train.txt')
-  unbiased_file = path.join(in_dir, 'ydata-ymusic-rating-study-v1_0-test.txt')
   read_kwargs = {'sep': '\t', 'names': ['user', 'item', 'rating']}
   biased_ratings = pd.read_csv(biased_file, **read_kwargs)
   unbiased_ratings = pd.read_csv(unbiased_file, **read_kwargs)
