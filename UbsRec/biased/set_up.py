@@ -11,7 +11,6 @@ import pandas as pd
 
 train_ratio = 0.90
 valid_ratio = 0.05
-n_core = 10
 
 def read_data_set(data_file, separator):
   data_set = []
@@ -27,10 +26,9 @@ def read_data_set(data_file, separator):
       data_set.append((user, item, rating))
   return data_set
 
-def filter_data_set(data_file, separator):
+def filter_data_set(data_file, separator, n_core):
   data_set = read_data_set(data_file, separator)
   n_rating = len(data_set)
-  print('Original #rating %d' % (n_rating))
   while True:
     user_n_rating = dict()
     for user, _, _ in data_set:
@@ -47,31 +45,6 @@ def filter_data_set(data_file, separator):
     data_set = [(user, item, rating) for user, item, rating in data_set
                                      if user not in invalid_users
                                      and item not in invalid_items]
-    n_rating = len(data_set)
-    users = set([user for user, _, _ in data_set])
-    n_user = len(users)
-    items = set([item for _, item, _ in data_set])
-    n_item = len(items)
-    print('Filtered #rating %d . #users %d . #items %d' % (n_rating, n_user, n_item))
-  return data_set
-
-def _filter_data_set(data_file, separator):
-  data_set = read_data_set(data_file, separator)
-  n_rating = len(data_set)
-  print('Original #rating %d' % (n_rating))
-  user_n_rating = dict()
-  for user, _, _ in data_set:
-    user_n_rating[user] = user_n_rating.get(user, 0) + 1
-  invalid_users = set([user for user, n_rating in user_n_rating.items()
-                            if n_rating < n_core])
-  data_set = [(user, item, rating) for user, item, rating in data_set
-                                   if user not in invalid_users]
-  n_rating = len(data_set)
-  users = set([user for user, _, _ in data_set])
-  n_user = len(users)
-  items = set([item for _, item, _ in data_set])
-  n_item = len(items)
-  print('Filtered #rating %d . #users %d . #items %d' % (n_rating, n_user, n_item))
   return data_set
 
 def save_data_set(data_set, data_file):
@@ -93,39 +66,48 @@ def shuffle_movie():
 
   raw_dir = path.expanduser('~/Downloads/data/ml-1m')
   raw_file = path.join(raw_dir, 'ratings.dat')
+  _maybe_download()
 
-  data_set = filter_data_set(raw_file, '::')
+  data_set = read_data_set(raw_file, '::')
+  n_rating = len(data_set)
+  users = set([user for user, _, _ in data_set])
+  n_user = len(users)
+  items = set([item for _, item, _ in data_set])
+  n_item = len(items)
+  print('movie #rating %d #users %d #items %d' % (n_rating, n_user, n_item))
 
-def shuffle_amazon(raw_url, raw_file):
+def shuffle_book():
   def _maybe_download():
     if path.exists(raw_file):
       return
     os.system('wget %s -O %s' % (raw_url, raw_file))
 
+  amazon_url = 'http://snap.stanford.edu/data/amazon/productGraph/categoryFiles'
+  raw_url = path.join(amazon_url, 'ratings_Books.csv')
+  raw_file = path.expanduser('~/Downloads/data/book.csv')
   _maybe_download()
-  data_set = filter_data_set(raw_file, ',')
+
+  data_set = filter_data_set(raw_file, ',', 10)
+  n_rating = len(data_set)
+  users = set([user for user, _, _ in data_set])
+  n_user = len(users)
+  items = set([item for _, item, _ in data_set])
+  n_item = len(items)
+  print('book #rating %d #users %d #items %d' % (n_rating, n_user, n_item))
 
 def main():
   parser = argparse.ArgumentParser()
-  parser.add_argument('data_set', choices=['book', 'movie', 'tvshow'])
+  parser.add_argument('data_set', choices=['book', 'movie'])
   parser.add_argument('out_format', choices=['lib', 'resp'])
   args = parser.parse_args()
   data_set = args.data_set
   out_format = args.out_format
   print('data_set %s . out_format %s' % (data_set, out_format))
 
+  if data_set == 'book':
+    shuffle_book()
   if data_set == 'movie':
     shuffle_movie()
-
-  amazon_url = 'http://snap.stanford.edu/data/amazon/productGraph/categoryFiles'
-  if data_set == 'book':
-    raw_url = path.join(amazon_url, 'ratings_Books.csv')
-    raw_file = path.expanduser('~/Downloads/data/book.csv')
-    shuffle_amazon(raw_url, raw_file)
-  if data_set == 'tvshow':
-    raw_url = path.join(amazon_url, 'ratings_Movies_and_TV.csv')
-    raw_file = path.expanduser('~/Downloads/data/tvshow.csv')
-    shuffle_amazon(raw_url, raw_file)
 
 if __name__ == '__main__':
   main()
