@@ -62,7 +62,9 @@ def save_data_set(data_set, data_dir):
   n_user = len(users)
   items = sorted(set([item for _, item, _ in data_set]))
   n_item = len(items)
-  print('#rating %d . #users %d . #items %d' % (n_rating, n_user, n_item))
+  sparsity = 100 * n_rating / (n_user * n_item)
+  print('#users %d . #items %d' % (n_user, n_item))
+  print('#rating %d . sparsity %.2f%%' % (n_rating, sparsity))
 
   user_id = dict(zip(users, range(n_user)))
   item_id = dict(zip(items, range(n_item)))
