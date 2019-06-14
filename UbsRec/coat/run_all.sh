@@ -1,11 +1,10 @@
-for ubs_ratio in 0.01 0.05 0.1 0.5; do
-  python set_up.py lib ${ubs_ratio}
-  python set_up.py resp ${ubs_ratio}
-done
+python set_up.py lib
+python set_up.py resp
 exit
 
 
 data_dir=~/Downloads/data/coat_incl_0.1
+data_dir=~/Downloads/data/coat_incl_0.05
 all_reg=0.001
 batch_norm=0
 batch_size=128

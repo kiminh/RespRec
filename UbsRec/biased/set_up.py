@@ -14,6 +14,7 @@ valid_ratio = 0.05
 
 def read_data_set(data_file, separator):
   data_set = []
+  rating_set = set()
   with open(data_file, 'r') as fin:
     while True:
       line = fin.readline()
@@ -23,7 +24,9 @@ def read_data_set(data_file, separator):
       user = fields[0]
       item = fields[1]
       rating = int(float(fields[2]))
+      rating_set.add(fields[2])
       data_set.append((user, item, rating))
+  print(rating_set)
   return data_set
 
 def filter_data_set(data_file, separator, n_core):
@@ -92,6 +95,8 @@ def shuffle_movie():
     os.system('unzip %s -d %s' % (zip_file, par_dir))
 
   data_dir = 'movie'
+  if path.exists(data_dir):
+    return
   raw_dir = path.expanduser('~/Downloads/data/ml-1m')
   raw_file = path.join(raw_dir, 'ratings.dat')
   _maybe_download()
@@ -105,12 +110,72 @@ def shuffle_book():
     os.system('wget %s -O %s' % (raw_url, raw_file))
 
   data_dir = 'book'
+  # if path.exists(data_dir):
+  #   return
   amazon_url = 'http://snap.stanford.edu/data/amazon/productGraph/categoryFiles'
   raw_url = path.join(amazon_url, 'ratings_Books.csv')
   raw_file = path.expanduser('~/Downloads/data/book.csv')
   _maybe_download()
   data_set = filter_data_set(raw_file, ',', 10)
   save_data_set(data_set, data_dir)
+
+def stringify(number):
+  string = '%f' % (number)
+  string = string.rstrip('0')
+  string = string[:-1] if string.endswith('.') else string
+  return string
+
+def load_data_sets(data_dir):
+  biased_file = path.join(data_dir, 'biased.dta')
+  unbiased_file = path.join(data_dir, 'unbiased.dta')
+  names = ['user', 'item', 'rating']
+  biased_set = pd.read_csv(biased_file, sep='\t', names=names)
+  unbiased_set = pd.read_csv(unbiased_file, sep='\t', names=names)
+
+  train_set = biased_set
+  n_unbiased = len(unbiased_set.index)
+  n_valid = math.ceil(valid_ratio * n_unbiased)
+  valid_set = unbiased_set[:n_valid]
+  test_set = unbiased_set[n_valid:]
+  return train_set, valid_set, test_set
+
+def to_lib_once(data_set, inc_valid):
+  def _to_lib_once(ratings, out_dir):
+    kwargs = {'sep': '\t', 'header': False, 'index':False}
+    if not path.exists(out_dir):
+      os.makedirs(out_dir)
+    data_file = path.join(out_dir, 'ratings.txt')
+    n_rating = len(ratings.index)
+    print('Save %d ratings to %s' % (n_rating, data_file))
+    ratings.to_csv(data_file, **kwargs)
+
+  base_dir = path.expanduser('~/Projects/librec/data')
+  dir_name = data_set
+  dir_name += '_incl' if inc_valid else '_excl'
+  dir_name += '_%s' % (stringify(valid_ratio))
+  out_dir = path.join(base_dir, dir_name)
+  if not path.exists(out_dir):
+    os.makedirs(out_dir)
+
+  train_set, valid_set, test_set = load_data_sets(data_set)
+  if inc_valid:
+    train_set = pd.concat([train_set, valid_set])
+
+  train_dir = path.join(out_dir, 'train')
+  test_dir = path.join(out_dir, 'test')
+  _to_lib_once(train_set, train_dir)
+  _to_lib_once(test_set, test_dir)
+
+def to_lib_many(data_set):
+  to_lib_once(data_set, False)
+  to_lib_once(data_set, True)
+
+def to_resp_once(data_set, inc_valid):
+  raise Exception('todo')
+
+def to_resp_many(data_set):
+  to_resp_once(data_set, False)
+  to_resp_once(data_set, True)
 
 def main():
   parser = argparse.ArgumentParser()
@@ -119,12 +184,15 @@ def main():
   args = parser.parse_args()
   data_set = args.data_set
   out_format = args.out_format
-  print('data_set %s . out_format %s' % (data_set, out_format))
 
   if data_set == 'book':
     shuffle_book()
   if data_set == 'movie':
     shuffle_movie()
+  if out_format == 'lib':
+    to_lib_many(data_set)
+  if out_format == 'resp':
+    to_resp_many(data_set)
 
 if __name__ == '__main__':
   main()

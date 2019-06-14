@@ -1,5 +1,5 @@
-import util_data
-import util_model
+import ut_data
+import ut_model
 import numpy as np
 import six
 import tensorflow as tf
@@ -51,35 +51,35 @@ def run_once(data_sets):
   cont_inputs_ = tf.placeholder(tf.float32, shape=(None, tot_cont_input))
 
   with tf.name_scope('training'):
-    _, loss, _ = util_model.get_rating(inputs_, outputs_, weights_,
+    _, loss, _ = ut_model.get_rating(inputs_, outputs_, weights_,
                                        tf_flags, train_set,
                                        params=None,
                                        reuse=False)
-    optimizer = util_model.get_optimizer(opt_type, initial_lr)
+    optimizer = ut_model.get_optimizer(opt_type, initial_lr)
     train_op = optimizer.minimize(loss)
 
     # input([ltr_type, type(ltr_type), ltr_type == 'naive'])
     if ltr_type == 'batch':
-      _weights = util_model.ltr_batch(inputs_, outputs_, 
+      _weights = ut_model.ltr_batch(inputs_, outputs_, 
                                       ubs_inputs_, ubs_outputs_, 
                                       tf_flags, data_sets)
     elif (ltr_type == 'naive') or (ltr_type == 'param'):
-      weights, wt_params = util_model.get_weight(disc_inputs_, cont_inputs_, 
+      weights, wt_params = ut_model.get_weight(disc_inputs_, cont_inputs_, 
                                                  tf_flags, train_set,
                                                  reuse=False)
-      _weights, grads_and_vars = util_model.ltr_param(inputs_, outputs_, 
+      _weights, grads_and_vars = ut_model.ltr_param(inputs_, outputs_, 
                                                       ubs_inputs_, ubs_outputs_, 
                                                       disc_inputs_, cont_inputs_,
                                                       weights, wt_params,
                                                       tf_flags, data_sets)
-      wt_optimizer = util_model.get_optimizer(opt_type, initial_lr)
-      wt_optimizer = util_model.get_optimizer(opt_type, 0.005)
+      wt_optimizer = ut_model.get_optimizer(opt_type, initial_lr)
+      wt_optimizer = ut_model.get_optimizer(opt_type, 0.005)
       wt_train_op = wt_optimizer.apply_gradients(grads_and_vars)
     else:
       raise Exception('unknown ltr_type %s' % (ltr_type))
 
   with tf.name_scope('evaluating'):
-    _, _, outputs = util_model.get_rating(inputs_, outputs_, weights_,
+    _, _, outputs = ut_model.get_rating(inputs_, outputs_, weights_,
                                           tf_flags, train_set,
                                           params=None,
                                           reuse=True)
@@ -146,7 +146,7 @@ def run_once(data_sets):
 
 def main():
   n_trial = tf_flags.n_trial
-  data_sets = util_data.get_ltr_data(tf_flags)
+  data_sets = ut_data.get_ltr_data(tf_flags)
   mae_list = []
   mse_list = []
   for trial in tqdm.tqdm(six.moves.xrange(n_trial)):
