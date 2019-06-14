@@ -9,7 +9,7 @@ import numpy as np
 import os
 import pandas as pd
 
-train_ratio = 0.90
+train_ratio = 0.80
 valid_ratio = 0.05
 
 def read_data_set(data_file, separator):
@@ -22,7 +22,7 @@ def read_data_set(data_file, separator):
       fields = line.split(separator)
       user = fields[0]
       item = fields[1]
-      rating = fields[2]
+      rating = int(fields[2])
       data_set.append((user, item, rating))
   return data_set
 
@@ -47,12 +47,37 @@ def filter_data_set(data_file, separator, n_core):
                                      and item not in invalid_items]
   return data_set
 
-def save_data_set(data_set, data_file):
+def save_data_set(data_set, data_dir):
+  def _save_data_set(data_set, data_file):
+    n_rating = len(data_set)
+    with open(data_file, 'w') as fout:
+      for user, item, rating in data_set:
+        fout.write('%d\t%d\t%d\n' % (user, item, rating))
+    print('Save %d ratings to %s' % (n_rating, data_file))
+
+  if not path.exists(data_dir):
+    os.makedirs(data_dir)
   n_rating = len(data_set)
-  with open(data_file, 'w') as fout:
-    for user, item, rating in data_set:
-      fout.write('%d\t%d\t%d\n' % (user, item, rating))
-  print('Save %d ratings to %s' % (n_rating, data_file))
+  users = sorted(set([user for user, _, _ in data_set]))
+  n_user = len(users)
+  items = sorted(set([item for _, item, _ in data_set]))
+  n_item = len(items)
+  print('#rating %d . #users %d . #items %d' % (n_rating, n_user, n_item))
+
+  user_id = dict(zip(users, range(n_user)))
+  item_id = dict(zip(items, range(n_item)))
+  data_set = [(user_id[user], item_id[item], rating) for user, item, rating in data_set]
+
+  n_train = math.ceil(train_ratio * n_rating)
+  biased_set = data_set[:n_train]
+  unbiased_set = data_set[n_train:]
+  np.random.seed(0)
+  np.random.shuffle(biased_set)
+  np.random.shuffle(unbiased_set)
+  biased_file = path.join(data_dir, 'biased.dta')
+  unbiased_file = path.join(data_dir, 'unbiased.dta')
+  _save_data_set(biased_set, biased_file)
+  _save_data_set(unbiased_set, unbiased_file)
 
 def shuffle_movie():
   def _maybe_download():
@@ -64,17 +89,12 @@ def shuffle_movie():
     os.system('wget %s -O %s' % (raw_url, zip_file))
     os.system('unzip %s -d %s' % (zip_file, par_dir))
 
+  data_dir = 'movie'
   raw_dir = path.expanduser('~/Downloads/data/ml-1m')
   raw_file = path.join(raw_dir, 'ratings.dat')
   _maybe_download()
-
   data_set = read_data_set(raw_file, '::')
-  n_rating = len(data_set)
-  users = set([user for user, _, _ in data_set])
-  n_user = len(users)
-  items = set([item for _, item, _ in data_set])
-  n_item = len(items)
-  print('movie #rating %d #users %d #items %d' % (n_rating, n_user, n_item))
+  save_data_set(data_set, data_dir)
 
 def shuffle_book():
   def _maybe_download():
@@ -82,18 +102,13 @@ def shuffle_book():
       return
     os.system('wget %s -O %s' % (raw_url, raw_file))
 
+  data_dir = 'book'
   amazon_url = 'http://snap.stanford.edu/data/amazon/productGraph/categoryFiles'
   raw_url = path.join(amazon_url, 'ratings_Books.csv')
   raw_file = path.expanduser('~/Downloads/data/book.csv')
   _maybe_download()
-
   data_set = filter_data_set(raw_file, ',', 10)
-  n_rating = len(data_set)
-  users = set([user for user, _, _ in data_set])
-  n_user = len(users)
-  items = set([item for _, item, _ in data_set])
-  n_item = len(items)
-  print('book #rating %d #users %d #items %d' % (n_rating, n_user, n_item))
+  save_data_set(data_set, data_dir)
 
 def main():
   parser = argparse.ArgumentParser()
