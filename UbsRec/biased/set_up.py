@@ -11,7 +11,7 @@ import pandas as pd
 
 train_ratio = 0.90
 valid_ratio = 0.05
-n_core = 20
+n_core = 10
 
 def read_data_set(data_file, separator):
   data_set = []
@@ -35,6 +35,9 @@ def filter_data_set(data_file, separator):
     user_n_rating = dict()
     for user, _, _ in data_set:
       user_n_rating[user] = user_n_rating.get(user, 0) + 1
+    item_n_rating = dict()
+    for _, item, _ in data_set:
+      item_n_rating[item] = item_n_rating.get(item, 0) + 1
     invalid_users = set([user for user, n_rating in user_n_rating.items()
                               if n_rating < n_core])
     invalid_items = set([item for item, n_rating in item_n_rating.items()
@@ -50,12 +53,6 @@ def filter_data_set(data_file, separator):
     items = set([item for _, item, _ in data_set])
     n_item = len(items)
     print('Filtered #rating %d . #users %d . #items %d' % (n_rating, n_user, n_item))
-  n_rating = len(data_set)
-  users = set([user for user, _, _ in data_set])
-  n_user = len(users)
-  items = set([item for _, item, _ in data_set])
-  n_item = len(items)
-  print('Filtered #rating %d . #users %d . #items %d' % (n_rating, n_user, n_item))
   return data_set
 
 def _filter_data_set(data_file, separator):
