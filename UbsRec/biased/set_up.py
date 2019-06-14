@@ -22,7 +22,7 @@ def read_data_set(data_file, separator):
       fields = line.split(separator)
       user = fields[0]
       item = fields[1]
-      rating = int(fields[2])
+      rating = int(float(fields[2]))
       data_set.append((user, item, rating))
   return data_set
 
