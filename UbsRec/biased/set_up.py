@@ -84,6 +84,20 @@ def save_data_set(data_set, data_dir):
   _save_data_set(biased_set, biased_file)
   _save_data_set(unbiased_set, unbiased_file)
 
+def shuffle_book():
+  def _maybe_download():
+    if path.exists(raw_file):
+      return
+    os.system('wget %s -O %s' % (raw_url, raw_file))
+
+  data_dir = 'book'
+  amazon_url = 'http://snap.stanford.edu/data/amazon/productGraph/categoryFiles'
+  raw_url = path.join(amazon_url, 'ratings_Books.csv')
+  raw_file = path.expanduser('~/Downloads/data/book.csv')
+  _maybe_download()
+  data_set = filter_data_set(raw_file, ',', 10)
+  save_data_set(data_set, data_dir)
+
 def shuffle_movie():
   def _maybe_download():
     if path.exists(raw_dir):
@@ -95,28 +109,10 @@ def shuffle_movie():
     os.system('unzip %s -d %s' % (zip_file, par_dir))
 
   data_dir = 'movie'
-  if path.exists(data_dir):
-    return
   raw_dir = path.expanduser('~/Downloads/data/ml-1m')
   raw_file = path.join(raw_dir, 'ratings.dat')
   _maybe_download()
   data_set = read_data_set(raw_file, '::')
-  save_data_set(data_set, data_dir)
-
-def shuffle_book():
-  def _maybe_download():
-    if path.exists(raw_file):
-      return
-    os.system('wget %s -O %s' % (raw_url, raw_file))
-
-  data_dir = 'book'
-  # if path.exists(data_dir):
-  #   return
-  amazon_url = 'http://snap.stanford.edu/data/amazon/productGraph/categoryFiles'
-  raw_url = path.join(amazon_url, 'ratings_Books.csv')
-  raw_file = path.expanduser('~/Downloads/data/book.csv')
-  _maybe_download()
-  data_set = filter_data_set(raw_file, ',', 10)
   save_data_set(data_set, data_dir)
 
 def stringify(number):

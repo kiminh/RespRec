@@ -8,7 +8,7 @@ def output(method, acc_list):
   pct = 100 * mae / mse
   params = acc_list[0][2]
   p_data = (method, mae, mse, pct, params)
-  print('  %s mae %.3f mse %.3f %.2f%% %s' % p_data)
+  print(' %-8s & %.3f & %.3f & %.2f%% & %s' % p_data)
 
 def main():
   parser = argparse.ArgumentParser()

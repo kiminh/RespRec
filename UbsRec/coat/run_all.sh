@@ -1,9 +1,9 @@
-python set_up.py lib
 python set_up.py resp
+exit
+python set_up.py lib
 exit
 
 
-data_dir=~/Downloads/data/coat_incl_0.1
 data_dir=~/Downloads/data/coat_incl_0.05
 all_reg=0.001
 batch_norm=0

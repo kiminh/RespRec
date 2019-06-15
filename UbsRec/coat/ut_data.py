@@ -156,6 +156,55 @@ class LtrData(object):
     self._start = stop
     return _inputs, _outputs, _disc_inputs, _cont_inputs
 
+class NfmData(object):
+  def __init__(self, inputs, outputs):
+    self._inputs = inputs
+    self._outputs = outputs
+    self._nnz_input = inputs.shape[1]
+    self._tot_input = inputs.max() + 1
+    self._data_size = outputs.shape[0]
+    self._start = 0
+
+  @property
+  def inputs(self):
+    return self._inputs
+  
+  @property
+  def outputs(self):
+    return self._outputs
+
+  @property
+  def nnz_input(self):
+    return self._nnz_input
+
+  @property
+  def tot_input(self):
+    return self._tot_input
+
+  @property
+  def data_size(self):
+    return self._data_size
+
+  def shuffle_data(self):
+    indexes = np.arange(self.data_size)
+    indexes = np.random.permutation(indexes)
+    self._inputs = self.inputs[indexes]
+    self._outputs = self.outputs[indexes]
+
+  def next_batch(self, batch_size):
+    stop = self._start + batch_size
+    if stop < self.data_size:
+      _inputs = self.inputs[self._start:stop, :]
+      _outputs = self.outputs[self._start:stop]
+    else:
+      stop = stop - self.data_size
+      _inputs = np.concatenate((self.inputs[self._start:self.data_size, :],
+                                  self.inputs[:stop, :]))
+      _outputs = np.concatenate((self.outputs[self._start:self.data_size],
+                                 self.outputs[:stop]))
+    self._start = stop
+    return _inputs, _outputs
+
 def get_ips_data(tf_flags):
   def _get_ips_data(file_base):
     data_file = file_base + '.dta'
@@ -209,4 +258,24 @@ def get_ltr_data(tf_flags):
   valid_set = _get_ltr_data(valid_file)
   test_set = _get_ltr_data(test_file)
   return train_set, valid_set, test_set
+
+def get_nfm_data(tf_flags):
+  def _get_nfm_data(data_file):
+    data_df = pd.read_csv(data_file, sep='\t', header=None)
+    inputs = data_df.values[:, i_input].astype(int)
+    outputs = data_df.values[:, -1].astype(float)
+    data_set = NfmData(inputs, outputs)
+    return data_set
+
+  data_dir = tf_flags.data_dir
+  i_input = parse_index(tf_flags.i_input)
+
+  train_file = path.join(data_dir, 'train.dta')
+  valid_file = path.join(data_dir, 'valid.dta')
+  test_file = path.join(data_dir, 'test.dta')
+  train_set = _get_nfm_data(train_file)
+  valid_set = _get_nfm_data(valid_file)
+  test_set = _get_nfm_data(test_file)
+  return train_set, valid_set, test_set
+
 
