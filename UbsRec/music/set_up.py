@@ -6,6 +6,8 @@ import numpy as np
 import os
 import pandas as pd
 
+valid_ratio = 0.05
+
 def load_data_set(data_file):
   read_kwargs = {'sep': '\t', 'names': ['user', 'item', 'rating']}
   rating_df = pd.read_csv(data_file, **read_kwargs)
@@ -22,8 +24,9 @@ def save_data_set(data_set, data_file):
 
 def shuffle_data(in_dir):
   data_dir = 'data'
-  if path.exists(data_dir):
-    return
+  if not path.exists(data_dir):
+    os.makedirs(data_dir)
+
   biased_file = path.join(in_dir, 'ydata-ymusic-rating-study-v1_0-train.txt')
   unbiased_file = path.join(in_dir, 'ydata-ymusic-rating-study-v1_0-test.txt')
   n_user, n_item, biased_set = load_data_set(biased_file)
@@ -42,7 +45,7 @@ def shuffle_data(in_dir):
 
   biased_set = biased_set.sample(frac=1, random_state=0)
   unbiased_set = unbiased_set.sample(frac=1, random_state=0)
-  os.makedirs(data_dir)
+
   biased_file = path.join(data_dir, 'biased.dta')
   unbiased_file = path.join(data_dir, 'unbiased.dta')
   save_data_set(biased_set, biased_file)
@@ -54,7 +57,7 @@ def stringify(number):
   string = string[:-1] if string.endswith('.') else string
   return string
 
-def load_data_sets(ubs_ratio):
+def load_data_sets():
   data_dir = 'data'
   biased_file = path.join(data_dir, 'biased.dta')
   unbiased_file = path.join(data_dir, 'unbiased.dta')
@@ -64,12 +67,12 @@ def load_data_sets(ubs_ratio):
 
   train_set = biased_set
   n_unbiased = len(unbiased_set.index)
-  n_valid = math.ceil(ubs_ratio * n_unbiased)
+  n_valid = math.ceil(valid_ratio * n_unbiased)
   valid_set = unbiased_set[:n_valid]
   test_set = unbiased_set[n_valid:]
   return train_set, valid_set, test_set
 
-def to_lib_once(ubs_ratio, inc_valid):
+def to_lib_once(inc_valid):
   def _to_lib_once(ratings, out_dir):
     kwargs = {'sep': '\t', 'header': False, 'index':False}
     if not path.exists(out_dir):
@@ -82,12 +85,10 @@ def to_lib_once(ubs_ratio, inc_valid):
   base_dir = path.expanduser('~/Projects/librec/data')
   dir_name = 'music'
   dir_name += '_incl' if inc_valid else '_excl'
-  dir_name += '_%s' % (stringify(ubs_ratio))
+  dir_name += '_%s' % (stringify(valid_ratio))
   out_dir = path.join(base_dir, dir_name)
-  if not path.exists(out_dir):
-    os.makedirs(out_dir)
 
-  train_set, valid_set, test_set = load_data_sets(ubs_ratio)
+  train_set, valid_set, test_set = load_data_sets()
   if inc_valid:
     train_set = pd.concat([train_set, valid_set])
 
@@ -96,9 +97,9 @@ def to_lib_once(ubs_ratio, inc_valid):
   _to_lib_once(train_set, train_dir)
   _to_lib_once(test_set, test_dir)
 
-def to_lib_many(ubs_ratio):
-  to_lib_once(ubs_ratio, False)
-  to_lib_once(ubs_ratio, True)
+def to_lib_many():
+  to_lib_once(False)
+  to_lib_once(True)
 
 def marginalize(data_set):
   n_rating = data_set.rating.unique().shape[0]
@@ -137,8 +138,8 @@ def engr_cont_feats(train_set, n_cont_feat):
     item_cont_feats[item, -1] /= item_cont_feats[item, 0]
   return user_cont_feats, item_cont_feats
 
-def to_coat_once(ubs_ratio, inc_valid):
-  def _to_coat_once(data_set, file_base):
+def to_resp_once(inc_valid):
+  def _to_resp_once(data_set, file_base):
     data_file = file_base + '.dta'
     weight_file = file_base + '.wt'
     is_first = True
@@ -195,12 +196,12 @@ def to_coat_once(ubs_ratio, inc_valid):
   base_dir = path.expanduser('~/Downloads/data')
   dir_name = 'music'
   dir_name += '_incl' if inc_valid else '_excl'
-  dir_name += '_%s' % (stringify(ubs_ratio))
+  dir_name += '_%s' % (stringify(valid_ratio))
   out_dir = path.join(base_dir, dir_name)
   if not path.exists(out_dir):
     os.makedirs(out_dir)
 
-  train_set, valid_set, test_set = load_data_sets(ubs_ratio)
+  train_set, valid_set, test_set = load_data_sets()
 
   n_user = train_set.user.unique().shape[0]
   n_item = train_set.item.unique().shape[0]
@@ -229,13 +230,13 @@ def to_coat_once(ubs_ratio, inc_valid):
   train_base = path.join(out_dir, 'train')
   valid_base = path.join(out_dir, 'valid')
   test_base = path.join(out_dir, 'test')
-  _to_coat_once(train_set, train_base)
-  _to_coat_once(valid_set, valid_base)
-  _to_coat_once(test_set, test_base)
+  _to_resp_once(train_set, train_base)
+  _to_resp_once(valid_set, valid_base)
+  _to_resp_once(test_set, test_base)
 
-def to_resp_many(ubs_ratio):
-  to_coat_once(ubs_ratio, False)
-  to_coat_once(ubs_ratio, True)
+def to_resp_many():
+  to_resp_once(False)
+  to_resp_once(True)
 
 def main():
   in_dir = path.expanduser('~/Downloads/data/Webscope_R3')
@@ -245,14 +246,13 @@ def main():
 
   parser = argparse.ArgumentParser()
   parser.add_argument('out_format', choices=['lib', 'resp'])
-  parser.add_argument('ubs_ratio', type=float)
   args = parser.parse_args()
   out_format = args.out_format
-  ubs_ratio = args.ubs_ratio
   if out_format == 'lib':
-    to_lib_many(ubs_ratio)
+    to_lib_many()
   if out_format == 'resp':
-    to_resp_many(ubs_ratio)
+    to_resp_many()
 
 if __name__ == '__main__':
   main()
+

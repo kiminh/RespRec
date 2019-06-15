@@ -10,6 +10,15 @@ D: AA008X3AD3
 S: N0030589256  
 P: P311157  
 
+
+### Problem
+
+remote: Permission to xiaojiew1/LibRec.git denied to yinchuandong.
+vi .git/config
+  https://github.com/xiaojiew1/LibRec.git
+  ->
+  ssh://git@github.com/xiaojiew1/LibRec.git
+
 ### :GitHub
 git clone git@github.com:xiaojiew1/DRREC.git  
 drrec/mar/coat_fm_fml.sh  
