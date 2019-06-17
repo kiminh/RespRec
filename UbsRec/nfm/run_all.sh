@@ -1,6 +1,6 @@
 python NeuralFM.py \
   --path ~/Downloads/data/ \
-  --dataset frappe \
+  --dataset ml-tag \
   --hidden_factor 64 \
   --layers '[64]' \
   --keep_prob '[0.8,0.5]' \
@@ -15,6 +15,7 @@ python NeuralFM.py \
   --epoch 200
 exit
 # --dataset ml-tag
+# --dataset frappe
 
 python NeuralFM.py \
   --path ~/Downloads/data/ \

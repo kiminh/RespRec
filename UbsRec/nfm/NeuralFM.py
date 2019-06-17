@@ -291,12 +291,12 @@ class NeuralFM(BaseEstimator, TransformerMixin):
             #     print("Epoch %d [%.1f s]\ttrain=%.4f, validation=%.4f, test=%.4f [%.1f s]" 
             #           %(epoch+1, t2-t1, train_result, valid_result, test_result, time()-t2))
 
-            train_result = self.evaluate(Train_data)
+            # train_result = self.evaluate(Train_data)
             valid_result = self.evaluate(Validation_data)
             test_result = self.evaluate(Test_data)
             if self.verbose > 0 and epoch%self.verbose == 0:
-                print("Epoch %d [%.1f s] train %.4f %.4f [%.1f s]" 
-                      %(epoch+1, t2-t1, train_result[0], train_result[1], time()-t2))
+                # print("Epoch %d [%.1f s] train %.4f %.4f [%.1f s]" 
+                #       %(epoch+1, t2-t1, train_result[0], train_result[1], time()-t2))
                 print("Epoch %d [%.1f s] validation %.4f %.4f . test %.4f %.4f [%.1f s]" 
                       %(epoch+1, t2-t1, valid_result[0], valid_result[1], test_result[0], test_result[1], time()-t2))
                 sys.stdout.flush()
@@ -318,8 +318,25 @@ class NeuralFM(BaseEstimator, TransformerMixin):
 
     def evaluate(self, data):  # evaluate the results for an input set
         num_example = len(data['Y'])
-        feed_dict = {self.train_features: data['X'], self.train_labels: [[y] for y in data['Y']], self.dropout_keep: self.no_dropout, self.train_phase: False}
-        predictions = self.sess.run((self.out), feed_dict=feed_dict)
+        n_example = 50000
+        n_batch = num_example // n_example + 1
+        predictions = []
+        for b in range(n_batch):
+            start = b * n_example
+            stop = (b + 1) * n_example
+            stop = min(stop, num_example)
+            feed_dict = {self.train_features: data['X'][start:stop],
+                         self.train_labels: [[y] for y in data['Y'][start:stop]],
+                         self.dropout_keep: self.no_dropout,
+                         self.train_phase: False}
+            out = self.sess.run((self.out), feed_dict=feed_dict)
+            predictions.append(out)
+        predictions = np.concatenate(predictions)
+        # feed_dict = {self.train_features: data['X'],
+        #              self.train_labels: [[y] for y in data['Y']],
+        #              self.dropout_keep: self.no_dropout,
+        #              self.train_phase: False}
+        # predictions = self.sess.run((self.out), feed_dict=feed_dict)
         y_pred = np.reshape(predictions, (num_example,))
         y_true = np.reshape(data['Y'], (num_example,))
         if self.loss_type == 'square_loss':    
