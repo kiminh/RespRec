@@ -9,6 +9,7 @@ def output(method, acc_list):
   params = acc_list[0][2]
   p_data = (method, mae, mse, pct, params)
   print(' %-8s & %.3f & %.3f & %.2f%% & %s' % p_data)
+  print(' %-8s\t%.3f\t%.3f\t%.2f%%\t%s' % p_data)
 
 def main():
   parser = argparse.ArgumentParser()

@@ -296,7 +296,8 @@ class NeuralFM(BaseEstimator, TransformerMixin):
             if self.verbose > 0 and epoch%self.verbose == 0:
                 print("Epoch %d [%.1f s]\tvalidation %.4f %.4f . test %.4f %.4f [%.1f s]" 
                       %(epoch+1, t2-t1, valid_result[0], valid_result[1], test_result[0], test_result[1], time()-t2))
-
+                sys.stdout.flush()
+                
             if self.early_stop > 0 and self.eva_termination(self.valid_rmse):
                 #print "Early stop at %d based on validation result." %(epoch+1)
                 break
