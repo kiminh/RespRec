@@ -11,8 +11,8 @@ import pandas as pd
 
 train_ratio = 0.80
 valid_ratio = 0.05
-book_core = 36
-movie_core = 48
+book_core = 32
+movie_core = 40
 
 def read_data_set(data_file, separator):
   data_set = []
