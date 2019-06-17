@@ -1,4 +1,4 @@
-{'1.0', '4.0', '2.0', '5.0', '3.0'}
+{'1.0', '3.0', '5.0', '4.0', '2.0'}
 #Users 53750 . #Items 114386
 #Users 28311 . #Items 24789
 #Users 15785 . #Items 19774
@@ -49,7 +49,7 @@ Save 115525 ratings to /home/xiaojie/Downloads/data/book_excl_0.05/book_excl_0.0
 Save 492509 ratings to /home/xiaojie/Downloads/data/book_incl_0.05/book_incl_0.05.train.libfm
 Save 6081 ratings to /home/xiaojie/Downloads/data/book_incl_0.05/book_incl_0.05.validation.libfm
 Save 115525 ratings to /home/xiaojie/Downloads/data/book_incl_0.05/book_incl_0.05.test.libfm
-{'3', '4', '1', '5', '2'}
+{'4', '1', '5', '2', '3'}
 #Users 4377 . #Items 2546
 #Users 4337 . #Items 2511
 #Users 4337 . #Items 2508
