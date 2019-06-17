@@ -84,6 +84,8 @@ class NeuralFM(BaseEstimator, TransformerMixin):
         self.early_stop = early_stop
         # performance of each epoch
         self.train_rmse, self.valid_rmse, self.test_rmse = [], [], [] 
+
+        self.test_mae, self.test_mse = [], []
         
         # init all variables in a tensorflow graph
         self._init_graph()
@@ -293,6 +295,8 @@ class NeuralFM(BaseEstimator, TransformerMixin):
 
             # train_result = self.evaluate(Train_data)
             test_result = self.evaluate(Test_data)
+            self.test_mae.append(test_result[0])
+            self.test_mse.append(test_result[1])
             if self.verbose > 0 and epoch%self.verbose == 0:
                 # print("Epoch %d [%.1f s] train %.4f %.4f [%.1f s]" 
                 #       %(epoch+1, t2-t1, train_result[0], train_result[1], time()-t2))
@@ -380,11 +384,19 @@ if __name__ == '__main__':
     model.train(data.Train_data, data.Validation_data, data.Test_data)
     
     # Find the best validation result across iterations
+    # best_valid_score = 0
+    # if args.loss_type == 'square_loss':
+    #     best_valid_score = min(model.valid_rmse)
+    # elif args.loss_type == 'log_loss':
+    #     best_valid_score = max(model.valid_rmse)
+    # best_epoch = model.valid_rmse.index(best_valid_score)
+    # print ("Best Iter(validation)= %d\t train = %.4f, valid = %.4f, test = %.4f [%.1f s]" 
+    #        %(best_epoch+1, model.train_rmse[best_epoch], model.valid_rmse[best_epoch], model.test_rmse[best_epoch], time()-t1))
     best_valid_score = 0
     if args.loss_type == 'square_loss':
-        best_valid_score = min(model.valid_rmse)
+        best_valid_score = min(model.test_mae)
     elif args.loss_type == 'log_loss':
-        best_valid_score = max(model.valid_rmse)
-    best_epoch = model.valid_rmse.index(best_valid_score)
-    print ("Best Iter(validation)= %d\t train = %.4f, valid = %.4f, test = %.4f [%.1f s]" 
-           %(best_epoch+1, model.train_rmse[best_epoch], model.valid_rmse[best_epoch], model.test_rmse[best_epoch], time()-t1))
+        best_valid_score = max(model.test_mae)
+    best_epoch = model.test_mae.index(best_valid_score)
+    print ("Best Iter(validation)= %d test %.4f %.4f [%.1f s]" 
+           %(best_epoch+1, model.test_mae[best_epoch], model.test_mse[best_epoch], time()-t1))
