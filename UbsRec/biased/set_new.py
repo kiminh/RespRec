@@ -11,7 +11,7 @@ import pandas as pd
 
 train_ratio = 0.80
 valid_ratio = 0.05
-book_core = 50
+book_core = 40
 movie_core = 40
 
 def read_data_set(data_file, separator):
@@ -50,6 +50,11 @@ def filter_data_set(data_file, separator, n_core):
     data_set = [(user, item, rating) for user, item, rating in data_set
                                      if user not in invalid_users
                                      and item not in invalid_items]
+    users = sorted(set([user for user, _, _ in data_set]))
+    n_user = len(users)
+    items = sorted(set([item for _, item, _ in data_set]))
+    n_item = len(items)
+    print('#Users %d . #Items %d' % (n_user, n_item))
   return data_set
 
 def save_data_set(data_set, data_dir):
