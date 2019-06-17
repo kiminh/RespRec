@@ -12,7 +12,9 @@ import pandas as pd
 train_ratio = 0.80
 valid_ratio = 0.05
 book_core = 36
-movie_core = 72
+#Users 2779 . #Items 2327
+#Ratings 197995 . Sparsity 3.06%
+movie_core = 216
 
 def read_data_set(data_file, separator):
   data_set = []
