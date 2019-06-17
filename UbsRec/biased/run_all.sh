@@ -1,4 +1,4 @@
-python set_new.py book resp
+# python set_new.py book resp
 python set_new.py movie resp
 exit
 
