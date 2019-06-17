@@ -5,7 +5,7 @@ for lr in 0.005 0.01 0.05; do
 
 python NeuralFM.py \
   --path ~/Downloads/data/ \
-  --dataset movie_incl_0.05 \
+  --dataset book_incl_0.05 \
   --hidden_factor ${hidden_factor} \
   --layers ${layers} \
   --keep_prob ${keep_prob} \
