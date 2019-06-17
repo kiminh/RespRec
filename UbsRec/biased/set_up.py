@@ -91,6 +91,8 @@ def shuffle_book():
     os.system('wget %s -O %s' % (raw_url, raw_file))
 
   data_dir = 'book'
+  if path.exists(data_dir):
+    return
   amazon_url = 'http://snap.stanford.edu/data/amazon/productGraph/categoryFiles'
   raw_url = path.join(amazon_url, 'ratings_Books.csv')
   raw_file = path.expanduser('~/Downloads/data/book.csv')
@@ -109,6 +111,8 @@ def shuffle_movie():
     os.system('unzip %s -d %s' % (zip_file, par_dir))
 
   data_dir = 'movie'
+  if path.exists(data_dir):
+    return
   raw_dir = path.expanduser('~/Downloads/data/ml-1m')
   raw_file = path.join(raw_dir, 'ratings.dat')
   _maybe_download()
@@ -135,7 +139,7 @@ def load_data_sets(data_dir):
   test_set = unbiased_set[n_valid:]
   return train_set, valid_set, test_set
 
-def to_lib_once(data_set, inc_valid):
+def to_lib_once(data_name, inc_valid):
   def _to_lib_once(ratings, out_dir):
     kwargs = {'sep': '\t', 'header': False, 'index':False}
     if not path.exists(out_dir):
@@ -146,14 +150,14 @@ def to_lib_once(data_set, inc_valid):
     ratings.to_csv(data_file, **kwargs)
 
   base_dir = path.expanduser('~/Projects/librec/data')
-  dir_name = data_set
+  dir_name = data_name
   dir_name += '_incl' if inc_valid else '_excl'
   dir_name += '_%s' % (stringify(valid_ratio))
   out_dir = path.join(base_dir, dir_name)
   if not path.exists(out_dir):
     os.makedirs(out_dir)
 
-  train_set, valid_set, test_set = load_data_sets(data_set)
+  train_set, valid_set, test_set = load_data_sets(data_name)
   if inc_valid:
     train_set = pd.concat([train_set, valid_set])
 
@@ -162,33 +166,75 @@ def to_lib_once(data_set, inc_valid):
   _to_lib_once(train_set, train_dir)
   _to_lib_once(test_set, test_dir)
 
-def to_lib_many(data_set):
-  to_lib_once(data_set, False)
-  to_lib_once(data_set, True)
+def to_lib_many(data_name):
+  to_lib_once(data_name, False)
+  to_lib_once(data_name, True)
 
-def to_resp_once(data_set, inc_valid):
-  raise Exception('todo')
+def to_resp_once(data_name, inc_valid):
+  def _to_resp_once(data_set, data_file):
+    with open(data_file, 'w') as fout:
+      for row in data_set.itertuples():
+        fout.write('%d' % (row.rating))
+        fout.write(' %d:1' % (user_ids[row.user]))
+        fout.write(' %d:1\n' % (item_ids[row.item]))
+    n_rating = len(data_set.index)
+    print('Save %d ratings to %s' % (n_rating, data_file))
 
-def to_resp_many(data_set):
-  to_resp_once(data_set, False)
-  to_resp_once(data_set, True)
+  base_dir = path.expanduser('~/Downloads/data')
+  dir_name = data_name
+  dir_name += '_incl' if inc_valid else '_excl'
+  dir_name += '_%s' % (stringify(valid_ratio))
+  out_dir = path.join(base_dir, dir_name)
+  if not path.exists(out_dir):
+    os.makedirs(out_dir)
+
+  train_set, valid_set, test_set = load_data_sets(data_name)
+  if inc_valid:
+    train_set = pd.concat([train_set, valid_set])
+
+  global_id = 0
+  users = set(train_set.user.unique())
+  users = users.union(set(valid_set.user.unique()))
+  users = users.union(set(test_set.user.unique()))
+  user_ids = dict()
+  for user in sorted(users):
+    user_ids[user] = global_id
+    global_id += 1
+  items = set(train_set.item.unique())
+  items = items.union(set(valid_set.item.unique()))
+  items = items.union(set(test_set.item.unique()))
+  item_ids = dict()
+  for item in sorted(items):
+    item_ids[item] = global_id
+    global_id += 1
+
+  train_file = path.join(out_dir, '%s.train.libfm' % (dir_name))
+  valid_file = path.join(out_dir, '%s.validation.libfm' % (dir_name))
+  test_file = path.join(out_dir, '%s.test.libfm' % (dir_name))
+  _to_resp_once(train_set, train_file)
+  _to_resp_once(valid_set, valid_file)
+  _to_resp_once(test_set, test_file)
+
+def to_resp_many(data_name):
+  to_resp_once(data_name, False)
+  to_resp_once(data_name, True)
 
 def main():
   parser = argparse.ArgumentParser()
-  parser.add_argument('data_set', choices=['book', 'movie'])
+  parser.add_argument('data_name', choices=['book', 'movie'])
   parser.add_argument('out_format', choices=['lib', 'resp'])
   args = parser.parse_args()
-  data_set = args.data_set
+  data_name = args.data_name
   out_format = args.out_format
 
-  if data_set == 'book':
+  if data_name == 'book':
     shuffle_book()
-  if data_set == 'movie':
+  if data_name == 'movie':
     shuffle_movie()
   if out_format == 'lib':
-    to_lib_many(data_set)
+    to_lib_many(data_name)
   if out_format == 'resp':
-    to_resp_many(data_set)
+    to_resp_many(data_name)
 
 if __name__ == '__main__':
   main()
