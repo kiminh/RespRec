@@ -4,6 +4,7 @@ GitHub/
 *.rec
 *.tmp
 *.DS_Store
+~$*
 /data/coat+vd
 
 # Byte-compiled / optimized / DLL files
