@@ -263,7 +263,8 @@ class NeuralFM(BaseEstimator, TransformerMixin):
         # Check Init performance
         if self.verbose > 0:
             t2 = time()
-            init_train = self.evaluate(Train_data)
+            # init_train = self.evaluate(Train_data)
+            init_train = 0.0
             init_valid = self.evaluate(Validation_data)
             init_test = self.evaluate(Test_data)
             print("Init: \t train=%.4f, validation=%.4f, test=%.4f [%.1f s]" %(init_train, init_valid, init_test, time()-t2))
@@ -280,7 +281,8 @@ class NeuralFM(BaseEstimator, TransformerMixin):
             t2 = time()
             
             # output validation
-            train_result = self.evaluate(Train_data)
+            # train_result = self.evaluate(Train_data)
+            train_result = 0.0
             valid_result = self.evaluate(Validation_data)
             test_result = self.evaluate(Test_data)
             
