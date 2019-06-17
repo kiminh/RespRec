@@ -1,7 +1,7 @@
-for lr in 0.005 0.01 0.05; do
-  for hidden_factor in 64 128 256; do
-    for layers in '[32]' '[64]' '[128]'; do
-      for keep_prob in '[0.6,0.6]' '[0.8,0.8]'; do
+for lr in 0.1 0.05 0.01 0.005; do
+  for hidden_factor in 512 256 128 64; do
+    for layers in '[256]' '[128]' '[64]' '[32]'; do
+      for keep_prob in '[0.8,0.8]' '[0.8,0.6]' '[0.6,0.8]' '[0.6,0.6]'; do
 
 python NeuralFM.py \
   --path ~/Downloads/data/ \
@@ -18,7 +18,6 @@ python NeuralFM.py \
   --verbose 1 \
   --early_stop 1 \
   --epoch 200
-exit
 
       done
     done

@@ -18,7 +18,6 @@ python NeuralFM.py \
   --verbose 1 \
   --early_stop 1 \
   --epoch 200
-exit
 
       done
     done
