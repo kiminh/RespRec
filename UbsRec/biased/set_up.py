@@ -213,7 +213,7 @@ def to_resp_once(data_name, inc_valid):
   test_file = path.join(out_dir, '%s.test.libfm' % (dir_name))
   _to_resp_once(train_set, train_file)
   _to_resp_once(valid_set, valid_file)
-  _to_resp_once(test_set, test_file)
+  _to_resp_once(valid_set, test_file)
 
 def to_resp_many(data_name):
   to_resp_once(data_name, False)
