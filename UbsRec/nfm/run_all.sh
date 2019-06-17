@@ -1,3 +1,5 @@
+for lr in 0.001 0.005 0.01 0.05
+
 python NeuralFM.py \
   --path ~/Downloads/data/ \
   --dataset movie_incl_0.05 \
@@ -18,6 +20,8 @@ exit
 # --dataset frappe
 # --dataset book_incl_0.05
 # --dataset movie_incl_0.05
+
+
 
 
 
