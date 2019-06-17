@@ -1,5 +1,5 @@
-import util_data
-import util_model
+import ut_data
+import ut_model
 
 import numpy as np
 import six
@@ -8,7 +8,7 @@ import tqdm
 
 flags = tf.flags
 flags.DEFINE_float('all_reg', 0.001, '')
-flags.DEFINE_float('initial_lr', 0.01, '')
+flags.DEFINE_float('inner_lr', 0.01, '')
 flags.DEFINE_integer('batch_norm', 0, '')
 flags.DEFINE_integer('batch_size', 128, '')
 flags.DEFINE_integer('eval_freq', 10, '')
@@ -18,14 +18,14 @@ flags.DEFINE_integer('n_trial', 10, '')
 flags.DEFINE_integer('verbose', 1, '')
 flags.DEFINE_string('data_dir', 'coat', '')
 flags.DEFINE_string('i_input', '0:2', '')
-flags.DEFINE_string('model_name', 'fm', '')
+flags.DEFINE_string('base_model', 'fm', '')
 flags.DEFINE_string('opt_type', 'adagrad', '')
 tf_flags = tf.flags.FLAGS
 
 def run_once(data_sets):
   batch_size = tf_flags.batch_size
   eval_freq = tf_flags.eval_freq
-  initial_lr = tf_flags.initial_lr
+  inner_lr = tf_flags.inner_lr
   n_epoch = tf_flags.n_epoch
   opt_type = tf_flags.opt_type
   verbose = tf_flags.verbose
@@ -37,16 +37,16 @@ def run_once(data_sets):
   outputs_ = tf.placeholder(tf.float32, shape=(None))
   weights_ = tf.placeholder(tf.float32, shape=(None))
   with tf.name_scope('training'):
-    _, loss, _ = util_model.get_rating(inputs_, outputs_, weights_,
+    _, loss, _ = ut_model.get_rating(inputs_, outputs_, weights_,
                                        tf_flags, train_set,
                                        params=None,
                                        reuse=False)
-    optimizer = util_model.get_optimizer(opt_type, initial_lr)
+    optimizer = ut_model.get_optimizer(opt_type, inner_lr)
     train_op = optimizer.minimize(loss)
   [print(var) for var in tf.trainable_variables()]
 
   with tf.name_scope('evaluating'):
-    _, _, outputs = util_model.get_rating(inputs_, outputs_, weights_,
+    _, _, outputs = ut_model.get_rating(inputs_, outputs_, weights_,
                                           tf_flags, train_set,
                                           params=None,
                                           reuse=True)
@@ -88,7 +88,7 @@ def run_once(data_sets):
 
 def main():
   n_trial = tf_flags.n_trial
-  data_sets = util_data.get_ips_data(tf_flags)
+  data_sets = ut_data.get_ips_data(tf_flags)
   mae_list = []
   mse_list = []
   for trial in tqdm.tqdm(six.moves.xrange(n_trial)):

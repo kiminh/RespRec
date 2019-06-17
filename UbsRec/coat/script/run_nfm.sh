@@ -1,5 +1,3 @@
-# PYTHONPATH=..
-
 act_func=relu
 all_reg=0.01
 batch_norm=0

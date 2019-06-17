@@ -218,12 +218,14 @@ def to_resp_once(inc_valid):
   user_cont_feats, item_cont_feats = engr_cont_feats(train_set, n_cont_feat)
 
   global_id = 0
+  users = sorted(train_set.user.unique())
   user_ids = dict()
-  for user in sorted(train_set.user.unique()):
+  for user in users:
     user_ids[user] = global_id
     global_id += 1
+  items = sorted(train_set.item.unique())
   item_ids = dict()
-  for item in sorted(train_set.item.unique()):
+  for item in items:
     item_ids[item] = global_id
     global_id += 1
 
@@ -233,6 +235,15 @@ def to_resp_once(inc_valid):
   _to_resp_once(train_set, train_base)
   _to_resp_once(valid_set, valid_base)
   _to_resp_once(test_set, test_base)
+
+  user_file = path.join(out_dir, 'user.ft')
+  with open(user_file, 'w') as fout:
+    for user in users:
+      fout.write('%d\n' % (user_ids[user]))
+  item_file = path.join(out_dir, 'item.ft')
+  with open(item_file, 'w') as fout:
+    for item in items:
+      fout.write('%d\n' % (item_ids[item]))
 
 def to_resp_many():
   to_resp_once(False)

@@ -273,7 +273,18 @@ def to_resp_once(inc_valid):
   with open(user_file, 'w') as fout:
     for user in users:
       assert user == user_ids[user]
+      fout.write('%d' % (user_ids[user]))
+      for user_disc_feat in user_disc_feats[user]:
+        fout.write('\t%d' % (user_feat_ids[user_disc_feat]))
+      fout.write('\n')
   item_file = path.join(out_dir, 'item.ft')
+  with open(item_file, 'w') as fout:
+    for item in items:
+      assert item + len(users) == item_ids[item]
+      fout.write('%d' % (item_ids[item]))
+      for item_disc_feat in item_disc_feats[item]:
+        fout.write('\t%d' % (item_feat_ids[item_disc_feat]))
+      fout.write('\n')
 
 def to_resp_many():
   to_resp_once(False)
