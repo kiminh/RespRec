@@ -292,13 +292,12 @@ class NeuralFM(BaseEstimator, TransformerMixin):
             #           %(epoch+1, t2-t1, train_result, valid_result, test_result, time()-t2))
 
             # train_result = self.evaluate(Train_data)
-            valid_result = self.evaluate(Validation_data)
             test_result = self.evaluate(Test_data)
             if self.verbose > 0 and epoch%self.verbose == 0:
                 # print("Epoch %d [%.1f s] train %.4f %.4f [%.1f s]" 
                 #       %(epoch+1, t2-t1, train_result[0], train_result[1], time()-t2))
-                print("Epoch %d [%.1f s] validation %.4f %.4f . test %.4f %.4f [%.1f s]" 
-                      %(epoch+1, t2-t1, valid_result[0], valid_result[1], test_result[0], test_result[1], time()-t2))
+                print("Epoch %d [%.1f s] test %.4f %.4f [%.1f s]" 
+                      %(epoch+1, t2-t1, test_result[0], test_result[1], time()-t2))
                 sys.stdout.flush()
                 
             if self.early_stop > 0 and self.eva_termination(self.valid_rmse):
