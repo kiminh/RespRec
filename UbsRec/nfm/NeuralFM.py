@@ -16,7 +16,7 @@ import math
 import numpy as np
 import tensorflow as tf
 from sklearn.base import BaseEstimator, TransformerMixin
-from sklearn.metrics import mean_squared_error
+from sklearn.metrics import mean_squared_error, mean_absolute_error
 from sklearn.metrics import accuracy_score
 from sklearn.metrics import log_loss
 from time import time
@@ -264,10 +264,9 @@ class NeuralFM(BaseEstimator, TransformerMixin):
         if self.verbose > 0:
             t2 = time()
             # init_train = self.evaluate(Train_data)
-            init_train = 0.0
-            init_valid = self.evaluate(Validation_data)
-            init_test = self.evaluate(Test_data)
-            print("Init: \t train=%.4f, validation=%.4f, test=%.4f [%.1f s]" %(init_train, init_valid, init_test, time()-t2))
+            # init_valid = self.evaluate(Validation_data)
+            # init_test = self.evaluate(Test_data)
+            # print("Init: \t train=%.4f, validation=%.4f, test=%.4f [%.1f s]" %(init_train, init_valid, init_test, time()-t2))
         
         for epoch in range(self.epoch):
             t1 = time()
@@ -282,16 +281,22 @@ class NeuralFM(BaseEstimator, TransformerMixin):
             
             # output validation
             # train_result = self.evaluate(Train_data)
-            train_result = 0.0
+            # valid_result = self.evaluate(Validation_data)
+            # test_result = self.evaluate(Test_data)
+            
+            # self.train_rmse.append(train_result)
+            # self.valid_rmse.append(valid_result)
+            # self.test_rmse.append(test_result)
+            # if self.verbose > 0 and epoch%self.verbose == 0:
+            #     print("Epoch %d [%.1f s]\ttrain=%.4f, validation=%.4f, test=%.4f [%.1f s]" 
+            #           %(epoch+1, t2-t1, train_result, valid_result, test_result, time()-t2))
+
             valid_result = self.evaluate(Validation_data)
             test_result = self.evaluate(Test_data)
-            
-            self.train_rmse.append(train_result)
-            self.valid_rmse.append(valid_result)
-            self.test_rmse.append(test_result)
             if self.verbose > 0 and epoch%self.verbose == 0:
-                print("Epoch %d [%.1f s]\ttrain=%.4f, validation=%.4f, test=%.4f [%.1f s]" 
-                      %(epoch+1, t2-t1, train_result, valid_result, test_result, time()-t2))
+                print("Epoch %d [%.1f s]\tvalidation %.4f %.4f . test %.4f %.4f [%.1f s]" 
+                      %(epoch+1, t2-t1, valid_result[0], valid_result[1], test_result[0], test_result[1], time()-t2))
+
             if self.early_stop > 0 and self.eva_termination(self.valid_rmse):
                 #print "Early stop at %d based on validation result." %(epoch+1)
                 break
@@ -316,8 +321,11 @@ class NeuralFM(BaseEstimator, TransformerMixin):
         if self.loss_type == 'square_loss':    
             predictions_bounded = np.maximum(y_pred, np.ones(num_example) * min(y_true))  # bound the lower values
             predictions_bounded = np.minimum(predictions_bounded, np.ones(num_example) * max(y_true))  # bound the higher values
-            RMSE = math.sqrt(mean_squared_error(y_true, predictions_bounded))
-            return RMSE
+            # RMSE = math.sqrt(mean_squared_error(y_true, predictions_bounded))
+            MAE = mean_absolute_error(y_true, predictions_bounded)
+            MSE = mean_squared_error(y_true, predictions_bounded)
+            # return RMSE
+            return MAE, MSE
         elif self.loss_type == 'log_loss':
             logloss = log_loss(y_true, y_pred) # I haven't checked the log_loss
             return logloss
