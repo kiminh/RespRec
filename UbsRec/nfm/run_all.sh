@@ -1,7 +1,7 @@
 for lr in 0.005 0.01 0.05; do
   for hidden_factor in 64 128 256; do
     for layers in '[32]' '[64]' '[128]'; do
-      for keep_prob in '[0.6,0.6]' '[0.6,0.8]' '[0.8,0.6]' '[0.8,0.8]'; do
+      for keep_prob in '[0.6,0.6]' '[0.8,0.8]'; do
 
 python NeuralFM.py \
   --path ~/Downloads/data/ \
