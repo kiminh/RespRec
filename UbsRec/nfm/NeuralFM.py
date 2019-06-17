@@ -317,7 +317,7 @@ class NeuralFM(BaseEstimator, TransformerMixin):
 
     def evaluate(self, data):  # evaluate the results for an input set
         num_example = len(data['Y'])
-        n_example = 60000
+        n_example = 10000
         n_batch = num_example // n_example + 1
         predictions = []
         for b in range(n_batch):
