@@ -1,6 +1,6 @@
 python NeuralFM.py \
   --path ~/Downloads/data/ \
-  --dataset book_incl_0.05 \
+  --dataset movie_incl_0.05 \
   --hidden_factor 64 \
   --layers '[64]' \
   --keep_prob '[0.8,0.5]' \
