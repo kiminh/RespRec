@@ -378,6 +378,17 @@ def ltr_param(inputs_, outputs_,
     params=ubs_params, reuse=True)
   wt_var_names = wt_params.keys()
   wt_var_list = [wt_params[key] for key in wt_var_names]
+
+  ## variance regularization
+  batch_size = tf_flags.batch_size
+  var_reg = tf_flags.var_reg
+  mean_weight = tf.reduce_mean(weights)
+  var_loss = tf.reduce_sum(tf.square(weights - mean_weight))
+  # input(tf.gradients(var_loss, wt_var_list))
+  ## * batch_size because loss = reduce_sum in get_rating(\cdot)
+  ubs_loss += (var_reg * batch_size) * var_loss
+
+
   wt_gradients = tf.gradients(ubs_loss, wt_var_list)
   grads_and_vars = list(zip(wt_gradients, wt_var_list))
 

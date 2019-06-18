@@ -7,11 +7,13 @@ import tqdm
 
 flags = tf.flags
 flags.DEFINE_float('all_reg', 0.001, '')
+flags.DEFINE_float('var_reg', 0.001, '')
 flags.DEFINE_float('inner_lr', 0.01, '')
 flags.DEFINE_float('outer_lr', 0.005, '')
 flags.DEFINE_integer('batch_norm', 0, '')
 flags.DEFINE_integer('batch_size', 128, '')
-flags.DEFINE_integer('eval_freq', 10, '')
+flags.DEFINE_integer('by_batch', 0, '')
+flags.DEFINE_integer('by_epoch', 0, '')
 flags.DEFINE_integer('n_epoch', 200, '')
 flags.DEFINE_integer('n_factor', 128, '')
 flags.DEFINE_integer('n_trial', 10, '')
@@ -31,8 +33,11 @@ tf_flags.keep_probs = eval(tf_flags.keep_probs)
 tf_flags.layer_sizes = eval(tf_flags.layer_sizes)
 
 def run_once(data_sets):
+  by_batch = tf_flags.by_batch
+  by_epoch = tf_flags.by_epoch
+  assert (by_batch and not by_epoch) or (not by_batch and by_epoch)
+
   batch_size = tf_flags.batch_size
-  eval_freq = tf_flags.eval_freq
   inner_lr = tf_flags.inner_lr
   outer_lr = tf_flags.outer_lr
   n_epoch = tf_flags.n_epoch
@@ -102,8 +107,10 @@ def run_once(data_sets):
   mae_mse_list = []
   with tf.Session() as sess:
     sess.run(tf.global_variables_initializer())
+    t_batch = 0
     for epoch in range(n_epoch):
       train_set.shuffle_data()
+      t_epoch = epoch + 1
       n_batch = train_set.data_size // batch_size + 1
       for batch in range(n_batch):
         inputs, outputs, disc_inputs, cont_inputs = train_set.next_batch(batch_size)
@@ -126,29 +133,42 @@ def run_once(data_sets):
                      weights_: weights}
         sess.run(train_op, feed_dict=feed_dict)
 
-      if (epoch + 1) % eval_freq == 0:
+        t_batch += 1
+        if by_batch and t_batch % by_batch == 0:
+          feed_dict = {inputs_: test_set.inputs,
+                       outputs_: test_set.outputs}
+          mae, mse = sess.run([_mae, _mse], feed_dict=feed_dict)
+          if verbose:
+            print('epoch=%d mae=%.3f mse=%.3f' % (t_epoch, mae, mse))
+          mae_mse_list.append((t_epoch, mae, mse))
+
+      if by_epoch and t_epoch % by_epoch == 0:
         feed_dict = {inputs_: test_set.inputs,
                      outputs_: test_set.outputs}
         mae, mse = sess.run([_mae, _mse], feed_dict=feed_dict)
         if verbose:
-          print('mae=%.3f mse=%.3f' % (mae, mse))
-        mae_mse_list.append((mae, mse, epoch))
+          print('epoch=%d mae=%.3f mse=%.3f' % (t_epoch, mae, mse))
+        mae_mse_list.append((t_epoch, mae, mse))
     ### do not work with batch
-    # feed_dict = {inputs_: train_set.inputs,
-    #              disc_inputs_: train_set.disc_inputs,
-    #              cont_inputs_: train_set.cont_inputs}
-    # weights = sess.run(_weights, feed_dict=feed_dict)
-    # average = dict()
-    # for weight, output in zip(weights, train_set.outputs):
-    #   if output not in average:
-    #     average[output] = []
-    #   average[output].append(weight)
-    # average = {k: sum(v) / len(v) for k, v in average.items()}
-    # for output in sorted(average.keys()):
-    #   print('output=%d weight=%.4f' % (output, average[output]))
-  mae_mse_list = sorted(mae_mse_list, key=lambda t: (t[1], t[0]))
-  mae, mse, epoch = mae_mse_list[0]
-  print('epoch=%d mae=%.3f mse=%.3f' % (epoch + 1, mae, mse))
+    if meta_model != 'batch':
+      # feed_dict = {inputs_: train_set.inputs,
+      #              disc_inputs_: train_set.disc_inputs,
+      #              cont_inputs_: train_set.cont_inputs}
+      feed_dict = {inputs_: test_set.inputs,
+                   disc_inputs_: test_set.disc_inputs,
+                   cont_inputs_: test_set.cont_inputs}
+      weights = sess.run(_weights, feed_dict=feed_dict)
+      average = dict()
+      for weight, output in zip(weights, train_set.outputs):
+        if output not in average:
+          average[output] = []
+        average[output].append(weight)
+      average = {k: sum(v) / len(v) for k, v in average.items()}
+      for output in sorted(average.keys()):
+        print('output=%d weight=%.4f' % (output, average[output]))
+  mae_mse_list = sorted(mae_mse_list, key=lambda t: (t[2], t[1]))
+  t_epoch, mae, mse = mae_mse_list[0]
+  print('epoch=%d mae=%.3f mse=%.3f' % (t_epoch, mae, mse))
   return mae, mse
 
 def main():
