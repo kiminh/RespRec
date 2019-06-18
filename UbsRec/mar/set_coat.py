@@ -10,6 +10,7 @@ import os
 import pandas as pd
 
 valid_ratio = 0.05
+data_dir = 'coat'
 
 def maybe_download(in_dir):
   if path.exists(in_dir):
@@ -41,7 +42,6 @@ def save_data_set(data_set, data_file):
   print('Save %d ratings to %s' % (n_rating, data_file))
 
 def shuffle_data(in_dir):
-  data_dir = 'data'
   if not path.exists(data_dir):
     os.makedirs(data_dir)
   biased_file = path.join(in_dir, 'train.ascii')
@@ -61,7 +61,6 @@ def shuffle_data(in_dir):
   save_data_set(unbiased_set, unbiased_file)
 
 def load_data_sets():
-  data_dir = 'data'
   biased_file = path.join(data_dir, 'biased.dta')
   unbiased_file = path.join(data_dir, 'unbiased.dta')
   names = ['user', 'item', 'rating']
