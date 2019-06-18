@@ -279,6 +279,7 @@ class NeuralFM(BaseEstimator, TransformerMixin):
                 batch_xs = self.get_random_block_from_data(Train_data, self.batch_size)
                 # Fit training
                 self.partial_fit(batch_xs)
+
             t2 = time()
             
             # output validation
