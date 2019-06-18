@@ -1,6 +1,17 @@
 import numpy as np
 import tensorflow as tf
 
+
+x = tf.placeholder(tf.float32, ())
+y = tf.placeholder(tf.float32, ())
+feed_dict={x: 1, y: 1}
+l = x * x
+gx = tf.gradients(l, x)
+gy = tf.gradients(l, y)
+s = tf.Session()
+print(s.run([gx], feed_dict=feed_dict))
+exit()
+
 np.random.seed(0)
 l = np.arange(10)
 print(l)
