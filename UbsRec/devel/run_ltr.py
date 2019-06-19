@@ -17,7 +17,7 @@ flags.DEFINE_integer('by_epoch', 0, '')
 flags.DEFINE_integer('n_epoch', 200, '')
 flags.DEFINE_integer('n_factor', 128, '')
 flags.DEFINE_integer('n_trial', 10, '')
-flags.DEFINE_integer('verbose', 1, '')
+flags.DEFINE_integer('verbose', 0, '')
 flags.DEFINE_string('act_func', 'relu', 'identity|relu|sigmoid|tanh')
 flags.DEFINE_string('data_dir', 'coat', '')
 flags.DEFINE_string('i_input', '0:2', '')
@@ -28,6 +28,8 @@ flags.DEFINE_string('meta_model', 'batch', 'batch|naive|param')
 flags.DEFINE_string('keep_probs', '[0.2,0.5]', '')
 flags.DEFINE_string('layer_sizes', '[64]', '')
 flags.DEFINE_string('opt_type', 'adagrad', '')
+flags.DEFINE_string('std_dev_file', None, '')
+
 tf_flags = tf.flags.FLAGS
 tf_flags.keep_probs = eval(tf_flags.keep_probs)
 tf_flags.layer_sizes = eval(tf_flags.layer_sizes)
@@ -44,6 +46,8 @@ def run_once(data_sets):
   meta_model = tf_flags.meta_model
   opt_type = tf_flags.opt_type
   verbose = tf_flags.verbose
+
+  std_dev_file = tf_flags.std_dev_file
 
   train_set, valid_set, test_set = data_sets
   nnz_input = train_set.nnz_input
@@ -105,6 +109,8 @@ def run_once(data_sets):
       print('var=%s' % (var))
 
   mae_mse_list = []
+  if std_dev_file:
+    std_dev_list = []
   with tf.Session() as sess:
     sess.run(tf.global_variables_initializer())
     t_batch = 0
@@ -142,6 +148,14 @@ def run_once(data_sets):
             print('epoch=%d mae=%.3f mse=%.3f' % (t_epoch, mae, mse))
           mae_mse_list.append((t_epoch, mae, mse))
 
+          if std_dev_file:
+            feed_dict = {inputs_: test_set.inputs,
+                         disc_inputs_: test_set.disc_inputs,
+                         cont_inputs_: test_set.cont_inputs}
+            weights = sess.run(_weights, feed_dict=feed_dict)
+            std_dev = np.std(weights)
+            std_dev_list.append(std_dev)
+
       if by_epoch and t_epoch % by_epoch == 0:
         feed_dict = {inputs_: test_set.inputs,
                      outputs_: test_set.outputs}
@@ -170,6 +184,10 @@ def run_once(data_sets):
   t_epoch, mae, mse = mae_mse_list[0]
   if verbose:
     print('epoch=%d mae=%.3f mse=%.3f' % (t_epoch, mae, mse))
+  if std_dev_file:
+    with open(std_dev_file, 'w') as fout:
+      for std_dev in std_dev_list:
+        fout.write('%f\n' % (std_dev))
   return mae, mse
 
 def main():
