@@ -428,5 +428,10 @@ def ltr_batch(inputs_, outputs_,
   weights = plus_weights / sum_weights * batch_size
   return weights
 
-
+def trailing_zero(f):
+  s = '%f' % (f)
+  s = s.rstrip('0')
+  if s.endswith('.'):
+    s = s[:-1]
+  return s
 

@@ -4,26 +4,27 @@ batch_norm=0
 batch_size=128
 by_batch=0
 by_epoch=10
-i_input=0:2
+
 i_input=0:10
-i_disc_input=10:11
 i_disc_input=0:10
-i_cont_input=11:11
 i_cont_input=11:13,23:26
+# meta_model=batch
+# i_disc_input=10:11
+# i_cont_input=11:11
+
 inner_lr=0.01
 outer_lr=0.005
 keep_probs='[0.8,0.8]' # '[0.2,0.5]'
 layer_sizes='[64]'
 base_model=fm
-n_epoch=200
+n_epoch=100
 n_factor=128
-n_trial=1 # 0
-meta_model=batch
-# meta_model=naive
-meta_model=param
+n_trial=6
 opt_type=adagrad
-var_reg=0.1
-verbose=1
+verbose=0
+for meta_model in naive param; do
+  for var_reg in 0 0.001 0.01 0.1 1 10 100 1000; do
+
 python -W ignore ../run_ltr.py \
     --data_dir ${data_dir} \
     --all_reg ${all_reg} \
@@ -44,8 +45,12 @@ python -W ignore ../run_ltr.py \
     --n_trial ${n_trial} \
     --meta_model ${meta_model} \
     --opt_type ${opt_type} \
+    --var_reg ${var_reg} \
     --verbose ${verbose}
+exit
 
+  done
+done
 
 
 

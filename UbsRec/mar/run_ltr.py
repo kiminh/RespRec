@@ -157,22 +157,26 @@ def run_once(data_sets):
       feed_dict = {inputs_: test_set.inputs,
                    disc_inputs_: test_set.disc_inputs,
                    cont_inputs_: test_set.cont_inputs}
-      weights = sess.run(_weights, feed_dict=feed_dict)
-      average = dict()
-      for weight, output in zip(weights, train_set.outputs):
-        if output not in average:
-          average[output] = []
-        average[output].append(weight)
-      average = {k: sum(v) / len(v) for k, v in average.items()}
-      for output in sorted(average.keys()):
-        print('output=%d weight=%.4f' % (output, average[output]))
+      # weights = sess.run(_weights, feed_dict=feed_dict)
+      # average = dict()
+      # for weight, output in zip(weights, train_set.outputs):
+      #   if output not in average:
+      #     average[output] = []
+      #   average[output].append(weight)
+      # average = {k: sum(v) / len(v) for k, v in average.items()}
+      # for output in sorted(average.keys()):
+      #   print('output=%d weight=%.4f' % (output, average[output]))
   mae_mse_list = sorted(mae_mse_list, key=lambda t: (t[2], t[1]))
   t_epoch, mae, mse = mae_mse_list[0]
-  print('epoch=%d mae=%.3f mse=%.3f' % (t_epoch, mae, mse))
+  if verbose:
+    print('epoch=%d mae=%.3f mse=%.3f' % (t_epoch, mae, mse))
   return mae, mse
 
 def main():
   n_trial = tf_flags.n_trial
+  meta_model = tf_flags.meta_model
+  var_reg = tf_flags.var_reg
+  verbose = tf_flags.verbose
   data_sets = ut_data.get_ltr_data(tf_flags)
   mae_list = []
   mse_list = []
@@ -183,8 +187,14 @@ def main():
     mse_list.append(mse)
   mae_arr = np.array(mae_list)
   mse_arr = np.array(mse_list)
-  print('mae=%.3f (%.3f)' % (mae_arr.mean(), mae_arr.std()))
-  print('mse=%.3f (%.3f)' % (mse_arr.mean(), mse_arr.std()))
+  if verbose:
+    print('mae=%.3f (%.3f)' % (mae_arr.mean(), mae_arr.std()))
+    print('mse=%.3f (%.3f)' % (mse_arr.mean(), mse_arr.std()))
+  var_reg = ut_model.trailing_zero(var_reg)
+  mae = mae_arr.mean()
+  mse = mse_arr.mean()
+  print('%s %s %f %f' % (meta_model, var_reg, mae, mse))
+
 
 if __name__ == '__main__':
   main()
