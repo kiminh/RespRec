@@ -175,9 +175,9 @@ def run_once(data_sets):
             std_dev = np.std(weights)
             std_dev_list.append(std_dev)
 
-          # if weight_file:
-          #   weight_avg = _get_weight_avg(train_set)
-          #   weight_avg_list.append(weight_avg)
+          if weight_file:
+            weight_avg = _get_weight_avg(train_set)
+            weight_avg_list.append(weight_avg)
 
       if by_epoch and t_epoch % by_epoch == 0:
         feed_dict = {inputs_: test_set.inputs,
@@ -186,12 +186,9 @@ def run_once(data_sets):
         if verbose:
           print('epoch=%d mae=%.3f mse=%.3f' % (t_epoch, mae, mse))
         mae_mse_list.append((t_epoch, mae, mse))
-    # weight_avg_list.append(_get_weight_avg(train_set))
-    # weight_avg_list.append(_get_weight_avg(valid_set))
-    # weight_avg_list.append(_get_weight_avg(test_set))
-    weight_avg = _get_weight_avg(train_set)
-    for i in range(5):
-      print('%f' % (weight_avg[i]))
+    weight_avg_list.append(_get_weight_avg(train_set))
+    weight_avg_list.append(_get_weight_avg(valid_set))
+    weight_avg_list.append(_get_weight_avg(test_set))
   mae_mse_list = sorted(mae_mse_list, key=lambda t: (t[2], t[1]))
   t_epoch, mae, mse = mae_mse_list[0]
   if verbose:
@@ -200,10 +197,11 @@ def run_once(data_sets):
     with open(std_dev_file, 'w') as fout:
       for std_dev in std_dev_list:
         fout.write('%f\n' % (std_dev))
-  # if weight_file:
-  #   with open(weight_file, 'w') as fout:
-  #     for weight_avg in weight_avg_list:
-  #       pass
+  if weight_file:
+    with open(weight_file, 'w') as fout:
+      for weight_avg in weight_avg_list:
+        weight_avg = [str(weight) for weight in weight_avg]
+        fout.write('%s\n' % ('\t'.join(weight_avg)))
   return mae, mse
 
 def main():

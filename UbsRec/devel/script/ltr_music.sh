@@ -18,8 +18,8 @@ n_trial=4
 opt_type=adagrad
 verbose=0
 
-# by_batch=40
-n_epoch=1
+by_batch=40
+n_epoch=2
 n_trial=1
 verbose=1
 meta_model=param
