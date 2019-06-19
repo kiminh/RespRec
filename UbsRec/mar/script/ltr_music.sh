@@ -14,12 +14,12 @@ layer_sizes='[64]'
 base_model=fm
 n_epoch=10
 n_factor=128
-n_trial=1 # 0
-meta_model=batch
-meta_model=naive
-meta_model=param
+n_trial=10
 opt_type=adagrad
 verbose=1
+for meta_model in naive param; do
+  for var_reg in 0 0.001 0.01 0.1 1 10 100 1000; do
+
 python -W ignore ../run_ltr.py \
     --data_dir ${data_dir} \
     --all_reg ${all_reg} \
@@ -40,34 +40,8 @@ python -W ignore ../run_ltr.py \
     --n_trial ${n_trial} \
     --meta_model ${meta_model} \
     --opt_type ${opt_type} \
+    --var_reg ${var_reg} \
     --verbose ${verbose}
 
-
-#   ips: base_model=fm
-#   ltr: meta_model=batch
-#   ltr: meta_model=naive
-#   ltr: meta_model=param
-# i_input=0:2
-#     mae=0.769 (0.004)
-#     mae=0.751 (0.005)
-#     mae=0.749 (0.006)
-#     mae=0.747 (0.003)
-
-#     mse=0.999 (0.006)
-#     mse=0.993 (0.005)
-#     mse=0.989 (0.006)
-#     mse=0.988 (0.003)
-# i_input=0:10
-#     mae=0.771 (0.004)
-#     mae=0.769 (0.005)
-#     mae=0.767 (0.004)
-#     mae=0.762 (0.005)
-
-#     mse=1.016 (0.007)
-#     mse=1.016 (0.006)
-#     mse=1.008 (0.006)
-#     mse=1.000 (0.005)
-
-
-
-
+  done
+done
