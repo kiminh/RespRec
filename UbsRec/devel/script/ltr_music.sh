@@ -18,12 +18,17 @@ n_trial=4
 opt_type=adagrad
 verbose=0
 
-by_batch=50
+by_batch=40
 n_epoch=2
 n_trial=1
+verbose=1
 meta_model=param
+std_dev_dir=std_dev
+rm -rf ${std_dev_dir}
+mkdir -p ${std_dev_dir}
 for var_reg in 0 0.001 0.01 0.1 1 10 100 1000; do
-var_file=music_${var_reg}
+
+std_dev_file=${std_dev_dir}/music_${meta_model}_${var_reg}
 python -W ignore ../run_ltr.py \
     --data_dir ${data_dir} \
     --all_reg ${all_reg} \
@@ -46,8 +51,7 @@ python -W ignore ../run_ltr.py \
     --opt_type ${opt_type} \
     --var_reg ${var_reg} \
     --verbose ${verbose} \
-    --var_file ${var_file}
-exit
+    --std_dev_file ${std_dev_file}
 
 done
 exit
