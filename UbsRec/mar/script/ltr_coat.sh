@@ -19,7 +19,7 @@ layer_sizes='[64]'
 base_model=fm
 n_epoch=100
 n_factor=128
-n_trial=6
+n_trial=10
 opt_type=adagrad
 verbose=0
 for meta_model in naive param; do
