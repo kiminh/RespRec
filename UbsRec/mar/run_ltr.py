@@ -17,7 +17,7 @@ flags.DEFINE_integer('by_epoch', 0, '')
 flags.DEFINE_integer('n_epoch', 200, '')
 flags.DEFINE_integer('n_factor', 128, '')
 flags.DEFINE_integer('n_trial', 10, '')
-flags.DEFINE_integer('verbose', 1, '')
+flags.DEFINE_integer('verbose', 0, '')
 flags.DEFINE_string('act_func', 'relu', 'identity|relu|sigmoid|tanh')
 flags.DEFINE_string('data_dir', 'coat', '')
 flags.DEFINE_string('i_input', '0:2', '')
@@ -28,11 +28,29 @@ flags.DEFINE_string('meta_model', 'batch', 'batch|naive|param')
 flags.DEFINE_string('keep_probs', '[0.2,0.5]', '')
 flags.DEFINE_string('layer_sizes', '[64]', '')
 flags.DEFINE_string('opt_type', 'adagrad', '')
+flags.DEFINE_string('std_dev_file', None, '')
+flags.DEFINE_string('weight_file', None, '')
+
 tf_flags = tf.flags.FLAGS
 tf_flags.keep_probs = eval(tf_flags.keep_probs)
 tf_flags.layer_sizes = eval(tf_flags.layer_sizes)
 
 def run_once(data_sets):
+  def _get_weight_avg(data_set):
+    assert meta_model != 'batch'
+    feed_dict = {inputs_: data_set.inputs,
+                 disc_inputs_: data_set.disc_inputs,
+                 cont_inputs_: data_set.cont_inputs}
+    weights = sess.run(_weights, feed_dict=feed_dict)
+    weight_num = np.zeros((5))
+    weight_avg = np.zeros((5))
+    for weight, output in zip(weights, data_set.outputs):
+      index = int(output - 1)
+      weight_num[index] += 1
+      weight_avg[index] += weight
+    weight_avg /= weight_num
+    return weight_avg
+
   by_batch = tf_flags.by_batch
   by_epoch = tf_flags.by_epoch
   assert (by_batch and not by_epoch) or (not by_batch and by_epoch)
@@ -44,6 +62,9 @@ def run_once(data_sets):
   meta_model = tf_flags.meta_model
   opt_type = tf_flags.opt_type
   verbose = tf_flags.verbose
+
+  std_dev_file = tf_flags.std_dev_file
+  weight_file = tf_flags.weight_file
 
   train_set, valid_set, test_set = data_sets
   nnz_input = train_set.nnz_input
@@ -105,6 +126,10 @@ def run_once(data_sets):
       print('var=%s' % (var))
 
   mae_mse_list = []
+  if std_dev_file:
+    std_dev_list = []
+  if weight_file:
+    weight_avg_list = []
   with tf.Session() as sess:
     sess.run(tf.global_variables_initializer())
     t_batch = 0
@@ -142,6 +167,18 @@ def run_once(data_sets):
             print('epoch=%d mae=%.3f mse=%.3f' % (t_epoch, mae, mse))
           mae_mse_list.append((t_epoch, mae, mse))
 
+          if std_dev_file:
+            feed_dict = {inputs_: test_set.inputs,
+                         disc_inputs_: test_set.disc_inputs,
+                         cont_inputs_: test_set.cont_inputs}
+            weights = sess.run(_weights, feed_dict=feed_dict)
+            std_dev = np.std(weights)
+            std_dev_list.append(std_dev)
+
+          if weight_file:
+            weight_avg = _get_weight_avg(train_set)
+            weight_avg_list.append(weight_avg)
+
       if by_epoch and t_epoch % by_epoch == 0:
         feed_dict = {inputs_: test_set.inputs,
                      outputs_: test_set.outputs}
@@ -149,27 +186,22 @@ def run_once(data_sets):
         if verbose:
           print('epoch=%d mae=%.3f mse=%.3f' % (t_epoch, mae, mse))
         mae_mse_list.append((t_epoch, mae, mse))
-    ### do not work with batch
-    if meta_model != 'batch':
-      # feed_dict = {inputs_: train_set.inputs,
-      #              disc_inputs_: train_set.disc_inputs,
-      #              cont_inputs_: train_set.cont_inputs}
-      feed_dict = {inputs_: test_set.inputs,
-                   disc_inputs_: test_set.disc_inputs,
-                   cont_inputs_: test_set.cont_inputs}
-      # weights = sess.run(_weights, feed_dict=feed_dict)
-      # average = dict()
-      # for weight, output in zip(weights, train_set.outputs):
-      #   if output not in average:
-      #     average[output] = []
-      #   average[output].append(weight)
-      # average = {k: sum(v) / len(v) for k, v in average.items()}
-      # for output in sorted(average.keys()):
-      #   print('output=%d weight=%.4f' % (output, average[output]))
+    weight_avg_list.append(_get_weight_avg(train_set))
+    weight_avg_list.append(_get_weight_avg(valid_set))
+    weight_avg_list.append(_get_weight_avg(test_set))
   mae_mse_list = sorted(mae_mse_list, key=lambda t: (t[2], t[1]))
   t_epoch, mae, mse = mae_mse_list[0]
   if verbose:
     print('epoch=%d mae=%.3f mse=%.3f' % (t_epoch, mae, mse))
+  if std_dev_file:
+    with open(std_dev_file, 'w') as fout:
+      for std_dev in std_dev_list:
+        fout.write('%f\n' % (std_dev))
+  if weight_file:
+    with open(weight_file, 'w') as fout:
+      for weight_avg in weight_avg_list:
+        weight_avg = [str(weight) for weight in weight_avg]
+        fout.write('%s\n' % ('\t'.join(weight_avg)))
   return mae, mse
 
 def main():
