@@ -273,7 +273,8 @@ def get_rating(inputs_, outputs_, weights_,
     if weights_ is None:
       loss = 0.5 * tf.reduce_sum(tf.square(errors))
     else:
-      loss = 0.5 * tf.reduce_sum(tf.multiply(weights_, tf.square(errors)))
+      # loss = 0.5 * tf.reduce_sum(tf.multiply(weights_, tf.square(errors)))
+      loss = 0.5 * tf.reduce_sum(tf.divide(tf.square(errors), weights_))
     loss += tf_flags.all_reg * (tf.reduce_sum(tf.square(fe)) +
                                 tf.reduce_sum(tf.square(fb)) +
                                 tf.reduce_sum(tf.square(gb)))
