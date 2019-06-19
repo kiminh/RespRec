@@ -12,11 +12,11 @@ outer_lr=0.005
 keep_probs='[0.8,0.8]' # '[0.2,0.5]'
 layer_sizes='[64]'
 base_model=fm
-n_epoch=10
+n_epoch=4
 n_factor=128
-n_trial=10
+n_trial=4
 opt_type=adagrad
-verbose=1
+verbose=0
 for meta_model in naive param; do
   for var_reg in 0 0.001 0.01 0.1 1 10 100 1000; do
 
@@ -42,6 +42,7 @@ python -W ignore ../run_ltr.py \
     --opt_type ${opt_type} \
     --var_reg ${var_reg} \
     --verbose ${verbose}
+# exit
 
   done
 done

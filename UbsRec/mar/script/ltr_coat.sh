@@ -47,6 +47,7 @@ python -W ignore ../run_ltr.py \
     --opt_type ${opt_type} \
     --var_reg ${var_reg} \
     --verbose ${verbose}
+# exit
 
   done
 done
