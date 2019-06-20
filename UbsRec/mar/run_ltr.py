@@ -58,6 +58,8 @@ def run_once(data_sets):
   batch_size = tf_flags.batch_size
   inner_lr = tf_flags.inner_lr
   outer_lr = tf_flags.outer_lr
+  keep_probs = tf_flags.keep_probs
+  layer_sizes = tf_flags.layer_sizes
   n_epoch = tf_flags.n_epoch
   meta_model = tf_flags.meta_model
   opt_type = tf_flags.opt_type
@@ -186,13 +188,17 @@ def run_once(data_sets):
         if verbose:
           print('epoch=%d mae=%.3f mse=%.3f' % (t_epoch, mae, mse))
         mae_mse_list.append((t_epoch, mae, mse))
-    weight_avg_list.append(_get_weight_avg(train_set))
-    weight_avg_list.append(_get_weight_avg(valid_set))
-    weight_avg_list.append(_get_weight_avg(test_set))
+    if weight_file:
+      weight_avg_list.append(_get_weight_avg(train_set))
+      weight_avg_list.append(_get_weight_avg(valid_set))
+      weight_avg_list.append(_get_weight_avg(test_set))
   mae_mse_list = sorted(mae_mse_list, key=lambda t: (t[2], t[1]))
   t_epoch, mae, mse = mae_mse_list[0]
-  if verbose:
-    print('epoch=%d mae=%.3f mse=%.3f' % (t_epoch, mae, mse))
+  param_str = ut_model.trailing_zero(inner_lr)
+  param_str += '_' + ut_model.trailing_zero(outer_lr)
+  param_str += '_' + str(keep_probs).replace(' ', '')
+  param_str += '_' + str(layer_sizes)
+  print('epoch=%d mae=%.3f mse=%.3f %s' % (t_epoch, mae, mse, param_str))
   if std_dev_file:
     with open(std_dev_file, 'w') as fout:
       for std_dev in std_dev_list:
@@ -225,7 +231,8 @@ def main():
   var_reg = ut_model.trailing_zero(var_reg)
   mae = mae_arr.mean()
   mse = mse_arr.mean()
-  print('%s %s %f %f' % (meta_model, var_reg, mae, mse))
+  if verbose:
+    print('%s %s %f %f' % (meta_model, var_reg, mae, mse))
 
 
 if __name__ == '__main__':
