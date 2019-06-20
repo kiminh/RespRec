@@ -1,3 +1,5 @@
+export CUDA_VISIBLE_DEVICES=''
+
 data_dir=~/Downloads/data/coat_incl_0.05
 all_reg=0.001
 batch_norm=0
