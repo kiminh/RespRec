@@ -1,3 +1,6 @@
+python naive_bayes.py ../mar/music
+exit
+
 evalres_dir=../../../librec/bin/evalres
 python pick_librec.py ${evalres_dir}/music_excl_0.05.csv
 python pick_librec.py ${evalres_dir}/music_incl_0.05.csv

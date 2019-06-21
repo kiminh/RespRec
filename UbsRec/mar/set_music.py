@@ -98,11 +98,11 @@ def to_lib_many():
 
 def marginalize(data_set):
   n_rating = data_set.rating.unique().shape[0]
-  p_data = np.zeros((n_rating))
+  marginal = np.zeros((n_rating))
   for rating in data_set.rating:
-    p_data[rating - 1] += 1
-  p_data = p_data / p_data.sum()
-  return p_data
+    marginal[rating - 1] += 1
+  marginal = marginal / marginal.sum()
+  return marginal
 
 def engr_cont_feats(train_set, n_cont_feat):
   '''Continuous feature engineering
