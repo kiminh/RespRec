@@ -32,7 +32,7 @@ flags.DEFINE_string('layer_sizes', '[64]', '')
 flags.DEFINE_string('opt_type', 'adagrad', '')
 flags.DEFINE_string('std_dev_file', None, '')
 flags.DEFINE_string('weight_file', None, '')
-
+flags.DEFINE_string('mse_file', None, '')
 tf_flags = tf.flags.FLAGS
 tf_flags.keep_probs = eval(tf_flags.keep_probs)
 tf_flags.layer_sizes = eval(tf_flags.layer_sizes)
@@ -140,6 +140,8 @@ def run_once(data_sets):
     std_dev_list = []
   if weight_file:
     weight_avg_list = []
+  if mse_file:
+    mse_list = []
   with tf.Session() as sess:
     sess.run(tf.global_variables_initializer())
     t_batch = 0
@@ -189,6 +191,9 @@ def run_once(data_sets):
             weight_avg, _ = _get_weight_stat(train_set)
             weight_avg_list.append(weight_avg)
 
+          if mse_file:
+            mse_list.append(mse)
+
       if by_epoch and t_epoch % by_epoch == 0:
         feed_dict = {inputs_: test_set.inputs,
                      outputs_: test_set.outputs}
@@ -200,14 +205,6 @@ def run_once(data_sets):
       weight_avg, weight_std = _get_weight_stat(train_set)
       weight_avg_list.append(weight_avg)
       weight_avg_list.append(weight_std)
-  mae_mse_list = sorted(mae_mse_list, key=lambda t: (t[2], t[1]))
-  t_epoch, mae, mse = mae_mse_list[0]
-  param_str = ut_model.trailing_zero(inner_lr)
-  param_str += '_' + ut_model.trailing_zero(outer_lr)
-  param_str += '_' + str(keep_probs).replace(' ', '')
-  param_str += '_' + str(layer_sizes)
-  if verbose:
-    print('epoch=%d mae=%.3f mse=%.3f %s' % (t_epoch, mae, mse, param_str))
   if std_dev_file:
     with open(std_dev_file, 'w') as fout:
       for std_dev in std_dev_list:
@@ -217,6 +214,18 @@ def run_once(data_sets):
       for weight_avg in weight_avg_list:
         weight_avg = [str(weight) for weight in weight_avg]
         fout.write('%s\n' % ('\t'.join(weight_avg)))
+  if mse_file:
+    with open(mse_file, 'w') as fout:
+      for mse in mse_list:
+        fout.write('%f\n' % (mse))
+  mae_mse_list = sorted(mae_mse_list, key=lambda t: (t[2], t[1]))
+  t_epoch, mae, mse = mae_mse_list[0]
+  param_str = ut_model.trailing_zero(inner_lr)
+  param_str += '_' + ut_model.trailing_zero(outer_lr)
+  param_str += '_' + str(keep_probs).replace(' ', '')
+  param_str += '_' + str(layer_sizes)
+  if verbose:
+    print('epoch=%d mae=%.3f mse=%.3f %s' % (t_epoch, mae, mse, param_str))
   return mae, mse
 
 def main():

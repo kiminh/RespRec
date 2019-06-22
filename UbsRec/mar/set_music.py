@@ -8,7 +8,7 @@ import pandas as pd
 
 dflt_ratio = 0.05
 data_dir = 'music'
-max_ratio = 0.25
+max_ratio = 0.5
 
 def load_data_set(data_file):
   read_kwargs = {'sep': '\t', 'names': ['user', 'item', 'rating']}
@@ -297,8 +297,8 @@ def to_size_once(data_sets, valid_ratio):
 
   base_dir = path.expanduser('~/Downloads/data')
   dir_name = 'music'
-  dir_name += '_%.2f' % (valid_ratio)
-  dir_name += '_%.2f' % (max_ratio)
+  dir_name += '_%s' % (stringify(valid_ratio))
+  dir_name += '_%s' % (stringify(max_ratio))
   out_dir = path.join(base_dir, dir_name)
   if not path.exists(out_dir):
     os.makedirs(out_dir)
@@ -340,7 +340,7 @@ def to_size_once(data_sets, valid_ratio):
 
 def to_size_many():
   data_sets = load_data_sets(max_ratio)
-  ratio_list = [0.01, 0.02, 0.04, 0.08, 0.12, 0.16, 0.20] + [max_ratio]
+  ratio_list = [0.001, 0.005, 0.01, 0.05, 0.1] + [max_ratio]
   for valid_ratio in ratio_list:
     to_size_once(data_sets, valid_ratio)
 
