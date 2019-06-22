@@ -9,8 +9,9 @@ import numpy as np
 import os
 import pandas as pd
 
-valid_ratio = 0.05
+dflt_ratio = 0.05
 data_dir = 'coat'
+max_ratio = 0.5
 
 def maybe_download(in_dir):
   if path.exists(in_dir):
@@ -60,7 +61,7 @@ def shuffle_data(in_dir):
   save_data_set(biased_set, biased_file)
   save_data_set(unbiased_set, unbiased_file)
 
-def load_data_sets():
+def load_data_sets(valid_ratio):
   biased_file = path.join(data_dir, 'biased.dta')
   unbiased_file = path.join(data_dir, 'unbiased.dta')
   names = ['user', 'item', 'rating']
@@ -93,9 +94,9 @@ def to_lib_once(inc_valid):
   base_dir = path.expanduser('~/Projects/librec/data')
   dir_name = 'coat'
   dir_name += '_incl' if inc_valid else '_excl'
-  dir_name += '_%s' % (stringify(valid_ratio))
+  dir_name += '_%s' % (stringify(dflt_ratio))
   out_dir = path.join(base_dir, dir_name)
-  train_set, valid_set, test_set = load_data_sets()
+  train_set, valid_set, test_set = load_data_sets(dflt_ratio)
   if inc_valid:
     train_set = pd.concat([train_set, valid_set])
 
@@ -224,12 +225,12 @@ def to_resp_once(inc_valid):
   base_dir = path.expanduser('~/Downloads/data')
   dir_name = 'coat'
   dir_name += '_incl' if inc_valid else '_excl'
-  dir_name += '_%s' % (stringify(valid_ratio))
+  dir_name += '_%s' % (stringify(dflt_ratio))
   out_dir = path.join(base_dir, dir_name)
   if not path.exists(out_dir):
     os.makedirs(out_dir)
 
-  train_set, valid_set, test_set = load_data_sets()
+  train_set, valid_set, test_set = load_data_sets(dflt_ratio)
 
   in_dir = path.expanduser('~/Downloads/data/coat')
   weight_file = path.join(in_dir, 'propensities.ascii')
@@ -289,19 +290,41 @@ def to_resp_many():
   to_resp_once(False)
   to_resp_once(True)
 
+
+def to_size_once(data_sets, valid_ratio):
+  def _to_size_once(data_set, file_base):
+    pass
+
+  base_dir = path.expanduser('~/Downloads/data')
+  dir_name = 'coat'
+  dir_name += '_%s' % (stringify(valid_ratio))
+  dir_name += '_%s' % (stringify(max_ratio))
+  out_dir = path.join(base_dir, dir_name)
+  if not path.exists(out_dir):
+    os.makedirs(out_dir)
+
+def to_size_many():
+  data_sets = load_data_sets(max_ratio)
+  ratio_list = [0.001, 0.005, 0.01, 0.05, 0.1] + [max_ratio]
+  for valid_ratio in ratio_list:
+    to_size_once(data_sets, valid_ratio)
+
 def main():
   in_dir = path.expanduser('~/Downloads/data/coat')
   maybe_download(in_dir)
   shuffle_data(in_dir)
 
+  choices = ['lib', 'resp', 'size']
   parser = argparse.ArgumentParser()
-  parser.add_argument('out_format', choices=['lib', 'resp'])
+  parser.add_argument('out_format', choices=choices)
   args = parser.parse_args()
   out_format = args.out_format
-  if out_format == 'lib':
+  if out_format == choices[0]:
     to_lib_many()
-  if out_format == 'resp':
+  if out_format == choices[1]:
     to_resp_many()
+  if out_format == choices[2]:
+    to_size_many()
 
 if __name__ == '__main__':
   main()

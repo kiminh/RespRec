@@ -17,7 +17,7 @@ fig, ax = plt.subplots(1, 1)
 fig.set_size_inches(width, height, forward=True)
 
 kwargs = copy.deepcopy(line_kwargs)
-kwargs['label'] = '0'
+kwargs['label'] = '0.1\\%' # '0'
 kwargs['linestyle'] = linestyles[0]
 ax.plot(x, data[:n_epoch, 0], **kwargs)
 
@@ -27,7 +27,7 @@ kwargs['linestyle'] = linestyles[1]
 ax.plot(x, data[:n_epoch, 1], **kwargs)
 
 kwargs = copy.deepcopy(line_kwargs)
-kwargs['label'] = '10$^{-2}$'
+kwargs['label'] = '0.5\\%' # '10$^{-2}$'
 kwargs['linestyle'] = linestyles[2]
 ax.plot(x, data[:n_epoch, 2], **kwargs)
 
@@ -37,7 +37,7 @@ kwargs['linestyle'] = linestyles[3]
 ax.plot(x, data[:n_epoch, 3], **kwargs)
 
 kwargs = copy.deepcopy(line_kwargs)
-kwargs['label'] = '10$^{0}$'
+kwargs['label'] = '2\\%' # '10$^{0}$'
 kwargs['marker'] = markers[1]
 kwargs['linestyle'] = linestyles[0]
 kwargs['markevery'] = list(np.arange(0, n_epoch, 20))
@@ -51,7 +51,7 @@ kwargs['markevery'] = list(np.arange(5, n_epoch, 20))
 ax.plot(x, data[:n_epoch, 5], **kwargs)
 
 kwargs = copy.deepcopy(line_kwargs)
-kwargs['label'] = '10$^{2}$'
+kwargs['label'] = '10\\%' # '10$^{2}$'
 kwargs['marker'] = markers[3]
 kwargs['linestyle'] = linestyles[2]
 kwargs['markevery'] = list(np.arange(10, n_epoch, 20))

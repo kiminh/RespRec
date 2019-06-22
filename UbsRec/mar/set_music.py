@@ -8,7 +8,7 @@ import pandas as pd
 
 dflt_ratio = 0.05
 data_dir = 'music'
-max_ratio = 0.5
+max_ratio = 0.2
 
 def load_data_set(data_file):
   read_kwargs = {'sep': '\t', 'names': ['user', 'item', 'rating']}
@@ -340,7 +340,7 @@ def to_size_once(data_sets, valid_ratio):
 
 def to_size_many():
   data_sets = load_data_sets(max_ratio)
-  ratio_list = [0.001, 0.005, 0.01, 0.05, 0.1] + [max_ratio]
+  ratio_list = [0.001, 0.002, 0.005, 0.01, 0.02, 0.05, 0.1] + [max_ratio]
   for valid_ratio in ratio_list:
     to_size_once(data_sets, valid_ratio)
 

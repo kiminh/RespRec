@@ -7,8 +7,8 @@ import os
 rc('font', **{'family': 'serif', 'serif': ['Times']})
 rc('text', usetex=True)
 rc('text.latex', unicode=True)
-rc('legend', handlelength=rcParams['legend.handlelength'] * 0.7,
-             handletextpad=rcParams['legend.handletextpad'] * 0.5)
+rc('legend', handlelength=rcParams['legend.handlelength'] * 0.55,
+             handletextpad=rcParams['legend.handletextpad'] * 0.35)
 
 data_dir = 'data'
 fig_dir = 'figure'
