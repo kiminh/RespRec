@@ -18,6 +18,7 @@ n_trial=4
 opt_type=adagrad
 verbose=0
 
+
 n_epoch=2
 n_trial=2
 var_reg=0
@@ -25,7 +26,6 @@ for i_cont_input in 3:5,17:18 3:18; do
   for meta_model in naive param; do
     for valid_ratio in 0.01 0.02 0.04 0.08 0.12 0.16 0.20 0.25; do
       data_dir=~/Downloads/data/music_${valid_ratio}_0.25
-      meta_model=param
       python -W ignore ../run_ltr.py \
         --data_dir ${data_dir} \
         --all_reg ${all_reg} \
