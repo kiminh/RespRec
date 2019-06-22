@@ -32,7 +32,9 @@ def get_base_model(args, kwargs, params=None, reuse=False):
     fb = _get_var('fb', shape=(tot_input), initializer=z_init)
     gb = _get_var('gb', shape=(), initializer=z_init)
 
-    if base_model == 'fm':
+    if base_model == 'mf':
+      raise Exception('to implement')
+    elif base_model == 'fm':
       nnz_embedding = tf.nn.embedding_lookup(fe, inputs_)
       sum_embedding = tf.reduce_sum(nnz_embedding, axis=1)
       # batch_size, n_factor

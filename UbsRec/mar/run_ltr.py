@@ -1,3 +1,5 @@
+from os import path
+
 import ut_data
 import ut_model
 import numpy as np
@@ -36,20 +38,26 @@ tf_flags.keep_probs = eval(tf_flags.keep_probs)
 tf_flags.layer_sizes = eval(tf_flags.layer_sizes)
 
 def run_once(data_sets):
-  def _get_weight_avg(data_set):
+  def _get_weight_stat(data_set):
     assert meta_model != 'batch'
     feed_dict = {inputs_: data_set.inputs,
                  disc_inputs_: data_set.disc_inputs,
                  cont_inputs_: data_set.cont_inputs}
     weights = sess.run(_weights, feed_dict=feed_dict)
-    weight_num = np.zeros((5))
-    weight_avg = np.zeros((5))
+    n_rating = 5
+    rating_weights = dict()
+    for i in range(1, n_rating + 1):
+      rating_weights[i] = []
     for weight, output in zip(weights, data_set.outputs):
-      index = int(output - 1)
-      weight_num[index] += 1
-      weight_avg[index] += weight
-    weight_avg /= weight_num
-    return weight_avg
+      rating = int(output)
+      rating_weights[rating].append(weight)
+    weight_avg = np.zeros((n_rating))
+    weight_std = np.zeros((n_rating))
+    for rating in range(1, n_rating + 1):
+      index = n_rating - rating
+      weight_avg[index] = np.mean(rating_weights[rating])
+      weight_std[index] = np.std(rating_weights[rating])
+    return weight_avg, weight_std
 
   by_batch = tf_flags.by_batch
   by_epoch = tf_flags.by_epoch
@@ -178,7 +186,7 @@ def run_once(data_sets):
             std_dev_list.append(std_dev)
 
           if weight_file:
-            weight_avg = _get_weight_avg(train_set)
+            weight_avg, _ = _get_weight_stat(train_set)
             weight_avg_list.append(weight_avg)
 
       if by_epoch and t_epoch % by_epoch == 0:
@@ -189,16 +197,17 @@ def run_once(data_sets):
           print('epoch=%d mae=%.3f mse=%.3f' % (t_epoch, mae, mse))
         mae_mse_list.append((t_epoch, mae, mse))
     if weight_file:
-      weight_avg_list.append(_get_weight_avg(train_set))
-      weight_avg_list.append(_get_weight_avg(valid_set))
-      weight_avg_list.append(_get_weight_avg(test_set))
+      weight_avg, weight_std = _get_weight_stat(train_set)
+      weight_avg_list.append(weight_avg)
+      weight_avg_list.append(weight_std)
   mae_mse_list = sorted(mae_mse_list, key=lambda t: (t[2], t[1]))
   t_epoch, mae, mse = mae_mse_list[0]
   param_str = ut_model.trailing_zero(inner_lr)
   param_str += '_' + ut_model.trailing_zero(outer_lr)
   param_str += '_' + str(keep_probs).replace(' ', '')
   param_str += '_' + str(layer_sizes)
-  print('epoch=%d mae=%.3f mse=%.3f %s' % (t_epoch, mae, mse, param_str))
+  if verbose:
+    print('epoch=%d mae=%.3f mse=%.3f %s' % (t_epoch, mae, mse, param_str))
   if std_dev_file:
     with open(std_dev_file, 'w') as fout:
       for std_dev in std_dev_list:
@@ -211,7 +220,9 @@ def run_once(data_sets):
   return mae, mse
 
 def main():
+  data_dir = tf_flags.data_dir
   n_trial = tf_flags.n_trial
+  i_cont_input = tf_flags.i_cont_input
   meta_model = tf_flags.meta_model
   var_reg = tf_flags.var_reg
   verbose = tf_flags.verbose
@@ -229,11 +240,10 @@ def main():
     print('mae=%.3f (%.3f)' % (mae_arr.mean(), mae_arr.std()))
     print('mse=%.3f (%.3f)' % (mse_arr.mean(), mse_arr.std()))
   var_reg = ut_model.trailing_zero(var_reg)
+  dir_name = path.basename(data_dir)
   mae = mae_arr.mean()
   mse = mse_arr.mean()
-  if verbose:
-    print('%s %s %f %f' % (meta_model, var_reg, mae, mse))
-
+  print('%s %s %s %f %f' % (meta_model, i_cont_input, dir_name, mae, mse))
 
 if __name__ == '__main__':
   main()

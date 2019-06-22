@@ -17,20 +17,24 @@ if not path.exists(fig_dir):
 
 width = 6.4
 height = 4.8
-legend_size = 20
-label_size = 20
-line_width = 3.0
-dotted_width = 3.5
+legend_size = 25
+label_size = 25
+line_width = 3.5
+dotted_width = 4.0
 marker_edge_width = 1.5
 marker_size = 12
-tick_size = 18
+tick_size = 23
 pad_inches = 0.10
-bbox_to_anchor = (-0.03, 1.0, 1.06, 1.0)
-c_kwargs = {'linewidth': line_width,
-            'markersize': marker_size,
-            'fillstyle': 'none',
-            'markeredgewidth': marker_edge_width}
-markers = ['x', 'v', 'o', 's']
+bbox_to_anchor = (-0.20, 1.0, 1.24, 1.0)
+line_kwargs = {'linewidth': line_width,
+               'markersize': marker_size,
+               'fillstyle': 'none',
+               'markeredgewidth': marker_edge_width}
+bar_width = 0.25
+capsize = 5
+bar_kwargs = {'width': bar_width,
+              'capsize': capsize}
+markers = ['|', 'v', 's', 'p', 'o']
 colors = ['g', 'r', 'b', 'm']
 linestyles = ['-', ':', '-.', '--']
 mf_ips_np = 'MF-IPS-NP'

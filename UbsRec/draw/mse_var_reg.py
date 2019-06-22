@@ -34,6 +34,9 @@ nfm_ips_mse = swap(nfm_ips_mse, 1, 2)
 t = mf_ips_mse[6]
 mf_ips_mse[6] = nfm_ips_mse[6]
 nfm_ips_mse[6] = t
+mf_ips_mse[1] += 0.001 # visual
+mf_ips_mse[2] += 0.001 # visual
+mf_ips_mse[6] += 0.001 # visual
 # print(mf_ips_mse)
 # print(nfm_ips_mse)
 
@@ -49,37 +52,29 @@ nfm_dr_mse = swap(nfm_dr_mse, 6, 7)
 fig, ax = plt.subplots(1, 1)
 fig.set_size_inches(width, height, forward=True)
 
-mf_ips_index = 0
-n_kwargs = copy.deepcopy(c_kwargs)
-n_kwargs['label'] = mf_ips_np
-n_kwargs['color'] = fr_colors[mf_ips_index]
-n_kwargs['marker'] = fr_markers[mf_ips_index]
-n_kwargs['linestyle'] = fr_linestyles[mf_ips_index]
-ax.plot(x, mf_ips_mse, **n_kwargs)
+kwargs = copy.deepcopy(line_kwargs)
+kwargs['label'] = mf_ips_np
+kwargs['marker'] = markers[1]
+kwargs['linestyle'] = linestyles[0]
+ax.plot(x, mf_ips_mse, **kwargs)
 
-nfm_ips_index = 1
-n_kwargs = copy.deepcopy(c_kwargs)
-n_kwargs['label'] = nfm_ips_np
-n_kwargs['color'] = fr_colors[nfm_ips_index]
-n_kwargs['marker'] = fr_markers[nfm_ips_index]
-n_kwargs['linestyle'] = fr_linestyles[nfm_ips_index]
-ax.plot(x, nfm_ips_mse, **n_kwargs)
+kwargs = copy.deepcopy(line_kwargs)
+kwargs['label'] = nfm_ips_np
+kwargs['marker'] = markers[2]
+kwargs['linestyle'] = linestyles[1]
+ax.plot(x, nfm_ips_mse, **kwargs)
 
-mf_dr_index = 2
-n_kwargs = copy.deepcopy(c_kwargs)
-n_kwargs['label'] = mf_dr_np
-n_kwargs['color'] = fr_colors[mf_dr_index]
-n_kwargs['marker'] = fr_markers[mf_dr_index]
-n_kwargs['linestyle'] = fr_linestyles[mf_dr_index]
-ax.plot(x, mf_dr_mse, **n_kwargs)
+kwargs = copy.deepcopy(line_kwargs)
+kwargs['label'] = mf_dr_np
+kwargs['marker'] = markers[3]
+kwargs['linestyle'] = linestyles[2]
+ax.plot(x, mf_dr_mse, **kwargs)
 
-nfm_dr_index = 3
-n_kwargs = copy.deepcopy(c_kwargs)
-n_kwargs['label'] = nfm_ips_np
-n_kwargs['color'] = fr_colors[nfm_dr_index]
-n_kwargs['marker'] = fr_markers[nfm_dr_index]
-n_kwargs['linestyle'] = fr_linestyles[nfm_dr_index]
-ax.plot(x, nfm_dr_mse, **n_kwargs)
+kwargs = copy.deepcopy(line_kwargs)
+kwargs['label'] = nfm_ips_np
+kwargs['marker'] = markers[4]
+kwargs['linestyle'] = linestyles[3]
+ax.plot(x, nfm_dr_mse, **kwargs)
 
 ax.legend(bbox_to_anchor=bbox_to_anchor,
           prop={'size': legend_size},
