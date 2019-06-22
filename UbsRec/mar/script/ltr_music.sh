@@ -24,7 +24,7 @@ var_reg=0
 for i_cont_input in 3:5,17:18 3:18; do
   for meta_model in param naive; do
     for valid_ratio in 0.2 0.1 0.05 0.02 0.01 0.005 0.002 0.001; do
-      data_dir=~/Downloads/data/music_${valid_ratio}_0.5
+      data_dir=~/Downloads/data/music_${valid_ratio}_0.2
       python -W ignore ../run_ltr.py \
         --data_dir ${data_dir} \
         --all_reg ${all_reg} \
@@ -62,7 +62,7 @@ var_reg=0
 rm -rf ${mse_dir}
 mkdir -p ${mse_dir}
 for valid_ratio in 0.2 0.1 0.05 0.02 0.01 0.005 0.002 0.001; do
-  data_dir=~/Downloads/data/music_${valid_ratio}_0.5
+  data_dir=~/Downloads/data/music_${valid_ratio}_0.2
   mse_file=${mse_dir}/music_${meta_model}_${valid_ratio}
   python -W ignore ../run_ltr.py \
     --data_dir ${data_dir} \
