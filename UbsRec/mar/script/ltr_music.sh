@@ -18,43 +18,8 @@ n_trial=4
 opt_type=adagrad
 verbose=0
 
-
 n_epoch=2
-n_trial=1
-var_reg=0
-for i_cont_input in 3:5,17:18 3:18; do
-  for meta_model in param naive; do
-    for valid_ratio in 0.2 0.1 0.05 0.02 0.01 0.005 0.002 0.001; do
-      data_dir=~/Downloads/data/music_${valid_ratio}_0.2
-      python -W ignore ../run_ltr.py \
-        --data_dir ${data_dir} \
-        --all_reg ${all_reg} \
-        --batch_norm ${batch_norm} \
-        --batch_size ${batch_size} \
-        --by_batch ${by_batch} \
-        --by_epoch ${by_epoch} \
-        --i_input ${i_input} \
-        --i_disc_input ${i_disc_input} \
-        --i_cont_input ${i_cont_input} \
-        --inner_lr ${inner_lr} \
-        --outer_lr ${outer_lr} \
-        --keep_probs ${keep_probs} \
-        --layer_sizes ${layer_sizes} \
-        --base_model ${base_model} \
-        --n_epoch ${n_epoch} \
-        --n_factor ${n_factor} \
-        --n_trial ${n_trial} \
-        --meta_model ${meta_model} \
-        --opt_type ${opt_type} \
-        --var_reg ${var_reg} \
-        --verbose ${verbose}
-    done
-  done
-done
-exit
-
-n_epoch=2
-n_trial=1
+n_trial=4
 by_batch=40
 verbose=1
 meta_model=param
@@ -88,6 +53,40 @@ for valid_ratio in 0.2 0.1 0.05 0.02 0.01 0.005 0.002 0.001; do
     --var_reg ${var_reg} \
     --verbose ${verbose} \
     --mse_file ${mse_file}
+done
+exit
+
+n_epoch=2
+n_trial=1
+var_reg=0
+for i_cont_input in 3:5,17:18 3:18; do
+  for meta_model in param naive; do
+    for valid_ratio in 0.2 0.1 0.05 0.02 0.01 0.005 0.002 0.001; do
+      data_dir=~/Downloads/data/music_${valid_ratio}_0.2
+      python -W ignore ../run_ltr.py \
+        --data_dir ${data_dir} \
+        --all_reg ${all_reg} \
+        --batch_norm ${batch_norm} \
+        --batch_size ${batch_size} \
+        --by_batch ${by_batch} \
+        --by_epoch ${by_epoch} \
+        --i_input ${i_input} \
+        --i_disc_input ${i_disc_input} \
+        --i_cont_input ${i_cont_input} \
+        --inner_lr ${inner_lr} \
+        --outer_lr ${outer_lr} \
+        --keep_probs ${keep_probs} \
+        --layer_sizes ${layer_sizes} \
+        --base_model ${base_model} \
+        --n_epoch ${n_epoch} \
+        --n_factor ${n_factor} \
+        --n_trial ${n_trial} \
+        --meta_model ${meta_model} \
+        --opt_type ${opt_type} \
+        --var_reg ${var_reg} \
+        --verbose ${verbose}
+    done
+  done
 done
 exit
 
