@@ -18,6 +18,8 @@ n_trial=4
 opt_type=adagrad
 verbose=0
 
+
+
 n_epoch=2
 n_trial=2
 var_reg=0

@@ -75,6 +75,7 @@ def run_once(data_sets):
 
   std_dev_file = tf_flags.std_dev_file
   weight_file = tf_flags.weight_file
+  mse_file = tf_flags.mse_file
 
   train_set, valid_set, test_set = data_sets
   nnz_input = train_set.nnz_input
