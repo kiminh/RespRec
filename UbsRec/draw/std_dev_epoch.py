@@ -5,6 +5,9 @@ import copy
 import matplotlib.pyplot as plt
 import numpy as np
 
+handletextpad = 0.4 * rcParams['legend.handletextpad']
+rc('legend', handlelength=handlelength, handletextpad=handletextpad)
+
 run_file = path.basename(__file__)
 data_file = path.join(data_dir, run_file.replace('.py', '.dta'))
 
@@ -17,31 +20,21 @@ fig, ax = plt.subplots(1, 1)
 fig.set_size_inches(width, height, forward=True)
 
 kwargs = copy.deepcopy(line_kwargs)
-kwargs['label'] = '0.1\\%' # '0'
+kwargs['label'] = '0'
 kwargs['linestyle'] = linestyles[0]
 ax.plot(x, data[:n_epoch, 0], **kwargs)
+
+kwargs = copy.deepcopy(line_kwargs)
+kwargs['label'] = '1' # '10$^{0}$'
+kwargs['marker'] = markers[1]
+kwargs['linestyle'] = linestyles[0]
+kwargs['markevery'] = list(np.arange(0, n_epoch, 20))
+ax.plot(x, data[:n_epoch, 4], **kwargs)
 
 kwargs = copy.deepcopy(line_kwargs)
 kwargs['label'] = '10$^{-3}$'
 kwargs['linestyle'] = linestyles[1]
 ax.plot(x, data[:n_epoch, 1], **kwargs)
-
-kwargs = copy.deepcopy(line_kwargs)
-kwargs['label'] = '0.5\\%' # '10$^{-2}$'
-kwargs['linestyle'] = linestyles[2]
-ax.plot(x, data[:n_epoch, 2], **kwargs)
-
-kwargs = copy.deepcopy(line_kwargs)
-kwargs['label'] = '10$^{-1}$'
-kwargs['linestyle'] = linestyles[3]
-ax.plot(x, data[:n_epoch, 3], **kwargs)
-
-kwargs = copy.deepcopy(line_kwargs)
-kwargs['label'] = '2\\%' # '10$^{0}$'
-kwargs['marker'] = markers[1]
-kwargs['linestyle'] = linestyles[0]
-kwargs['markevery'] = list(np.arange(0, n_epoch, 20))
-ax.plot(x, data[:n_epoch, 4], **kwargs)
 
 kwargs = copy.deepcopy(line_kwargs)
 kwargs['label'] = '10$^{1}$'
@@ -51,11 +44,21 @@ kwargs['markevery'] = list(np.arange(5, n_epoch, 20))
 ax.plot(x, data[:n_epoch, 5], **kwargs)
 
 kwargs = copy.deepcopy(line_kwargs)
-kwargs['label'] = '10\\%' # '10$^{2}$'
+kwargs['label'] = '10$^{-2}$'
+kwargs['linestyle'] = linestyles[2]
+ax.plot(x, data[:n_epoch, 2], **kwargs)
+
+kwargs = copy.deepcopy(line_kwargs)
+kwargs['label'] = '10$^{2}$'
 kwargs['marker'] = markers[3]
 kwargs['linestyle'] = linestyles[2]
 kwargs['markevery'] = list(np.arange(10, n_epoch, 20))
 ax.plot(x, data[:n_epoch, 6], **kwargs)
+
+kwargs = copy.deepcopy(line_kwargs)
+kwargs['label'] = '10$^{-1}$'
+kwargs['linestyle'] = linestyles[3]
+ax.plot(x, data[:n_epoch, 3], **kwargs)
 
 kwargs = copy.deepcopy(line_kwargs)
 kwargs['label'] = '10$^{3}$'
@@ -76,6 +79,7 @@ ax.set_ylabel('Standard Deviation', fontsize=label_size)
 
 ax.set_xlim(x.min(), x.max())
 ax.set_xticks(np.arange(0, n_epoch, 20))
+ax.set_xticklabels(['%d' % (2 * i) for i in range(5)])
 ax.set_yticks(np.arange(0.01, 0.03, 0.01))
 
 eps_file = path.join(fig_dir, run_file.replace('.py', '.eps'))

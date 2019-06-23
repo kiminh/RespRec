@@ -7,8 +7,9 @@ import os
 rc('font', **{'family': 'serif', 'serif': ['Times']})
 rc('text', usetex=True)
 rc('text.latex', unicode=True)
-rc('legend', handlelength=rcParams['legend.handlelength'] * 0.55,
-             handletextpad=rcParams['legend.handletextpad'] * 0.35)
+handlelength = 0.8 * rcParams['legend.handlelength']
+handletextpad = 0.8 * rcParams['legend.handletextpad']
+rc('legend', handlelength=handlelength, handletextpad=handletextpad)
 
 data_dir = 'data'
 fig_dir = 'figure'
@@ -25,7 +26,7 @@ marker_edge_width = 1.5
 marker_size = 12
 tick_size = 23
 pad_inches = 0.10
-bbox_to_anchor = (-0.20, 1.0, 1.24, 1.0)
+bbox_to_anchor = (-0.22, 1.0, 1.26, 1.0)
 line_kwargs = {'linewidth': line_width,
                'markersize': marker_size,
                'fillstyle': 'none',

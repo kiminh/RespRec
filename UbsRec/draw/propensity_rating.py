@@ -18,8 +18,8 @@ f = (data[3, :].sum() - data[0, :].sum()) / (n_rating * data[3, 4])
 data[3, :] -= data[3, 4] * f
 data[4, :] *= (1.0 - f)
 
-print(data[1, :])
-print(data[3, :])
+# print(data[1, :])
+# print(data[3, :])
 
 fig, ax = plt.subplots(1, 1)
 fig.set_size_inches(width, height, forward=True)

@@ -5,6 +5,9 @@ import copy
 import matplotlib.pyplot as plt
 import numpy as np
 
+handletextpad = 0.4 * rcParams['legend.handletextpad']
+rc('legend', handlelength=handlelength, handletextpad=handletextpad)
+
 run_file = path.basename(__file__)
 data_file = path.join(data_dir, run_file.replace('.py', '.dta'))
 data = np.loadtxt(data_file, dtype=np.float32)
@@ -62,6 +65,7 @@ ax.set_ylabel('Propensity', fontsize=label_size)
 
 ax.set_xlim(x.min(), x.max())
 ax.set_xticks(np.arange(0, n_epoch, 20))
+ax.set_xticklabels(['%d' % (2 * i) for i in range(5)])
 
 eps_file = path.join(fig_dir, run_file.replace('.py', '.eps'))
 fig.savefig(eps_file, format='eps', bbox_inches='tight', pad_inches=pad_inches)

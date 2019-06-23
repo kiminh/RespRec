@@ -59,16 +59,16 @@ kwargs['linestyle'] = linestyles[0]
 ax.plot(x, mf_ips_mse, **kwargs)
 
 kwargs = copy.deepcopy(line_kwargs)
-kwargs['label'] = nfm_ips_np
-kwargs['marker'] = markers[2]
-kwargs['linestyle'] = linestyles[1]
-ax.plot(x, nfm_ips_mse, **kwargs)
-
-kwargs = copy.deepcopy(line_kwargs)
 kwargs['label'] = mf_dr_np
 kwargs['marker'] = markers[3]
 kwargs['linestyle'] = linestyles[2]
 ax.plot(x, mf_dr_mse, **kwargs)
+
+kwargs = copy.deepcopy(line_kwargs)
+kwargs['label'] = nfm_ips_np
+kwargs['marker'] = markers[2]
+kwargs['linestyle'] = linestyles[1]
+ax.plot(x, nfm_ips_mse, **kwargs)
 
 kwargs = copy.deepcopy(line_kwargs)
 kwargs['label'] = nfm_ips_np
@@ -89,7 +89,10 @@ ax.set_ylabel('MSE', fontsize=label_size)
 ax.set_xlim(x.min(), x.max())
 ax.set_xticks(x)
 xticklabels = ['0']
-for i in range(-3, 4, 1):
+for i in range(-3, 0, 1):
+  xticklabels.append('$10^{%d}$' % (i))
+xticklabels.append('1')
+for i in range(1, 4, 1):
   xticklabels.append('$10^{%d}$' % (i))
 ax.set_xticklabels(xticklabels)
 
