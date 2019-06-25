@@ -22,6 +22,7 @@ meta_model=param
 var_reg=0
 verbose=1
 n_trial=10
+n_epoch=2
 python -W ignore ../run_ltr.py \
   --data_dir ${data_dir} \
   --all_reg ${all_reg} \
