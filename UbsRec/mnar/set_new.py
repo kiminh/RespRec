@@ -11,7 +11,7 @@ import pandas as pd
 
 train_ratio = 0.80
 valid_ratio = 0.05
-book_core = 36
+book_core = 25 # 36
 #Users 2779 . #Items 2327
 #Ratings 197995 . Sparsity 3.06%
 movie_core = 216
