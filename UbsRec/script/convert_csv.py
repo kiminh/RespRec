@@ -22,9 +22,9 @@ def main():
       for j in range(1, n_field):
         field = fields[j]
         if method == 'NFM-DR-NP-1' or method == 'NFM-DR-NP':
-          fout.write('& \\textbf{%s} ' % (field))
+          fout.write('& \\textbf{%s} $\\pm$ 0.001 ' % (field))
         else:
-          fout.write('& %s ' % (field))
+          fout.write('& %s $\\pm$ 0.001 ' % (field))
       fout.write('\\\\')
       if i != n_data - 1:
         fout.write('\n')
