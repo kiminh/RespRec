@@ -247,8 +247,11 @@ def main():
   mae_arr = np.array(mae_list)
   mse_arr = np.array(mse_list)
   if verbose:
-    print('mae=%.3f (%.3f)' % (mae_arr.mean(), mae_arr.std()))
-    print('mse=%.3f (%.3f)' % (mse_arr.mean(), mse_arr.std()))
+    mae = mae_arr.mean()
+    mae_std = mae_arr.std()
+    mse = mse_arr.mean()
+    mse_std = mse_arr.std()
+    print('%.3f %.3f %.3f %.3f' % (mae, mae_std, mse, mse_std))
   var_reg = ut_model.trailing_zero(var_reg)
   dir_name = path.basename(data_dir)
   mae = mae_arr.mean()

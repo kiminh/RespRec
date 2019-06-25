@@ -20,7 +20,7 @@ flags.DEFINE_string('data_dir', 'coat', '')
 flags.DEFINE_string('i_input', '0:2', '')
 flags.DEFINE_string('keep_probs', '[0.2,0.5]', '')
 flags.DEFINE_string('layer_sizes', '[64]', '')
-flags.DEFINE_string('model_name', 'nfm', '')
+flags.DEFINE_string('base_model', 'nfm', '')
 flags.DEFINE_string('opt_type', 'adagrad', 'adagrad|adam|sgd|rmsprop')
 tf_flags = tf.flags.FLAGS
 tf_flags.keep_probs = eval(tf_flags.keep_probs)
@@ -43,18 +43,18 @@ def run_once(data_sets):
   is_train_ = tf.placeholder(tf.bool)
 
   with tf.name_scope('training'):
-    _, loss, _ = ut_model.get_rating(inputs_, outputs_,
+    _, loss, _ = ut_model.get_rating(inputs_, outputs_, None,
                                      keep_probs_, is_train_,
                                      tf_flags, train_set,
-                                     weights_=None, params=None, reuse=False)
+                                     params=None, reuse=False)
     optimizer = ut_model.get_optimizer(opt_type, initial_lr)
     train_op = optimizer.minimize(loss)
 
   with tf.name_scope('evaluating'):
-    _, _, outputs = ut_model.get_rating(inputs_, outputs_,
+    _, _, outputs = ut_model.get_rating(inputs_, outputs_, None,
                                         keep_probs_, is_train_,
                                         tf_flags, train_set,
-                                        weights_=None, params=None, reuse=True)
+                                        params=None, reuse=True)
     outputs = tf.clip_by_value(outputs, 1.0, 5.0)
     _mae = tf.keras.metrics.mean_absolute_error(outputs_, outputs)
     _mse = tf.keras.metrics.mean_squared_error(outputs_, outputs)
@@ -103,8 +103,11 @@ def main():
     mse_list.append(mse)
   mae_arr = np.array(mae_list)
   mse_arr = np.array(mse_list)
-  print('mae=%.3f (%.3f)' % (mae_arr.mean(), mae_arr.std()))
-  print('mse=%.3f (%.3f)' % (mse_arr.mean(), mse_arr.std()))
+  mae = mae_arr.mean()
+  mae_std = mae_arr.std()
+  mse = mse_arr.mean()
+  mse_std = mse_arr.std()
+  print('%.3f %.3f %.3f %.3f' % (mae, mae_std, mse, mse_std))
 
 if __name__ == '__main__':
   main()
