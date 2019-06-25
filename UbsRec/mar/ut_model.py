@@ -164,6 +164,7 @@ def bn_layer(in_tensor, train_phase, scope_bn):
   return out_tensor
 
 def get_rating(inputs_, outputs_, weights_,
+              keep_probs_, is_train_,
                tf_flags, train_set,
                params=None, reuse=False):
   def _get_var(name, shape=None, initializer=None):
