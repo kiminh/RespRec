@@ -75,12 +75,13 @@ ax.legend(bbox_to_anchor=bbox_to_anchor,
 
 ax.tick_params(axis='both', which='major', labelsize=tick_size)
 ax.set_xlabel('Training Epoch', fontsize=label_size)
-ax.set_ylabel('Standard Deviation', fontsize=label_size)
+ax.set_ylabel('Propensity Variance', fontsize=label_size)
 
 ax.set_xlim(x.min(), x.max())
 ax.set_xticks(np.arange(0, n_epoch, 20))
 ax.set_xticklabels(['%d' % (2 * i) for i in range(5)])
-ax.set_yticks(np.arange(0.01, 0.03, 0.01))
+ax.set_yticks([0.008, 0.025])
+ax.set_yticklabels(['10$^{-4}$', '10$^{-3}$'])
 
 eps_file = path.join(fig_dir, run_file.replace('.py', '.eps'))
 fig.savefig(eps_file, format='eps', bbox_inches='tight', pad_inches=pad_inches)

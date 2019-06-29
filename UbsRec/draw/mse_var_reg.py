@@ -71,7 +71,7 @@ kwargs['linestyle'] = linestyles[1]
 ax.plot(x, nfm_ips_mse, **kwargs)
 
 kwargs = copy.deepcopy(line_kwargs)
-kwargs['label'] = nfm_ips_np
+kwargs['label'] = nfm_dr_np
 kwargs['marker'] = markers[4]
 kwargs['linestyle'] = linestyles[3]
 ax.plot(x, nfm_dr_mse, **kwargs)
@@ -83,7 +83,7 @@ ax.legend(bbox_to_anchor=bbox_to_anchor,
           ncol=2)
 
 ax.tick_params(axis='both', which='major', labelsize=tick_size)
-ax.set_xlabel('$\\lambda$', fontsize=label_size)
+ax.set_xlabel('Regularization Parameter $\\lambda$', fontsize=label_size)
 ax.set_ylabel('MSE', fontsize=label_size)
 
 ax.set_xlim(x.min(), x.max())

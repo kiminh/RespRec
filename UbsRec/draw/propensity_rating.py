@@ -47,7 +47,7 @@ ax.legend(bbox_to_anchor=bbox_to_anchor,
 
 ax.tick_params(axis='both', which='major', labelsize=tick_size)
 ax.set_xlabel('Rating Value', fontsize=label_size)
-ax.set_ylabel('Propensity', fontsize=label_size)
+ax.set_ylabel('Average Propensity', fontsize=label_size)
 ax.set_xticks(np.arange(1, 5.5, 1))
 ax.set_yticks(np.arange(0.00, 0.175, 0.05))
 

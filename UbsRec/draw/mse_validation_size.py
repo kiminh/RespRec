@@ -34,7 +34,7 @@ kwargs['linestyle'] = linestyles[2]
 ax.plot(x, data[:, 2], **kwargs)
 
 kwargs = copy.deepcopy(line_kwargs)
-kwargs['label'] = nfm_dr_np
+kwargs['label'] = nfm_ips_np
 kwargs['marker'] = markers[4]
 kwargs['linestyle'] = linestyles[3]
 ax.plot(x, data[:, 3], **kwargs)
@@ -42,7 +42,7 @@ ax.plot(x, data[:, 3], **kwargs)
 ax.legend(loc='lower left', prop={'size': legend_size})
 
 ax.tick_params(axis='both', which='major', labelsize=tick_size)
-ax.set_xlabel('Size of Validation Set', fontsize=label_size)
+ax.set_xlabel('Validation Set Size', fontsize=label_size)
 ax.set_ylabel('MSE', fontsize=label_size)
 
 ax.set_xlim(x.min(), x.max())
