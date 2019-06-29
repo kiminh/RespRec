@@ -48,7 +48,7 @@ for i_cont_input in 3:5,17:18 3:18; do
         --opt_type ${opt_type} \
         --var_reg ${var_reg} \
         --verbose ${verbose}
-      exit
+      # exit
     done
   done
 done
