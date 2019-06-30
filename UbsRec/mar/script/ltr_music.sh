@@ -19,7 +19,7 @@ opt_type=adagrad
 verbose=0
 
 n_epoch=2
-n_trial=4
+n_trial=8
 var_reg=0
 for i_cont_input in 3:5,17:18 3:18; do
   for meta_model in param naive; do
