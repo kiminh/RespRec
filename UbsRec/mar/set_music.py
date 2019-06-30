@@ -310,7 +310,7 @@ def to_size_once(data_sets, valid_ratio):
   n_valid = int(n_valid * valid_ratio / max_ratio)
   valid_set = valid_set[:n_valid]
   
-  train_set = pd.concat([train_set, valid_set])
+  # train_set = pd.concat([train_set, valid_set])
 
   n_train = len(train_set.index)
   n_valid = len(valid_set.index)

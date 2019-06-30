@@ -50,6 +50,7 @@ for i_cont_input in 3:5,17:18 3:18; do
         --verbose ${verbose}
       # exit
     done
+    break
   done
 done
 exit
