@@ -38,14 +38,20 @@ bar_kwargs = {'width': bar_width,
 markers = ['|', 'v', 's', 'p', 'o']
 colors = ['g', 'r', 'b', 'm']
 linestyles = ['-', ':', '-.', '--']
-mf_ips_np = 'MF-IPS-NP'
-nfm_ips_np = 'NFM-IPS-NP'
-mf_dr_np = 'MF-DR-NP'
-nfm_dr_np = 'NFM-DR-NP'
+mf_ips = 'MF-IPS'
+nfm_ips = 'NFM-IPS'
+mf_dr = 'MF-DR'
+nfm_dr = 'NFM-DR'
+ltd = '-LTD'
 
-def swap(l, i, j):
-  t = l[i]
-  l[i] = l[j]
-  l[j] = t
-  return l
+def swap_elem(arr_list, pos_i, pos_j):
+  elem = arr_list[pos_i]
+  arr_list[pos_i] = arr_list[pos_j]
+  arr_list[pos_j] = elem
+  return arr_list
 
+def report_impr(name, mse_list):
+  mse_min = mse_list.min()
+  mse_max = mse_list.max()
+  impr = (mse_max - mse_min) / mse_max * 100
+  print('%-16s %.2f%%' % (name, impr))

@@ -33,11 +33,13 @@ ax.plot(x, data[:n_epoch, 4], **kwargs)
 
 kwargs = copy.deepcopy(line_kwargs)
 kwargs['label'] = '10$^{-3}$'
+kwargs['label'] = '2$^{-6}$'
 kwargs['linestyle'] = linestyles[1]
 ax.plot(x, data[:n_epoch, 1], **kwargs)
 
 kwargs = copy.deepcopy(line_kwargs)
 kwargs['label'] = '10$^{1}$'
+kwargs['label'] = '2$^{2}$'
 kwargs['marker'] = markers[2]
 kwargs['linestyle'] = linestyles[1]
 kwargs['markevery'] = list(np.arange(5, n_epoch, 20))
@@ -45,11 +47,13 @@ ax.plot(x, data[:n_epoch, 5], **kwargs)
 
 kwargs = copy.deepcopy(line_kwargs)
 kwargs['label'] = '10$^{-2}$'
+kwargs['label'] = '2$^{-4}$'
 kwargs['linestyle'] = linestyles[2]
 ax.plot(x, data[:n_epoch, 2], **kwargs)
 
 kwargs = copy.deepcopy(line_kwargs)
 kwargs['label'] = '10$^{2}$'
+kwargs['label'] = '2$^{4}$'
 kwargs['marker'] = markers[3]
 kwargs['linestyle'] = linestyles[2]
 kwargs['markevery'] = list(np.arange(10, n_epoch, 20))
@@ -57,11 +61,13 @@ ax.plot(x, data[:n_epoch, 6], **kwargs)
 
 kwargs = copy.deepcopy(line_kwargs)
 kwargs['label'] = '10$^{-1}$'
+kwargs['label'] = '2$^{-2}$'
 kwargs['linestyle'] = linestyles[3]
 ax.plot(x, data[:n_epoch, 3], **kwargs)
 
 kwargs = copy.deepcopy(line_kwargs)
 kwargs['label'] = '10$^{3}$'
+kwargs['label'] = '2$^{6}$'
 kwargs['marker'] = markers[4]
 kwargs['linestyle'] = linestyles[3]
 kwargs['markevery'] = list(np.arange(15, n_epoch, 20))

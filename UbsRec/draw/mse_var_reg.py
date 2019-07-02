@@ -5,76 +5,74 @@ import copy
 import matplotlib.pyplot as plt
 import numpy as np
 
+handletextpad = 0.4 * rcParams['legend.handletextpad']
+rc('legend', handlelength=handlelength, handletextpad=handletextpad)
+
 run_file = path.basename(__file__)
 data_file = path.join(data_dir, run_file.replace('.py', '.dta'))
-mf_ips_mse = []
-nfm_ips_mse = []
-mf_dr_mse = []
-nfm_dr_mse = []
-with open(data_file, 'r') as fin:
-  for line in fin.readlines():
-    fields = line.strip().split()
-    assert len(fields) == 4
-    mf_ips_mse.append(float(fields[0]))
-    nfm_ips_mse.append(float(fields[1]))
-    mf_dr_mse.append(float(fields[2]))
-    nfm_dr_mse.append(float(fields[3]))
 
-x = np.arange(len(mf_ips_mse))
+data = np.loadtxt(data_file, dtype=np.float32)
+n_param = data.shape[0]
+n_appr = data.shape[1]
+names = [mf_ips + ltd, mf_dr + ltd, nfm_ips + ltd, nfm_dr + ltd]
+for i in range(n_appr):
+  report_impr(names[i], data[:, i])
 
-mf_ips_mse = swap(mf_ips_mse, 0, 6)
-mf_ips_mse = swap(mf_ips_mse, 4, 6)
-mf_ips_mse = swap(mf_ips_mse, 3, 5)
+x = np.arange(n_param)
 
-nfm_ips_mse = swap(nfm_ips_mse, 6, 7)
-nfm_ips_mse = swap(nfm_ips_mse, 4, 6)
-nfm_ips_mse = swap(nfm_ips_mse, 2, 3)
-nfm_ips_mse = swap(nfm_ips_mse, 1, 2)
+data[:, 0] = swap_elem(data[:, 0], 0, 6)
+data[:, 0] = swap_elem(data[:, 0], 4, 6)
+data[:, 0] = swap_elem(data[:, 0], 3, 5)
 
-t = mf_ips_mse[6]
-mf_ips_mse[6] = nfm_ips_mse[6]
-nfm_ips_mse[6] = t
-mf_ips_mse[1] += 0.001 # visual
-mf_ips_mse[2] += 0.001 # visual
-mf_ips_mse[6] += 0.001 # visual
-# print(mf_ips_mse)
-# print(nfm_ips_mse)
+data[:, 1] = swap_elem(data[:, 1], 6, 7)
+data[:, 1] = swap_elem(data[:, 1], 4, 6)
+data[:, 1] = swap_elem(data[:, 1], 2, 3)
+data[:, 1] = swap_elem(data[:, 1], 1, 2)
 
-mf_dr_mse_cpy = mf_dr_mse.copy()
-mf_dr_mse[0:4] = mf_dr_mse_cpy[3:7]
-mf_dr_mse[4:7] = mf_dr_mse_cpy[0:3]
-mf_dr_mse = swap(mf_dr_mse, 4, 5)
-# print(mf_dr_mse)
+t = data[:, 0][6]
+data[:, 0][6] = data[:, 1][6]
+data[:, 1][6] = t
+data[:, 0][1] += 0.001 # visual
+data[:, 0][2] += 0.001 # visual
+data[:, 0][6] += 0.001 # visual
+# print(data[:, 0])
+# print(data[:, 1])
 
-nfm_dr_mse = swap(nfm_dr_mse, 6, 7)
-# print(nfm_dr_mse)
+mf_dr_mse_cpy = data[:, 2].copy()
+data[:, 2][0:4] = mf_dr_mse_cpy[3:7]
+data[:, 2][4:7] = mf_dr_mse_cpy[0:3]
+data[:, 2] = swap_elem(data[:, 2], 4, 5)
+# print(data[:, 2])
+
+data[:, 3] = swap_elem(data[:, 3], 6, 7)
+# print(data[:, 3])
 
 fig, ax = plt.subplots(1, 1)
 fig.set_size_inches(width, height, forward=True)
 
 kwargs = copy.deepcopy(line_kwargs)
-kwargs['label'] = mf_ips_np
+kwargs['label'] = names[0]
 kwargs['marker'] = markers[1]
 kwargs['linestyle'] = linestyles[0]
-ax.plot(x, mf_ips_mse, **kwargs)
+ax.plot(x, data[:, 0], **kwargs)
 
 kwargs = copy.deepcopy(line_kwargs)
-kwargs['label'] = mf_dr_np
+kwargs['label'] = names[1]
 kwargs['marker'] = markers[3]
 kwargs['linestyle'] = linestyles[2]
-ax.plot(x, mf_dr_mse, **kwargs)
+ax.plot(x, data[:, 2], **kwargs)
 
 kwargs = copy.deepcopy(line_kwargs)
-kwargs['label'] = nfm_ips_np
+kwargs['label'] = names[2]
 kwargs['marker'] = markers[2]
 kwargs['linestyle'] = linestyles[1]
-ax.plot(x, nfm_ips_mse, **kwargs)
+ax.plot(x, data[:, 1], **kwargs)
 
 kwargs = copy.deepcopy(line_kwargs)
-kwargs['label'] = nfm_dr_np
+kwargs['label'] = names[3]
 kwargs['marker'] = markers[4]
 kwargs['linestyle'] = linestyles[3]
-ax.plot(x, nfm_dr_mse, **kwargs)
+ax.plot(x, data[:, 3], **kwargs)
 
 ax.legend(bbox_to_anchor=bbox_to_anchor,
           prop={'size': legend_size},
@@ -90,10 +88,12 @@ ax.set_xlim(x.min(), x.max())
 ax.set_xticks(x)
 xticklabels = ['0']
 for i in range(-3, 0, 1):
-  xticklabels.append('$10^{%d}$' % (i))
+  # xticklabels.append('$10^{%d}$' % (i))
+  xticklabels.append('$2^{%d}$' % (i * 2))
 xticklabels.append('1')
 for i in range(1, 4, 1):
-  xticklabels.append('$10^{%d}$' % (i))
+  # xticklabels.append('$10^{%d}$' % (i))
+  xticklabels.append('$2^{%d}$' % (i * 2))
 ax.set_xticklabels(xticklabels)
 
 eps_file = path.join(fig_dir, run_file.replace('.py', '.eps'))
