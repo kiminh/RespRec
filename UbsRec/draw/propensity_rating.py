@@ -43,21 +43,27 @@ n_pile = 2
 bar_width = 1.0 / (n_bar + 1)
 capsize = 5
 bar_kwargs = {'width': bar_width, 'capsize': capsize}
+hatches = ['/', '\\', '|', '-', '+']
 x = np.arange(1, 1 + n_pile)
 kwargs = copy.deepcopy(bar_kwargs)
 kwargs['label'] = '1'
+kwargs['hatch'] = hatches[0]
 plt.bar(x - 2 * bar_width, data[1:3, 0], **kwargs)
 kwargs = copy.deepcopy(bar_kwargs)
 kwargs['label'] = '2'
+kwargs['hatch'] = hatches[1]
 plt.bar(x - 1 * bar_width, data[1:3, 1], **kwargs)
 kwargs = copy.deepcopy(bar_kwargs)
 kwargs['label'] = '3'
+kwargs['hatch'] = hatches[2]
 plt.bar(x, data[1:3, 2], **kwargs)
 kwargs = copy.deepcopy(bar_kwargs)
 kwargs['label'] = '4'
+kwargs['hatch'] = hatches[3]
 plt.bar(x + 1 * bar_width, data[1:3, 3], **kwargs)
 kwargs = copy.deepcopy(bar_kwargs)
 kwargs['label'] = '5'
+kwargs['hatch'] = hatches[4]
 plt.bar(x + 2 * bar_width, data[1:3, 4], **kwargs)
 
 
