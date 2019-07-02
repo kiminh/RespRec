@@ -16,25 +16,25 @@ fig, ax = plt.subplots(1, 1)
 fig.set_size_inches(width, height, forward=True)
 
 kwargs = copy.deepcopy(line_kwargs)
-kwargs['label'] = mf_ips_np
+kwargs['label'] = mf_ips + ltd
 kwargs['marker'] = markers[1]
 kwargs['linestyle'] = linestyles[0]
 ax.plot(x, data[:, 0], **kwargs)
 
 kwargs = copy.deepcopy(line_kwargs)
-kwargs['label'] = nfm_ips_np
+kwargs['label'] = nfm_ips + ltd
 kwargs['marker'] = markers[2]
 kwargs['linestyle'] = linestyles[1]
 ax.plot(x, data[:, 1], **kwargs)
 
 kwargs = copy.deepcopy(line_kwargs)
-kwargs['label'] = mf_dr_np
+kwargs['label'] = mf_dr + ltd
 kwargs['marker'] = markers[3]
 kwargs['linestyle'] = linestyles[2]
 ax.plot(x, data[:, 2], **kwargs)
 
 kwargs = copy.deepcopy(line_kwargs)
-kwargs['label'] = nfm_ips_np
+kwargs['label'] = nfm_ips + ltd
 kwargs['marker'] = markers[4]
 kwargs['linestyle'] = linestyles[3]
 ax.plot(x, data[:, 3], **kwargs)

@@ -31,10 +31,6 @@ line_kwargs = {'linewidth': line_width,
                'markersize': marker_size,
                'fillstyle': 'none',
                'markeredgewidth': marker_edge_width}
-bar_width = 0.25
-capsize = 5
-bar_kwargs = {'width': bar_width,
-              'capsize': capsize}
 markers = ['|', 'v', 's', 'p', 'o']
 colors = ['g', 'r', 'b', 'm']
 linestyles = ['-', ':', '-.', '--']
