@@ -305,13 +305,11 @@ def to_size_once(data_sets, valid_ratio):
     os.makedirs(out_dir)
 
   train_set, valid_set, test_set = data_sets
-
   n_valid = len(valid_set.index)
   n_valid = int(n_valid * valid_ratio / max_ratio)
   valid_set = valid_set[:n_valid]
-  
-  # train_set = pd.concat([train_set, valid_set])
-
+  # add this validation set into training set
+  train_set = pd.concat([train_set, valid_set])
   n_train = len(train_set.index)
   n_valid = len(valid_set.index)
   n_test = len(test_set.index)
@@ -342,7 +340,7 @@ def to_size_once(data_sets, valid_ratio):
 def to_size_many():
   data_sets = load_data_sets(max_ratio)
   # ratio_list = [0.001, 0.002, 0.005, 0.01, 0.02, 0.05, 0.1] + [max_ratio]
-  ratio_list = np.arange(0.05, 0.525, 0.05)
+  ratio_list = [0.01, 0.05, 0.1, 0.2, 0.3, 0.4] + [max_ratio]
   assert ratio_list[-1] == max_ratio
   for valid_ratio in ratio_list:
     to_size_once(data_sets, valid_ratio)

@@ -62,7 +62,6 @@ def run_once(data_sets):
   by_batch = tf_flags.by_batch
   by_epoch = tf_flags.by_epoch
   assert (by_batch and not by_epoch) or (not by_batch and by_epoch)
-
   batch_size = tf_flags.batch_size
   inner_lr = tf_flags.inner_lr
   outer_lr = tf_flags.outer_lr
@@ -144,11 +143,11 @@ def run_once(data_sets):
   if mse_file:
     mse_list = []
   with tf.Session() as sess:
-    sess.run(tf.global_variables_initializer())
     t_batch = 0
+    sess.run(tf.global_variables_initializer())
     for epoch in range(n_epoch):
-      train_set.shuffle_data()
       t_epoch = epoch + 1
+      train_set.shuffle_data()
       n_batch = train_set.data_size // batch_size + 1
       for batch in range(n_batch):
         inputs, outputs, disc_inputs, cont_inputs = train_set.next_batch(batch_size)
@@ -246,16 +245,14 @@ def main():
     mse_list.append(mse)
   mae_arr = np.array(mae_list)
   mse_arr = np.array(mse_list)
+  mae = mae_arr.mean()
+  mae_std = mae_arr.std()
+  mse = mse_arr.mean()
+  mse_std = mse_arr.std()
   if verbose:
-    mae = mae_arr.mean()
-    mae_std = mae_arr.std()
-    mse = mse_arr.mean()
-    mse_std = mse_arr.std()
     print('%.3f %.3f %.3f %.3f' % (mae, mae_std, mse, mse_std))
   var_reg = ut_model.trailing_zero(var_reg)
   dir_name = path.basename(data_dir)
-  mae = mae_arr.mean()
-  mse = mse_arr.mean()
   print('%s %s %s %f %f' % (meta_model, i_cont_input, dir_name, mae, mse))
 
 if __name__ == '__main__':

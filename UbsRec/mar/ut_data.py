@@ -16,7 +16,7 @@ def parse_index(i_str):
     i_list = eval(i_str)
   return i_list
 
-class NfmData(object):
+class TradData(object):
   def __init__(self, inputs, outputs):
     self._inputs = inputs
     self._outputs = outputs
@@ -294,12 +294,12 @@ class LtrData(object):
     self._start = stop
     return _inputs, _outputs, _disc_inputs, _cont_inputs
 
-def get_nfm_data(tf_flags):
-  def _get_nfm_data(data_file):
+def get_trad_data(tf_flags):
+  def _get_trad_data(data_file):
     data_df = pd.read_csv(data_file, sep='\t', header=None)
     inputs = data_df.values[:, i_input].astype(int)
     outputs = data_df.values[:, -1].astype(float)
-    data_set = NfmData(inputs, outputs)
+    data_set = TradData(inputs, outputs)
     return data_set
 
   data_dir = tf_flags.data_dir
@@ -308,9 +308,9 @@ def get_nfm_data(tf_flags):
   train_file = path.join(data_dir, 'train.dta')
   valid_file = path.join(data_dir, 'valid.dta')
   test_file = path.join(data_dir, 'test.dta')
-  train_set = _get_nfm_data(train_file)
-  valid_set = _get_nfm_data(valid_file)
-  test_set = _get_nfm_data(test_file)
+  train_set = _get_trad_data(train_file)
+  valid_set = _get_trad_data(valid_file)
+  test_set = _get_trad_data(test_file)
   return train_set, valid_set, test_set
 
 def get_ips_data(tf_flags):

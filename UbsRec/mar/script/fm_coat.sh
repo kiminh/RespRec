@@ -1,19 +1,18 @@
-act_func=relu
-all_reg=0.01
+data_dir=~/Downloads/data/coat_incl_0.05
+all_reg=0.001
 batch_norm=0
 batch_size=128
-data_dir=~/Downloads/data/coat_incl_0.05
+eval_freq=10
+i_input=0:2
 i_input=0:10
-initial_lr=0.01
-keep_probs='[1.0,1.0]' # '[0.2,0.5]'
-layer_sizes='[64]'
-base_model=nfm
-n_epoch=50
+inner_lr=0.01
+base_model=fm
+n_epoch=200
 n_factor=128
 n_trial=10
 opt_type=adagrad
 verbose=1
-python -W ignore ../run_nfm.py \
+python -W ignore ../run_trad.py \
   --act_func ${act_func} \
   --all_reg ${all_reg} \
   --data_dir ${data_dir} \
