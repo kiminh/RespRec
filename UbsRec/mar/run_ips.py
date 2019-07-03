@@ -1,6 +1,7 @@
+from os import path
+
 import ut_data
 import ut_model
-
 import numpy as np
 import six
 import tensorflow as tf
