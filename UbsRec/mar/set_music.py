@@ -173,9 +173,7 @@ def to_resp_once(inc_valid):
           index += 1
           cont_indexes.append(index)
         is_first = False
-
         fwt.write('%f\n' % (weights[row.rating - 1]))
-
     index_file = file_base + '.ind'
     with open(index_file, 'w') as find:
       find.write('disc.')
@@ -186,7 +184,6 @@ def to_resp_once(inc_valid):
       for index in cont_indexes:
         find.write('\t%d' % (index))
       find.write('\n')
-
     n_rating = len(data_set.index)
     print('Save %d ratings to %s' % (n_rating, data_file))
 
@@ -248,10 +245,12 @@ def to_resp_many():
 def to_size_once(data_sets, valid_ratio):
   def _to_size_once(data_set, file_base):
     data_file = file_base + '.dta'
+    weight_file = file_base + '.wt'
     is_first = True
     disc_indexes = []
     cont_indexes = []
-    with open(data_file, 'w') as fdta:
+    with open(data_file, 'w') as fdta, \
+        open(weight_file, 'w') as fwt:
       for row_id, row in enumerate(data_set.itertuples()):
         if is_first:
           index = 0
@@ -281,7 +280,7 @@ def to_size_once(data_sets, valid_ratio):
           index += 1
           cont_indexes.append(index)
         is_first = False
-
+        fwt.write('%f\n' % (weights[row.rating - 1]))
     index_file = file_base + '.ind'
     with open(index_file, 'w') as find:
       find.write('disc.')
@@ -292,7 +291,6 @@ def to_size_once(data_sets, valid_ratio):
       for index in cont_indexes:
         find.write('\t%d' % (index))
       find.write('\n')
-
     n_rating = len(data_set.index)
     print('Save %d ratings to %s' % (n_rating, data_file))
 
@@ -305,6 +303,14 @@ def to_size_once(data_sets, valid_ratio):
     os.makedirs(out_dir)
 
   train_set, valid_set, test_set = data_sets
+
+  n_user = train_set.user.unique().shape[0]
+  n_item = train_set.item.unique().shape[0]
+  p_obs = len(train_set.index) / (n_user * n_item)
+  p_train = marginalize(train_set)
+  p_valid = marginalize(valid_set)
+  weights = 1.0 / (p_obs * p_train / p_valid)
+
   n_valid = len(valid_set.index)
   n_valid = int(n_valid * valid_ratio / max_ratio)
   valid_set = valid_set[:n_valid]
