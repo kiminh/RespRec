@@ -111,6 +111,7 @@ def run_once(data_sets):
   return mae, mse
 
 def main():
+  data_dir = tf_flags.data_dir
   n_trial = tf_flags.n_trial
   verbose = tf_flags.verbose
   data_sets = ut_data.get_trad_data(tf_flags)

@@ -19,7 +19,7 @@ opt_type=adagrad
 verbose=1
 
 n_epoch=2
-n_trial=1
+n_trial=8
 verbose=0
 for valid_ratio in 0.01 0.05 0.1 0.2 0.3 0.4 0.5; do
   data_dir=~/Downloads/data/music_${valid_ratio}_0.5
@@ -40,7 +40,7 @@ for valid_ratio in 0.01 0.05 0.1 0.2 0.3 0.4 0.5; do
     --n_trial ${n_trial} \
     --opt_type ${opt_type} \
     --verbose ${verbose}
-  exit
+  # exit
 done
 exit
 
