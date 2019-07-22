@@ -57,32 +57,38 @@ bar_width = 1.0 / (n_bar + 1)
 capsize = 5
 bar_kwargs = {'width': bar_width,
               'capsize': capsize}
-hatches = ['/', '\\', '|', '-', '+']
+hatches = [None, '/', 'o', 'O', '.']
+colors = ['lightgray', 'lightpink', 'lightgreen', 'lightblue', 'lightcyan']
 x = np.arange(1, 1 + n_pile)
 kwargs = copy.deepcopy(bar_kwargs)
 kwargs['yerr'] = data[3:5, 0]
 kwargs['label'] = '1'
 kwargs['hatch'] = hatches[0]
+kwargs['color'] = colors[0]
 plt.bar(x - 2 * bar_width, data[1:3, 0], **kwargs)
 kwargs = copy.deepcopy(bar_kwargs)
 kwargs['yerr'] = data[3:5, 1]
 kwargs['label'] = '2'
 kwargs['hatch'] = hatches[1]
+kwargs['color'] = colors[1]
 plt.bar(x - 1 * bar_width, data[1:3, 1], **kwargs)
 kwargs = copy.deepcopy(bar_kwargs)
 kwargs['yerr'] = data[3:5, 2]
 kwargs['label'] = '3'
 kwargs['hatch'] = hatches[2]
+kwargs['color'] = colors[2]
 plt.bar(x, data[1:3, 2], **kwargs)
 kwargs = copy.deepcopy(bar_kwargs)
 kwargs['yerr'] = data[3:5, 3]
 kwargs['label'] = '4'
 kwargs['hatch'] = hatches[3]
+kwargs['color'] = colors[3]
 plt.bar(x + 1 * bar_width, data[1:3, 3], **kwargs)
 kwargs = copy.deepcopy(bar_kwargs)
 kwargs['yerr'] = data[3:5, 4]
 kwargs['label'] = '5'
 kwargs['hatch'] = hatches[4]
+kwargs['color'] = colors[4]
 plt.bar(x + 2 * bar_width, data[1:3, 4], **kwargs)
 
 
