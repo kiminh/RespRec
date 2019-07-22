@@ -5,6 +5,9 @@ import copy
 import matplotlib.pyplot as plt
 import numpy as np
 
+import matplotlib
+matplotlib.use('Agg')
+
 run_file = path.basename(__file__)
 data_file = path.join(data_dir, run_file.replace('.py', '.dta'))
 data = np.loadtxt(data_file, dtype=np.float32)
