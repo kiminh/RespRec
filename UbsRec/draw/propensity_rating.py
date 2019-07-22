@@ -1,12 +1,12 @@
+# _tkinter.TclError: no display name and no $DISPLAY environment variable
+# echo "backend: Agg" > ~/.config/matplotlib/matplotlibrc
+
 from ut_plot import *
 from os import path
 
 import copy
 import matplotlib.pyplot as plt
 import numpy as np
-
-import matplotlib
-matplotlib.use('Agg')
 
 run_file = path.basename(__file__)
 data_file = path.join(data_dir, run_file.replace('.py', '.dta'))
