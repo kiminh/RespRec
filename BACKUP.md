@@ -3,6 +3,7 @@
   ubs_loss += var_loss
 
 
+Meta-Weight-Net: Learning an Explicit Mapping For Sample Weighting
 
 Synthesizing Robust Adversarial Examples
 

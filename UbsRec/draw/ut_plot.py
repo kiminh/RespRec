@@ -35,9 +35,9 @@ markers = ['|', 'v', 's', 'p', 'o']
 colors = ['g', 'r', 'b', 'm']
 linestyles = ['-', ':', '-.', '--']
 mf_ips = 'MF-IPS'
-nfm_ips = 'NFM-IPS'
+nf_ips = 'NF-IPS'
 mf_dr = 'MF-DR'
-nfm_dr = 'NFM-DR'
+nf_dr = 'NF-DR'
 ltd = '-LTD'
 
 def swap_elem(arr_list, pos_i, pos_j):

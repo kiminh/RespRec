@@ -24,9 +24,10 @@ n_trial=1
 verbose=1
 meta_model=param
 std_dev_dir=std_dev
-rm -rf ${std_dev_dir}
-mkdir -p ${std_dev_dir}
-for var_reg in 64 16 4 1 0.25 0.0625 0.015625 0; do
+# rm -rf ${std_dev_dir}
+# mkdir -p ${std_dev_dir}
+# for var_reg in 64 16 4 1 0.25 0.0625 0.015625 0; do
+for var_reg in 8 2 0.5; do
   std_dev_file=${std_dev_dir}/music_${meta_model}_${var_reg}
   python -W ignore ../run_ltr.py \
     --data_dir ${data_dir} \

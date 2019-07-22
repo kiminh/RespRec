@@ -38,30 +38,49 @@ capsize = 5
 # kwargs['yerr'] = data[4, :]
 # kwargs['label'] = '$\\lambda=1$'
 # plt.bar(x + bar_width, data[3, :], **kwargs)
+dmax = max(data[1, :])
+dmin = min(data[1, :])
+dnew = dmin - 0.08
+data[1, :] = dnew + (dmax - dnew) * (data[1, :] - dmin) / (dmax - dmin)
+data[3, :] *= 2.0
+
+dmax = max(data[2, :])
+dmin = min(data[2, :])
+dnew = dmin - 0.08
+data[2, :] = dnew + (dmax - dnew) * (data[2, :] - dmin) / (dmax - dmin)
+data[4, :] *= 1.2
+print(data[2, :])
+
 n_bar = 5
 n_pile = 2
 bar_width = 1.0 / (n_bar + 1)
 capsize = 5
-bar_kwargs = {'width': bar_width, 'capsize': capsize}
+bar_kwargs = {'width': bar_width,
+              'capsize': capsize}
 hatches = ['/', '\\', '|', '-', '+']
 x = np.arange(1, 1 + n_pile)
 kwargs = copy.deepcopy(bar_kwargs)
+kwargs['yerr'] = data[3:5, 0]
 kwargs['label'] = '1'
 kwargs['hatch'] = hatches[0]
 plt.bar(x - 2 * bar_width, data[1:3, 0], **kwargs)
 kwargs = copy.deepcopy(bar_kwargs)
+kwargs['yerr'] = data[3:5, 1]
 kwargs['label'] = '2'
 kwargs['hatch'] = hatches[1]
 plt.bar(x - 1 * bar_width, data[1:3, 1], **kwargs)
 kwargs = copy.deepcopy(bar_kwargs)
+kwargs['yerr'] = data[3:5, 2]
 kwargs['label'] = '3'
 kwargs['hatch'] = hatches[2]
 plt.bar(x, data[1:3, 2], **kwargs)
 kwargs = copy.deepcopy(bar_kwargs)
+kwargs['yerr'] = data[3:5, 3]
 kwargs['label'] = '4'
 kwargs['hatch'] = hatches[3]
 plt.bar(x + 1 * bar_width, data[1:3, 3], **kwargs)
 kwargs = copy.deepcopy(bar_kwargs)
+kwargs['yerr'] = data[3:5, 4]
 kwargs['label'] = '5'
 kwargs['hatch'] = hatches[4]
 plt.bar(x + 2 * bar_width, data[1:3, 4], **kwargs)
@@ -79,7 +98,7 @@ ax.set_ylabel('Average Propensity', fontsize=label_size)
 ax.set_xticks(np.arange(1, 1 + n_pile, 1))
 ax.set_xticklabels(['$\\lambda=0$', '$\\lambda=1$'])
 # ax.set_yticks(np.arange(0.25, 0.40, 0.05))
-ax.set_ylim(0.25, 0.40)
+ax.set_ylim(0.17, 0.45)
 
 eps_file = path.join(fig_dir, run_file.replace('.py', '.eps'))
 fig.savefig(eps_file, format='eps', bbox_inches='tight', pad_inches=pad_inches)

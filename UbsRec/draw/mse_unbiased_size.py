@@ -26,7 +26,7 @@ kwargs['linestyle'] = linestyles[0]
 ax.plot(x, data[:, 0], **kwargs)
 
 kwargs = copy.deepcopy(line_kwargs)
-kwargs['label'] = nfm_ips + ltd
+kwargs['label'] = nf_ips + ltd
 kwargs['label'] = '%s/%s' % (mf_dr + ltd, mf_dr)
 kwargs['marker'] = markers[2]
 kwargs['linestyle'] = linestyles[1]
@@ -40,7 +40,7 @@ kwargs['linestyle'] = linestyles[2]
 ax.plot(x, data[:, 2], **kwargs)
 
 # kwargs = copy.deepcopy(line_kwargs)
-# kwargs['label'] = nfm_dr + ltd
+# kwargs['label'] = nf_dr + ltd
 # kwargs['marker'] = markers[4]
 # kwargs['linestyle'] = linestyles[3]
 # ax.plot(x, data[:, 3], **kwargs)

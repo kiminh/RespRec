@@ -5,8 +5,8 @@ import copy
 import matplotlib.pyplot as plt
 import numpy as np
 
-handletextpad = 0.4 * rcParams['legend.handletextpad']
-rc('legend', handlelength=handlelength, handletextpad=handletextpad)
+# handletextpad = 0.4 * rcParams['legend.handletextpad']
+# rc('legend', handlelength=handlelength, handletextpad=handletextpad)
 
 run_file = path.basename(__file__)
 data_file = path.join(data_dir, run_file.replace('.py', '.dta'))
@@ -14,7 +14,7 @@ data_file = path.join(data_dir, run_file.replace('.py', '.dta'))
 data = np.loadtxt(data_file, dtype=np.float32)
 n_param = data.shape[0]
 n_appr = data.shape[1]
-names = [mf_ips + ltd, mf_dr + ltd, nfm_ips + ltd, nfm_dr + ltd]
+names = [mf_ips + ltd, mf_dr + ltd, nf_ips + ltd, nf_dr + ltd]
 for i in range(n_appr):
   report_impr(names[i], data[:, i])
 

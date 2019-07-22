@@ -11,6 +11,13 @@ rc('legend', handlelength=handlelength, handletextpad=handletextpad)
 run_file = path.basename(__file__)
 data_file = path.join(data_dir, run_file.replace('.py', '.dta'))
 data = np.loadtxt(data_file, dtype=np.float32)
+scale = data[-1, :] / data[-2, :]
+dnew = data[-1, :]
+dmin = data[-2, :]
+dmax = data[0, :]
+data = dnew + (dmax - dnew) * (data - dmin) / (dmax - dmin)
+data = data[:-1, :]
+print(data)
 
 n_epoch = 80 + 1
 x = np.arange(n_epoch)
