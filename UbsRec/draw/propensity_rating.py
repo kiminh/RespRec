@@ -60,7 +60,7 @@ bar_width = 1.0 / (n_bar + 1)
 capsize = 5
 bar_kwargs = {'width': bar_width,
               'capsize': capsize}
-hatches = [None, '/', 'o', 'O', '.']
+hatches = ['/', 'o', '.', 'O', '\\']
 colors = ['lightgray', 'lightpink', 'lightgreen', 'lightblue', 'lightcyan']
 x = np.arange(1, 1 + n_pile)
 kwargs = copy.deepcopy(bar_kwargs)
