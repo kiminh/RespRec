@@ -25,6 +25,7 @@ dotted_width = 4.0
 marker_edge_width = 1.5
 marker_size = 12
 tick_size = 23
+broken_length = 0.015
 pad_inches = 0.10
 bbox_to_anchor = (-0.22, 1.0, 1.26, 1.0)
 line_kwargs = {'linewidth': line_width,
@@ -34,10 +35,14 @@ line_kwargs = {'linewidth': line_width,
 markers = ['|', 'v', 's', 'p', 'o']
 colors = ['g', 'r', 'b', 'm']
 linestyles = ['-', ':', '-.', '--']
-mf_ips = 'MF-IPS'
-nf_ips = 'NF-IPS'
-mf_dr = 'MF-DR'
-nf_dr = 'NF-DR'
+mf = 'MF'
+nf = 'NF'
+ips = 'IPS'
+dr = 'DR'
+mf_ips = mf + '-' + ips
+nf_ips = nf + '-' + ips
+mf_dr = mf + '-' + dr
+nf_dr = nf + '-' + dr
 ltd = '-LTD'
 
 def swap_elem(arr_list, pos_i, pos_j):
