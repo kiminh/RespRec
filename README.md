@@ -12,6 +12,12 @@ P: P311157
 
 python NeuralFM.py --dataset frappe --hidden_factor 64 --layers '[64]' --keep_prob '[0.8,0.5]' --loss_type square_loss --activation relu --pretrain 0 --optimizer AdagradOptimizer --lr 0.05 --batch_norm 1 --verbose 1 --early_stop 1 --epoch 200
 
+### Inkscape
+sudo vi /Applications/Inkscape.app/Contents/Resources/script
+PATH=$PATH:/Library/TeX/texbin:/usr/local/bin
+https://tex.stackexchange.com/questions/257147/how-to-use-latex-with-inkscape-mac-os-x
+http://macappstore.org/pstoedit/
+
 ### Problem
 
 remote: Permission to xiaojiew1/LibRec.git denied to yinchuandong.
