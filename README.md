@@ -18,7 +18,10 @@ PATH=$PATH:/Library/TeX/texbin:/usr/local/bin
 https://tex.stackexchange.com/questions/257147/how-to-use-latex-with-inkscape-mac-os-x
 http://macappstore.org/pstoedit/
 
-PATH=$PATH:/usr/bin
+http://www.aaai.org/Publications/Author/formatting-instructions-word.pdf
+page width is 8.5 inch
+each column is 3.3 inch -> 237.6 point
+left/right margin is 0.75 inch -> 
 
 ### Problem
 
