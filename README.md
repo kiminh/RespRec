@@ -18,6 +18,8 @@ PATH=$PATH:/Library/TeX/texbin:/usr/local/bin
 https://tex.stackexchange.com/questions/257147/how-to-use-latex-with-inkscape-mac-os-x
 http://macappstore.org/pstoedit/
 
+PATH=$PATH:/usr/bin
+
 ### Problem
 
 remote: Permission to xiaojiew1/LibRec.git denied to yinchuandong.
