@@ -68,7 +68,7 @@ ax2.set_xticklabels(['1', '5', '10', '20', '30', '40', '50'])
 ax1_yticks = [0.35, 0.40]
 ax1.set_yticks(ax1_yticks)
 ax1.set_yticklabels(['%d' % (ax1_ytick * 100) for ax1_ytick in ax1_yticks])
-ax2_yticks = [0.04, 0.05]
+ax2_yticks = [0.04, 0.08]
 ax2.set_yticks(ax2_yticks)
 ax2.set_yticklabels(['%d' % (ax2_ytick * 100) for ax2_ytick in ax2_yticks])
 
