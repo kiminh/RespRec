@@ -1,5 +1,6 @@
 # _tkinter.TclError: no display name and no $DISPLAY environment variable
 # echo "backend: Agg" > ~/.config/matplotlib/matplotlibrc
+# save as svg and use inkscape for converting svg to eps
 
 from ut_plot import *
 from os import path
@@ -60,6 +61,7 @@ bar_width = 1.0 / (n_bar + 1)
 capsize = 5
 bar_kwargs = {'width': bar_width,
               'capsize': capsize}
+hatches = ['/', 'o', '.', 'O', '\\']
 hatches = ['/', 'o', '.', 'O', '*']
 colors = ['lightgray', 'lightpink', 'lightgreen', 'lightblue', 'lightcyan']
 x = np.arange(1, 1 + n_pile)
@@ -111,3 +113,6 @@ ax.set_ylim(0.17, 0.45)
 
 eps_file = path.join(fig_dir, run_file.replace('.py', '.eps'))
 fig.savefig(eps_file, format='eps', bbox_inches='tight', pad_inches=pad_inches)
+
+# pdf_file = path.join(fig_dir, run_file.replace('.py', '.pdf'))
+# fig.savefig(pdf_file, format='svg', bbox_inches='tight', pad_inches=pad_inches)
