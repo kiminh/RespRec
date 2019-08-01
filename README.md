@@ -18,10 +18,7 @@ PATH=$PATH:/Library/TeX/texbin:/usr/local/bin
 https://tex.stackexchange.com/questions/257147/how-to-use-latex-with-inkscape-mac-os-x
 http://macappstore.org/pstoedit/
 
-http://www.aaai.org/Publications/Author/formatting-instructions-word.pdf
-page width is 8.5 inch
-each column is 3.3 inch -> 237.6 point
-left/right margin is 0.75 inch -> 
+draw.io 400pt = latex 8.0cm = inkscape font 40
 
 ### Problem
 

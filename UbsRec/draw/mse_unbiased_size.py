@@ -45,7 +45,7 @@ ax.legend(bbox_to_anchor=bbox_to_anchor,
           ncol=2)
 
 ax.tick_params(axis='both', which='major', labelsize=tick_size)
-ax.set_xlabel('Unbiased Set Size (\\%)', fontsize=label_size)
+ax.set_xlabel('Validation Set Size (\\%)', fontsize=label_size)
 ax.set_ylabel('MSE', fontsize=label_size)
 
 ax.set_xlim(x.min(), x.max())
