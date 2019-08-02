@@ -20,18 +20,21 @@ fig.set_size_inches(width, height, forward=True)
 kwargs = copy.deepcopy(line_kwargs)
 kwargs['label'] = '%s/%s' % (nf_dr , nf)
 kwargs['marker'] = markers[1]
+kwargs['linestyle'] = name_linestyles['solid']
 ax1.plot(x, data[:, 0], **kwargs)
 ax2.plot(x, data[:, 0], **kwargs)
 
 kwargs = copy.deepcopy(line_kwargs)
 kwargs['label'] = '%s/%s' % (nf_dr + ltd, nf_dr)
 kwargs['marker'] = markers[2]
+kwargs['linestyle'] = name_linestyles['dotted']
 ax1.plot(x, data[:, 2], **kwargs)
 ax2.plot(x, data[:, 2], **kwargs)
 
 kwargs = copy.deepcopy(line_kwargs)
 kwargs['label'] = '%s/%s' % (nf_dr + ltd, nf)
 kwargs['marker'] = markers[3]
+kwargs['linestyle'] = name_linestyles['densely dashed']
 ax1.plot(x, data[:, 1], **kwargs)
 ax2.plot(x, data[:, 1], **kwargs)
 
