@@ -18,7 +18,7 @@ PATH=$PATH:/Library/TeX/texbin:/usr/local/bin
 https://tex.stackexchange.com/questions/257147/how-to-use-latex-with-inkscape-mac-os-x
 http://macappstore.org/pstoedit/
 
-draw.io 400pt = latex 8.0cm = inkscape font 40
+draw.io 400pt = latex 8.0cm = inkscape width 360 and font 40
 
 ### Problem
 
