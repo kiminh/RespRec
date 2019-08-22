@@ -67,8 +67,8 @@ ax.legend(bbox_to_anchor=bbox_to_anchor,
           ncol=5)
 
 ax.tick_params(axis='both', which='major', labelsize=tick_size)
-ax.set_xlabel('Training Epoch', fontsize=label_size)
-ax.set_ylabel('Average Propensity', fontsize=label_size)
+ax.set_xlabel('Training epoch', fontsize=label_size)
+ax.set_ylabel('Average propensity', fontsize=label_size)
 
 ax.set_xlim(x.min(), x.max())
 ax.set_xticks(np.arange(0, n_epoch, 20))
