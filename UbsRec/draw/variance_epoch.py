@@ -5,8 +5,8 @@ import copy
 import matplotlib.pyplot as plt
 import numpy as np
 
-handlelength = 1.64 * (1.25 * rcParams['legend.handlelength'])
-handletextpad = 0.4 * rcParams['legend.handletextpad']
+handlelength = 0.83 * (1.25 * rcParams['legend.handlelength'])
+handletextpad = 0.33 * rcParams['legend.handletextpad']
 rc('legend', handlelength=handlelength, handletextpad=handletextpad)
 
 run_file = path.basename(__file__)
@@ -21,38 +21,44 @@ fig, ax = plt.subplots(1, 1)
 fig.set_size_inches(width, height, forward=True)
 
 kwargs = copy.deepcopy(line_kwargs)
-kwargs['label'] = '0'
+kwargs['label'] = '$\\lambda=0$'
 kwargs['linestyle'] = name_linestyles['solid']
 ax.plot(x, data[:n_epoch, 0], **kwargs)
 
+
 kwargs = copy.deepcopy(line_kwargs)
-kwargs['label'] = '1'
-# kwargs['marker'] = markers[2]
+kwargs['label'] = '$\\lambda=2^{-6}$'
+# kwargs['label'] = '$\\lambda=\\frac{1}{2^6}$'
+kwargs['linestyle'] = name_linestyles['densely dashed']
+ax.plot(x, data[:n_epoch, 3], **kwargs)
+
+
+kwargs = copy.deepcopy(line_kwargs)
+kwargs['label'] = '$\\lambda=2^{-3}$'
+# kwargs['label'] = '$\\lambda=\\frac{1}{2^3}$'
 kwargs['linestyle'] = name_linestyles['dotted']
+kwargs['markevery'] = list(np.arange(0, n_epoch, 20))
+ax.plot(x, data[:n_epoch, 4], **kwargs)
+
+
+kwargs = copy.deepcopy(line_kwargs)
+kwargs['label'] = '$\\lambda=1$'
+# kwargs['marker'] = markers[2]
+kwargs['linestyle'] = name_linestyles['densely dashdotted']
 kwargs['markevery'] = list(np.arange(5, n_epoch, 20))
 ax.plot(x, data[:n_epoch, 5], **kwargs)
 
 
 kwargs = copy.deepcopy(line_kwargs)
-kwargs['label'] = '2$^{-6}$'
-kwargs['linestyle'] = name_linestyles['densely dashed']
-ax.plot(x, data[:n_epoch, 3], **kwargs)
-
-kwargs = copy.deepcopy(line_kwargs)
-kwargs['label'] = '2$^{3}$'
+kwargs['label'] = '$\\lambda=2^{3}$'
 # kwargs['marker'] = markers[3]
-kwargs['linestyle'] = name_linestyles['densely dashdotted']
+kwargs['linestyle'] = name_linestyles['densely dashdotdotted']
 kwargs['markevery'] = list(np.arange(10, n_epoch, 20))
 ax.plot(x, data[:n_epoch, 6], **kwargs)
 
-kwargs = copy.deepcopy(line_kwargs)
-kwargs['label'] = '2$^{-3}$'
-kwargs['linestyle'] = name_linestyles['densely dashdotdotted']
-kwargs['markevery'] = list(np.arange(0, n_epoch, 20))
-ax.plot(x, data[:n_epoch, 4], **kwargs)
 
 kwargs = copy.deepcopy(line_kwargs)
-kwargs['label'] = '2$^{6}$'
+kwargs['label'] = '$\\lambda=2^{6}$'
 # kwargs['marker'] = markers[4]
 kwargs['linestyle'] = name_linestyles['densely dashdotdotdotted']
 kwargs['markevery'] = list(np.arange(15, n_epoch, 20))

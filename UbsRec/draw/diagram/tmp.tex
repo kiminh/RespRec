@@ -1,0 +1,33 @@
+the challenge of training LTD by unrolling the parameter update of a rating model and regularizing the estimation variance of a propensity model.
+
+We tackle this challenge by approximating the best parameter values with the current parameter values of the rating model at each training step.
+We obtain the current parameter values by unrolling the training, i.e., performing a single mini-batch update for the parameters of the rating model.
+Then, we apply back-propagation over the unrolled training to compute gradient directions, along which we update the parameters of the propensity model.
+
+We address the challenge of learning a propensity model by unrolling the training at inner level and differentiating the unrolled training.
+We regularize the learning at outer level with propensity variance to address the difficulty in stabilizing the training of a rating model.
+
+Our approach unrolls a single step of training at inner level to reduce computational complexity.
+
+We extend this algorithm to work with the DR loss, which requires an extra error model.
+We address this challenge by unrolling each training step of updating the rating model and applying back-propagation over the unrolled training.
+The propensities provided by the propensity model can have a high variance, which makes it difficult to stabilize the training of the rating model.
+To address this difficulty, we propose to regularize the training of the propensity model with the variance of propensity estimation per mini-batch.
+
+$\sigma$
+
+$1$
+
+$\bm{w}_2$
+
+$\bm{w}, b$
+
+$\mathbf{W}_1, \bm{b}_1$
+
+$\bm{z}_1$
+
+$\bm{z}_3$
+
+$\bm{z}_9$
+
+$\bm{s}_{2,4}$

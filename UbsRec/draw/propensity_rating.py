@@ -104,8 +104,8 @@ ax.legend(bbox_to_anchor=bbox_to_anchor,
           ncol=5)
 
 ax.tick_params(axis='both', which='major', labelsize=tick_size)
-ax.set_xlabel('Rating value', fontsize=label_size)
-ax.set_ylabel('Average propensity', fontsize=label_size)
+ax.set_xlabel('Regularization parameter $\\lambda$', fontsize=label_size)
+ax.set_ylabel('Mean propensity', fontsize=label_size)
 ax.set_xticks(np.arange(1, 1 + n_pile, 1))
 ax.set_xticklabels(['$\\lambda=0$', '$\\lambda=1$'])
 # ax.set_yticks(np.arange(0.25, 0.40, 0.05))
