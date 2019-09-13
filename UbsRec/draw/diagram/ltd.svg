@@ -24,7 +24,7 @@
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
      inkscape:zoom="0.51994457"
-     inkscape:cx="526.1339"
+     inkscape:cx="724.23194"
      inkscape:cy="218.3529"
      inkscape:document-units="mm"
      inkscape:current-layer="layer1"
@@ -1135,7 +1135,7 @@
            style="fill:#000000;stroke-width:0" /></g>    </g>
     <g
        id="g1360"
-       transform="translate(19.131419,81.58227)">
+       transform="translate(20.189754,81.58227)">
       <g
          word-spacing="normal"
          letter-spacing="normal"
@@ -1188,25 +1188,25 @@
     <text
        id="text5982"
        y="161.05028"
-       x="3.8812556"
+       x="20.936321"
        style="font-style:normal;font-weight:normal;font-size:10.58333302px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332"
        xml:space="preserve"><tspan
          style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:14.46388912px;font-family:Times;-inkscape-font-specification:'Times Bold';stroke-width:0.26458332"
          y="161.05028"
-         x="3.8812556"
+         x="20.936321"
          sodipodi:role="line"
-         id="tspan2182">Outer-level</tspan></text>
+         id="tspan2182">Outer</tspan></text>
     <text
        id="text5986"
        y="293.11166"
-       x="305.55585"
+       x="319.7749"
        style="font-style:normal;font-weight:normal;font-size:13.75833321px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332"
        xml:space="preserve"><tspan
          style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:14.46388912px;font-family:Times;-inkscape-font-specification:'Times Bold';stroke-width:0.26458332"
          y="293.11166"
-         x="305.55585"
+         x="319.7749"
          id="tspan5984"
-         sodipodi:role="line">Inner-level</tspan></text>
+         sodipodi:role="line">Inner</tspan></text>
     <text
        id="text5990"
        y="159.90599"
@@ -1220,15 +1220,15 @@
          sodipodi:role="line">Back-propagation</tspan></text>
     <text
        id="text5994"
-       y="271.51459"
-       x="65.431137"
+       y="270.45624"
+       x="69.072006"
        style="font-style:normal;font-weight:normal;font-size:10.58333302px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332"
        xml:space="preserve"><tspan
          style="font-style:italic;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:13.75833321px;font-family:Times;-inkscape-font-specification:'Times Italic';stroke-width:0.26458332"
-         y="271.51459"
-         x="65.431137"
+         y="270.45624"
+         x="69.072006"
          id="tspan5992"
-         sodipodi:role="line">Unrolled training</tspan></text>
+         sodipodi:role="line">Update function</tspan></text>
     <g
        id="g472"
        transform="translate(240.48105,81.58227)">
@@ -1283,7 +1283,7 @@
            id="path512" /></g>    </g>
     <g
        id="g1025"
-       transform="translate(96.465937,147.6252)">
+       transform="translate(96.465937,148.15437)">
       <g
          word-spacing="normal"
          letter-spacing="normal"
@@ -1306,7 +1306,7 @@
            inkscape:connector-curvature="0"
            style="fill:#000000;stroke-width:0" /></g>    </g>
     <g
-       transform="translate(59.472202,108.75057)"
+       transform="translate(59.472202,109.245)"
        id="g1528">
       <g
          style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;letter-spacing:normal;word-spacing:normal;text-anchor:start;fill:none;fill-opacity:1;fill-rule:evenodd;stroke:#000000;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:10.43299961;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
@@ -1365,7 +1365,7 @@
          y="159.93286"
          style="font-style:italic;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:13.75833321px;font-family:Times;-inkscape-font-specification:'Times Italic';stroke-width:0.26458332">Sample variance</tspan></text>
     <g
-       transform="translate(21.454919,150.1602)"
+       transform="translate(22.513254,150.1602)"
        id="g1059">
       <g
          style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;letter-spacing:normal;word-spacing:normal;text-anchor:start;fill:none;fill-opacity:1;fill-rule:evenodd;stroke:#000000;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:10.43299961;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
@@ -1390,7 +1390,7 @@
            id="path1055" /></g>    </g>
     <g
        id="g1585"
-       transform="translate(171.7398,150.6147)">
+       transform="translate(171.7398,151.14387)">
       <g
          word-spacing="normal"
          letter-spacing="normal"
