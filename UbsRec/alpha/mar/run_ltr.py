@@ -130,6 +130,7 @@ def run_once(data_sets):
     # _mse = tf.keras.metrics.MSE(outputs_, outputs)
     _mae = tf.keras.metrics.mean_absolute_error(outputs_, outputs)
     _mse = tf.keras.metrics.mean_squared_error(outputs_, outputs)
+    _outputs = outputs
 
   if verbose:
     for var in tf.trainable_variables():
@@ -174,9 +175,15 @@ def run_once(data_sets):
         if by_batch and t_batch % by_batch == 0:
           feed_dict = {inputs_: test_set.inputs,
                        outputs_: test_set.outputs}
-          mae, mse = sess.run([_mae, _mse], feed_dict=feed_dict)
+          mae, mse, outputs = sess.run([_mae, _mse, _outputs], feed_dict=feed_dict)
           if verbose:
             print('epoch=%d mae=%.3f mse=%.3f' % (t_epoch, mae, mse))
+            pred_d = dict()
+            test_d = dict()
+            r_set = set()
+            for pred_r, test_r in zip(outputs, test_set.outputs):
+              test_r = int(test_r)
+              
           mae_mse_list.append((t_epoch, mae, mse))
 
           if std_dev_file:

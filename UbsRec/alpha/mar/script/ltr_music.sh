@@ -43,7 +43,7 @@ for var_reg in 0 1; do
     --opt_type ${opt_type} \
     --var_reg ${var_reg} \
     --verbose ${verbose}
-  # exit
+  exit
 done
 exit
 
