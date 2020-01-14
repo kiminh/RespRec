@@ -19,6 +19,7 @@ n_trial=4
 opt_type=adagrad
 verbose=0
 
+verbose=1
 for var_reg in 0 1; do
   python -W ignore ../run_ltr.py \
     --data_dir ${data_dir} \
