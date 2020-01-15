@@ -7,6 +7,9 @@ import six
 import tensorflow as tf
 import tqdm
 
+from sklearn.metrics import mean_absolute_error
+from sklearn.metrics import mean_squared_error
+
 flags = tf.flags
 flags.DEFINE_float('all_reg', 0.001, '')
 flags.DEFINE_float('var_reg', 0.001, '')
@@ -30,6 +33,7 @@ flags.DEFINE_string('meta_model', 'batch', 'batch|naive|param')
 flags.DEFINE_string('keep_probs', '[0.2,0.5]', '')
 flags.DEFINE_string('layer_sizes', '[64]', '')
 flags.DEFINE_string('opt_type', 'adagrad', '')
+flags.DEFINE_string('fine_grain_file', None, '')
 flags.DEFINE_string('std_dev_file', None, '')
 flags.DEFINE_string('weight_file', None, '')
 flags.DEFINE_string('mse_file', None, '')
@@ -72,6 +76,7 @@ def run_once(data_sets):
   opt_type = tf_flags.opt_type
   verbose = tf_flags.verbose
 
+  fine_grain_file = tf_flags.fine_grain_file
   std_dev_file = tf_flags.std_dev_file
   weight_file = tf_flags.weight_file
   mse_file = tf_flags.mse_file
@@ -137,6 +142,8 @@ def run_once(data_sets):
       print('var=%s' % (var))
 
   mae_mse_list = []
+  if fine_grain_file:
+    fine_grain_list = []
   if std_dev_file:
     std_dev_list = []
   if weight_file:
@@ -178,13 +185,31 @@ def run_once(data_sets):
           mae, mse, outputs = sess.run([_mae, _mse, _outputs], feed_dict=feed_dict)
           if verbose:
             print('epoch=%d mae=%.3f mse=%.3f' % (t_epoch, mae, mse))
+          mae_mse_list.append((t_epoch, mae, mse))
+
+          if fine_grain_file:
+            mae_batch = [mae]
+            mse_batch = [mse]
             pred_d = dict()
             test_d = dict()
             r_set = set()
             for pred_r, test_r in zip(outputs, test_set.outputs):
               test_r = int(test_r)
-              
-          mae_mse_list.append((t_epoch, mae, mse))
+              r_set.add(test_r)
+              if test_r not in pred_d:
+                pred_d[test_r] = []
+              pred_d[test_r].append(pred_r)
+              if test_r not in test_d:
+                test_d[test_r] = []
+              test_d[test_r].append(test_r)
+            for r in sorted(r_set):
+              mae = mean_absolute_error(pred_d[r], test_d[r])
+              mse = mean_squared_error(pred_d[r], test_d[r])
+              mae_batch.append(mae)
+              mse_batch.append(mse)
+            err_batch = mae_batch + mse_batch
+            err_batch = ["%.6f" % e for e in err_batch]
+            fine_grain_list.append("\t".join(err_batch))
 
           if std_dev_file:
             feed_dict = {inputs_: test_set.inputs,
@@ -212,6 +237,10 @@ def run_once(data_sets):
       weight_avg, weight_std = _get_weight_stat(train_set)
       weight_avg_list.append(weight_avg)
       weight_avg_list.append(weight_std)
+  if fine_grain_file:
+    with open(fine_grain_file, 'w') as fout:
+      for line in fine_grain_list:
+        fout.write('%s\n' % (line))
   if std_dev_file:
     with open(std_dev_file, 'w') as fout:
       for std_dev in std_dev_list:

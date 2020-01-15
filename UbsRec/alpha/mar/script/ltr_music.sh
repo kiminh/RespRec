@@ -20,7 +20,11 @@ opt_type=adagrad
 verbose=0
 
 verbose=1
+fine_grain_dir=fine_grain
+rm -rf ${fine_grain_dir}
+mkdir -p ${fine_grain_dir}
 for var_reg in 0 1; do
+  fine_grain_file=${fine_grain_dir}/music_${meta_model}_${var_reg}
   python -W ignore ../run_ltr.py \
     --data_dir ${data_dir} \
     --all_reg ${all_reg} \
@@ -42,7 +46,8 @@ for var_reg in 0 1; do
     --n_trial ${n_trial} \
     --opt_type ${opt_type} \
     --var_reg ${var_reg} \
-    --verbose ${verbose}
+    --verbose ${verbose} \
+    --fine_grain_file ${fine_grain_file}
   exit
 done
 exit
