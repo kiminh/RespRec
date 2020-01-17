@@ -31,7 +31,7 @@ flags.DEFINE_string('i_cont_input', '11:13,23:26', '')
 flags.DEFINE_string('base_model', 'fm', '')
 flags.DEFINE_string('meta_model', 'batch', 'batch|naive|param')
 flags.DEFINE_string('keep_probs', '[0.2,0.5]', '')
-flags.DEFINE_string('layer_sizes', '[64]', '')
+flags.DEFINE_string('layer_sizes', '[16]', '')
 flags.DEFINE_string('opt_type', 'adagrad', '')
 flags.DEFINE_string('fine_grain_file', None, '')
 flags.DEFINE_string('std_dev_file', None, '')
@@ -72,6 +72,7 @@ def run_once(data_sets):
   keep_probs = tf_flags.keep_probs
   layer_sizes = tf_flags.layer_sizes
   n_epoch = tf_flags.n_epoch
+  base_model = tf_flags.base_model
   meta_model = tf_flags.meta_model
   opt_type = tf_flags.opt_type
   verbose = tf_flags.verbose
@@ -184,7 +185,8 @@ def run_once(data_sets):
                        outputs_: test_set.outputs}
           mae, mse, outputs = sess.run([_mae, _mse, _outputs], feed_dict=feed_dict)
           if verbose:
-            print('epoch=%d mae=%.3f mse=%.3f' % (t_epoch, mae, mse))
+            p_data = (t_epoch, t_batch, mae, mse)
+            print('epoch=%d batch=%d mae=%.3f mse=%.3f' % p_data)
           mae_mse_list.append((t_epoch, mae, mse))
 
           if fine_grain_file:
@@ -256,12 +258,14 @@ def run_once(data_sets):
         fout.write('%f\n' % (mse))
   mae_mse_list = sorted(mae_mse_list, key=lambda t: (t[2], t[1]))
   t_epoch, mae, mse = mae_mse_list[0]
-  param_str = ut_model.trailing_zero(inner_lr)
-  param_str += '_' + ut_model.trailing_zero(outer_lr)
-  param_str += '_' + str(keep_probs).replace(' ', '')
-  param_str += '_' + str(layer_sizes)
+  param_str = "inner-lr-" + ut_model.trailing_zero(inner_lr)
+  param_str += '_outer-lr-' + ut_model.trailing_zero(outer_lr)
+  # param_str += '_' + str(keep_probs).replace(' ', '')
+  param_str += '_layer-sizes-' + str(layer_sizes)
   if verbose:
-    print('epoch=%d mae=%.3f mse=%.3f %s' % (t_epoch, mae, mse, param_str))
+    # print('epoch=%d mae=%.3f mse=%.3f %s' % (t_epoch, mae, mse, param_str))
+    p_data = (base_model, meta_model, t_epoch, mae, mse)
+    print('%s %s epoch=%d mae=%.3f mse=%.3f' % p_data)
   return mae, mse
 
 def main():
@@ -286,10 +290,11 @@ def main():
   mse = mse_arr.mean()
   mse_std = mse_arr.std()
   if verbose:
-    print('%.3f %.3f %.3f %.3f' % (mae, mae_std, mse, mse_std))
+    # print('%.3f %.3f %.3f %.3f' % (mae, mae_std, mse, mse_std))
+    pass
   var_reg = ut_model.trailing_zero(var_reg)
   dir_name = path.basename(data_dir)
-  print('%s %s %s %f %f' % (meta_model, i_cont_input, dir_name, mae, mse))
+  # print('%s %s %s %f %f' % (meta_model, i_cont_input, dir_name, mae, mse))
 
 if __name__ == '__main__':
   main()

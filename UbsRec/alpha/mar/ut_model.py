@@ -250,14 +250,14 @@ def get_rating(inputs_, outputs_, weights_,
         raise Exception('unknown act_func %s' % (act_func))
       if batch_norm:
         embedding = bn_layer(embedding, train_phase=is_train_, scope_bn='bn')
-      embedding = tf.nn.dropout(embedding, keep_probs_[-1])
+      # embedding = tf.nn.dropout(embedding, keep_probs_[-1])
       for i in range(0, n_layer):
         embedding = tf.matmul(embedding, _get_var('w%d' % i))
         embedding = tf.add(embedding, _get_var('b%d' % i))
         if batch_norm:
           embedding = bn_layer(embedding, train_phase=is_train_, scope_bn='bn%d' % (i))
         embedding = act_func(embedding)
-        embedding = tf.nn.dropout(embedding, keep_probs_[i])
+        # embedding = tf.nn.dropout(embedding, keep_probs_[i])
 
       # batch_size, 1
       embedding = tf.matmul(embedding, _get_var('h'))
