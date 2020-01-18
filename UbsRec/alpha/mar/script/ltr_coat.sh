@@ -28,13 +28,13 @@ var_reg=1
 verbose=1
 
 n_trial=1
-meta_model=batch
+meta_model=param
 base_model=fm
 by_epoch=10
 n_epoch=100
-base_model=nfm
-by_epoch=2
-n_epoch=32
+# base_model=nfm
+# by_epoch=2
+# n_epoch=32
 python -W ignore ../run_ltr.py \
   --data_dir ${data_dir} \
   --all_reg ${all_reg} \
@@ -56,7 +56,8 @@ python -W ignore ../run_ltr.py \
   --meta_model ${meta_model} \
   --opt_type ${opt_type} \
   --var_reg ${var_reg} \
-  --verbose ${verbose}
+  --verbose ${verbose} \
+  --eval_var 1
 exit
 
 ################################################################

@@ -37,6 +37,7 @@ flags.DEFINE_string('fine_grain_file', None, '')
 flags.DEFINE_string('std_dev_file', None, '')
 flags.DEFINE_string('weight_file', None, '')
 flags.DEFINE_string('mse_file', None, '')
+flags.DEFINE_integer('eval_var', 0, '')
 tf_flags = tf.flags.FLAGS
 tf_flags.keep_probs = eval(tf_flags.keep_probs)
 tf_flags.layer_sizes = eval(tf_flags.layer_sizes)
@@ -62,6 +63,15 @@ def run_once(data_sets):
       weight_avg[index] = np.mean(rating_weights[rating])
       weight_std[index] = np.std(rating_weights[rating])
     return weight_avg, weight_std
+
+  def _get_propensity_rating(data_set):
+    assert meta_model != "batch"
+    feed_dict = {inputs_: data_set.inputs,
+                 disc_inputs_: data_set.disc_inputs,
+                 cont_inputs_: data_set.cont_inputs}
+    weights = sess.run(_weights, feed_dict=feed_dict)
+    weights = np.asarray(weights)
+    return weights, data_set.outputs
 
   by_batch = tf_flags.by_batch
   by_epoch = tf_flags.by_epoch
@@ -235,10 +245,41 @@ def run_once(data_sets):
         if verbose:
           print('epoch=%d mae=%.3f mse=%.3f' % (t_epoch, mae, mse))
         mae_mse_list.append((t_epoch, mae, mse))
+    
     if weight_file:
       weight_avg, weight_std = _get_weight_stat(train_set)
       weight_avg_list.append(weight_avg)
       weight_avg_list.append(weight_std)
+
+    if tf_flags.eval_var:
+      n_user = len(np.unique(train_set.inputs[:, 0]))
+      n_item = len(np.unique(train_set.inputs[:, 1]))
+      print("Find %d users and %d items" % (n_user, n_item))
+      train_p, train_r = _get_propensity_rating(train_set)
+      test_p, test_r = _get_propensity_rating(test_set)
+      n_test = len(test_p)
+
+      mult = 0
+      for p in train_p:
+        mult += (1 / p)
+      mult /= (n_user * n_item)
+      print("Multiply propensities by %.6f" % mult)
+      train_p *= mult
+      test_p *= mult
+      mult = 0
+      for p in train_p:
+        mult += (1 / p)
+      print("Inverse propensity sum is %.6f" % mult)
+
+      sample_var = np.var(test_p, ddof=1)
+      inv_square = 0
+      for p in test_p:
+        inv_square += (1 / pow(p, 2))
+      inv_square /= n_test
+      print("Sample variance is %s" % "{:.3E}".format(sample_var))
+      print("Inverse square is %s" % "{:.3E}".format(inv_square))
+
+
   if fine_grain_file:
     with open(fine_grain_file, 'w') as fout:
       for line in fine_grain_list:
