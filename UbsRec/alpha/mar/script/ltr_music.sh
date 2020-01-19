@@ -20,6 +20,40 @@ opt_type=adagrad
 var_reg=1
 verbose=1
 
+fine_grain_dir=fine_grain
+# rm -rf ${fine_grain_dir}
+# mkdir -p ${fine_grain_dir}
+fine_grain_file=${fine_grain_dir}/music_${meta_model}
+python -W ignore ../run_ltr.py \
+  --data_dir ${data_dir} \
+  --all_reg ${all_reg} \
+  --batch_norm ${batch_norm} \
+  --batch_size ${batch_size} \
+  --by_batch ${by_batch} \
+  --by_epoch ${by_epoch} \
+  --i_input ${i_input} \
+  --i_disc_input ${i_disc_input} \
+  --i_cont_input ${i_cont_input} \
+  --inner_lr ${inner_lr} \
+  --outer_lr ${outer_lr} \
+  --keep_probs ${keep_probs} \
+  --layer_sizes ${layer_sizes} \
+  --base_model ${base_model} \
+  --meta_model ${meta_model} \
+  --n_epoch ${n_epoch} \
+  --n_factor ${n_factor} \
+  --n_trial ${n_trial} \
+  --opt_type ${opt_type} \
+  --var_reg ${var_reg} \
+  --verbose ${verbose} \
+  --fine_grain_file ${fine_grain_file}
+exit
+
+var_reg=0
+verbose=0
+n_epoch=1
+by_batch=400
+meta_model=naive
 base_model=fm
 # base_model=nfm
 python -W ignore ../run_ltr.py \
@@ -43,39 +77,8 @@ python -W ignore ../run_ltr.py \
   --n_trial ${n_trial} \
   --opt_type ${opt_type} \
   --var_reg ${var_reg} \
-  --verbose ${verbose}
-exit
-
-fine_grain_dir=fine_grain
-rm -rf ${fine_grain_dir}
-mkdir -p ${fine_grain_dir}
-for var_reg in 0 1; do
-  fine_grain_file=${fine_grain_dir}/music_${meta_model}_${var_reg}
-  python -W ignore ../run_ltr.py \
-    --data_dir ${data_dir} \
-    --all_reg ${all_reg} \
-    --batch_norm ${batch_norm} \
-    --batch_size ${batch_size} \
-    --by_batch ${by_batch} \
-    --by_epoch ${by_epoch} \
-    --i_input ${i_input} \
-    --i_disc_input ${i_disc_input} \
-    --i_cont_input ${i_cont_input} \
-    --inner_lr ${inner_lr} \
-    --outer_lr ${outer_lr} \
-    --keep_probs ${keep_probs} \
-    --layer_sizes ${layer_sizes} \
-    --base_model ${base_model} \
-    --meta_model ${meta_model} \
-    --n_epoch ${n_epoch} \
-    --n_factor ${n_factor} \
-    --n_trial ${n_trial} \
-    --opt_type ${opt_type} \
-    --var_reg ${var_reg} \
-    --verbose ${verbose} \
-    --fine_grain_file ${fine_grain_file}
-  exit
-done
+  --verbose ${verbose} \
+  --eval_var 1
 exit
 
 ################################################################

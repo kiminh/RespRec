@@ -73,6 +73,42 @@ def run_once(data_sets):
     weights = np.asarray(weights)
     return weights, data_set.outputs
 
+  def _print_eval_var():
+      n_user = len(np.unique(train_set.inputs[:, 0]))
+      n_item = len(np.unique(train_set.inputs[:, 1]))
+      # print("Find %d users and %d items" % (n_user, n_item))
+      train_p, train_r = _get_propensity_rating(train_set)
+      test_p, test_r = _get_propensity_rating(test_set)
+      n_test = len(test_p)
+      # print("Find %d test ratings" % n_test)
+
+      p_data = (t_epoch, t_batch, 
+                min(train_p), max(train_p), min(test_p), max(test_p))
+      print("%d %d %.2f %.2f %.2f %.2f" % p_data, end="\t")
+
+      mult = 0
+      for p in train_p:
+        mult += (1 / p)
+      mult /= (n_user * n_item)
+      # print("Multiply propensities by %.6f" % mult)
+      train_p *= mult
+      test_p *= mult
+      mult = 0
+      for p in train_p:
+        mult += (1 / p)
+      # print("Inverse propensity sum is %.6f" % mult)
+
+      sample_var = np.var(test_p, ddof=1)
+      inv_square = 0
+      for p in test_p:
+        inv_square += (1 / pow(p, 2))
+      inv_square /= n_test
+      # print("Sample variance is %s" % "{:.3E}".format(sample_var))
+      # print("Inverse square is %s" % "{:.3E}".format(inv_square))
+      p_data = ("{:.3E}".format(sample_var), "{:.3E}".format(inv_square), 
+                min(train_p), max(train_p), min(test_p), max(test_p))
+      print("%s %s %.2f %.2f %.2f %.2f" % p_data)
+
   by_batch = tf_flags.by_batch
   by_epoch = tf_flags.by_epoch
   assert (by_batch and not by_epoch) or (not by_batch and by_epoch)
@@ -86,6 +122,7 @@ def run_once(data_sets):
   meta_model = tf_flags.meta_model
   opt_type = tf_flags.opt_type
   verbose = tf_flags.verbose
+  eval_var = tf_flags.eval_var
 
   fine_grain_file = tf_flags.fine_grain_file
   std_dev_file = tf_flags.std_dev_file
@@ -190,7 +227,8 @@ def run_once(data_sets):
         sess.run(train_op, feed_dict=feed_dict)
 
         t_batch += 1
-        if by_batch and t_batch % by_batch == 0:
+        if ((by_batch and t_batch % by_batch == 0) or 
+            (by_epoch and t_epoch % by_epoch == 0 and batch == n_batch - 1)):
           feed_dict = {inputs_: test_set.inputs,
                        outputs_: test_set.outputs}
           mae, mse, outputs = sess.run([_mae, _mse, _outputs], feed_dict=feed_dict)
@@ -198,6 +236,9 @@ def run_once(data_sets):
             p_data = (t_epoch, t_batch, mae, mse)
             print('epoch=%d batch=%d mae=%.3f mse=%.3f' % p_data)
           mae_mse_list.append((t_epoch, mae, mse))
+
+          if eval_var:
+            _print_eval_var()
 
           if fine_grain_file:
             mae_batch = [mae]
@@ -238,47 +279,24 @@ def run_once(data_sets):
           if mse_file:
             mse_list.append(mse)
 
-      if by_epoch and t_epoch % by_epoch == 0:
-        feed_dict = {inputs_: test_set.inputs,
-                     outputs_: test_set.outputs}
-        mae, mse = sess.run([_mae, _mse], feed_dict=feed_dict)
-        if verbose:
-          print('epoch=%d mae=%.3f mse=%.3f' % (t_epoch, mae, mse))
-        mae_mse_list.append((t_epoch, mae, mse))
+      # if by_epoch and t_epoch % by_epoch == 0:
+      #   feed_dict = {inputs_: test_set.inputs,
+      #                outputs_: test_set.outputs}
+      #   mae, mse = sess.run([_mae, _mse], feed_dict=feed_dict)
+      #   if verbose:
+      #     print('epoch=%d mae=%.3f mse=%.3f' % (t_epoch, mae, mse))
+      #   mae_mse_list.append((t_epoch, mae, mse))
+
+      #   if eval_var:
+      #     _print_eval_var()
     
     if weight_file:
       weight_avg, weight_std = _get_weight_stat(train_set)
       weight_avg_list.append(weight_avg)
       weight_avg_list.append(weight_std)
 
-    if tf_flags.eval_var:
-      n_user = len(np.unique(train_set.inputs[:, 0]))
-      n_item = len(np.unique(train_set.inputs[:, 1]))
-      print("Find %d users and %d items" % (n_user, n_item))
-      train_p, train_r = _get_propensity_rating(train_set)
-      test_p, test_r = _get_propensity_rating(test_set)
-      n_test = len(test_p)
-
-      mult = 0
-      for p in train_p:
-        mult += (1 / p)
-      mult /= (n_user * n_item)
-      print("Multiply propensities by %.6f" % mult)
-      train_p *= mult
-      test_p *= mult
-      mult = 0
-      for p in train_p:
-        mult += (1 / p)
-      print("Inverse propensity sum is %.6f" % mult)
-
-      sample_var = np.var(test_p, ddof=1)
-      inv_square = 0
-      for p in test_p:
-        inv_square += (1 / pow(p, 2))
-      inv_square /= n_test
-      print("Sample variance is %s" % "{:.3E}".format(sample_var))
-      print("Inverse square is %s" % "{:.3E}".format(inv_square))
-
+    if eval_var:
+      _print_eval_var()
 
   if fine_grain_file:
     with open(fine_grain_file, 'w') as fout:

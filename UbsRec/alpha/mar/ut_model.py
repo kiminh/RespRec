@@ -276,8 +276,8 @@ def get_rating(inputs_, outputs_, weights_,
     if weights_ is None:
       loss = 0.5 * tf.reduce_sum(tf.square(errors))
     else:
-      # loss = 0.5 * tf.reduce_sum(tf.multiply(weights_, tf.square(errors)))
-      loss = 0.5 * tf.reduce_sum(tf.divide(tf.square(errors), weights_))
+      loss = 0.5 * tf.reduce_sum(tf.multiply(weights_, tf.square(errors)))
+      # loss = 0.5 * tf.reduce_sum(tf.divide(tf.square(errors), weights_))
     loss += tf_flags.all_reg * (tf.reduce_sum(tf.square(fe)) +
                                 tf.reduce_sum(tf.square(fb)) +
                                 tf.reduce_sum(tf.square(gb)))
@@ -296,6 +296,7 @@ def get_weight(disc_inputs_, cont_inputs_, tf_flags, train_set,
 
   meta_model = tf_flags.meta_model
   params = dict()
+
   with tf.variable_scope('weight', reuse=reuse):
     z_init = tf.constant_initializer(0.0)
     tot_disc_input = train_set.tot_disc_input
@@ -357,6 +358,8 @@ def get_weight(disc_inputs_, cont_inputs_, tf_flags, train_set,
       # weights = tf.nn.sigmoid(embedding + gb)
 
   # weights = 1.0 / weights
+  ## for eval var
+  # weights *= 0.1
   return weights, params
 
 def ltr_param(inputs_, outputs_, 
