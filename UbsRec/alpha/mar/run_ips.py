@@ -24,6 +24,7 @@ flags.DEFINE_string('i_input', '0:2', '')
 flags.DEFINE_string('keep_probs', '[0.2,0.5]', '')
 flags.DEFINE_string('layer_sizes', '[64]', '')
 flags.DEFINE_string('opt_type', 'adagrad', '')
+flags.DEFINE_string('cnvg_prefix', None, '')
 tf_flags = tf.flags.FLAGS
 
 def run_once(data_sets):
@@ -35,6 +36,7 @@ def run_once(data_sets):
   n_epoch = tf_flags.n_epoch
   opt_type = tf_flags.opt_type
   verbose = tf_flags.verbose
+  cnvg_prefix = tf_flags.cnvg_prefix
 
   train_set, valid_set, test_set = data_sets
   nnz_input = train_set.nnz_input
@@ -52,6 +54,10 @@ def run_once(data_sets):
   if verbose:
     for var in tf.trainable_variables():
       print('var=%s' % (var))
+
+  if cnvg_prefix:
+    train_cnvg = []
+    test_cnvg = []
 
   with tf.name_scope('evaluating'):
     _, _, outputs = ut_model.get_rating(inputs_, outputs_, weights_,
@@ -72,31 +78,51 @@ def run_once(data_sets):
       n_batch = train_set.data_size // batch_size + 1
       for batch in range(n_batch):
         inputs, outputs, weights = train_set.next_batch(batch_size)
+
+        ref_inputs, ref_outputs = inputs, outputs
+
         feed_dict = {inputs_: inputs,
                      outputs_: outputs,
                      weights_: weights}
         sess.run(train_op, feed_dict=feed_dict)
 
         t_batch += 1
-        if by_batch and t_batch % by_batch == 0:
+        if ((by_batch and t_batch % by_batch == 0) or
+            (by_epoch and t_epoch % by_epoch == 0 and batch == n_batch - 1)):
           feed_dict = {inputs_: test_set.inputs,
                        outputs_: test_set.outputs}
           mae, mse = sess.run([_mae, _mse], feed_dict=feed_dict)
           if verbose:
-            print('epoch=%d mae=%.3f mse=%.3f' % (t_epoch, mae, mse))
-          mae_mse_list.append((t_epoch, mae, mse))
+            p_data = (t_epoch, t_batch, mae, mse)
+            print('epoch=%d batch=%d mae=%.3f mse=%.3f' % p_data)
+          mae_mse_list.append((mae, mse, t_epoch, t_batch))
 
-      if by_epoch and t_epoch % by_epoch == 0:
-        feed_dict = {inputs_: test_set.inputs,
-                     outputs_: test_set.outputs}
-        mae, mse = sess.run([_mae, _mse], feed_dict=feed_dict)
-        if verbose:
-          print('mae=%.3f mse=%.3f' % (mae, mse))
-        mae_mse_list.append((t_epoch, mae, mse))
-  mae_mse_list = sorted(mae_mse_list, key=lambda t: (t[2], t[1]))
-  t_epoch, mae, mse = mae_mse_list[0]
+          if cnvg_prefix:
+            test_cnvg.append("%s\t%s" % (mae, mse))
+
+            # feed_dict = {inputs_: train_set.inputs,
+            #              outputs_: train_set.outputs}
+            feed_dict = {inputs_: ref_inputs,
+                         outputs_: ref_outputs}
+            mae, mse = sess.run([_mae, _mse], feed_dict=feed_dict)
+            train_cnvg.append("%s\t%s" % (mae, mse))
+            p_data = (mae, mse)
+            print('                  mae=%.3f mse=%.3f' % p_data)
+
+  mae_mse_list = sorted(mae_mse_list, key=lambda t: (t[1], t[0]))
+  mae, mse, t_epoch, t_batch = mae_mse_list[0]
   if verbose:
-    print('epoch=%d mae=%.3f mse=%.3f' % (t_epoch, mae, mse))
+    p_data = (mae, mse, t_epoch, t_batch)
+    print('mae=%.3f mse=%.3f epoch=%d batch=%d' % p_data)
+
+  if cnvg_prefix:
+    with open(cnvg_prefix + "_train.tsv", "w") as fout:
+      for line in train_cnvg:
+        fout.write("%s\n" % line)
+    with open(cnvg_prefix + "_test.tsv", "w") as fout:
+      for line in test_cnvg:
+        fout.write("%s\n" % line)
+
   return mae, mse
 
 def main():
@@ -117,10 +143,10 @@ def main():
   mae_std = mae_arr.std()
   mse = mse_arr.mean()
   mse_std = mse_arr.std()
-  if verbose:
-    print('%.3f %.3f %.3f %.3f' % (mae, mae_std, mse, mse_std))
-  dir_name = path.basename(data_dir)
-  print('%s %f %f %f %f' % (dir_name, mae, mae_std, mse, mse_std))
+  # if verbose:
+  #   print('%.3f %.3f %.3f %.3f' % (mae, mae_std, mse, mse_std))
+  # dir_name = path.basename(data_dir)
+  # print('%s %f %f %f %f' % (dir_name, mae, mae_std, mse, mse_std))
 
 if __name__ == '__main__':
   main()

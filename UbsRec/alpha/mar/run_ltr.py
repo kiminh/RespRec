@@ -38,6 +38,7 @@ flags.DEFINE_string('std_dev_file', None, '')
 flags.DEFINE_string('weight_file', None, '')
 flags.DEFINE_string('mse_file', None, '')
 flags.DEFINE_integer('eval_var', 0, '')
+flags.DEFINE_string('cnvg_prefix', None, '')
 tf_flags = tf.flags.FLAGS
 tf_flags.keep_probs = eval(tf_flags.keep_probs)
 tf_flags.layer_sizes = eval(tf_flags.layer_sizes)
@@ -123,6 +124,7 @@ def run_once(data_sets):
   opt_type = tf_flags.opt_type
   verbose = tf_flags.verbose
   eval_var = tf_flags.eval_var
+  cnvg_prefix = tf_flags.cnvg_prefix
 
   fine_grain_file = tf_flags.fine_grain_file
   std_dev_file = tf_flags.std_dev_file
@@ -137,6 +139,10 @@ def run_once(data_sets):
     print('nnz_input=%d' % (nnz_input))
     print('nnz_disc_input=%d' % (nnz_disc_input))
     print('tot_cont_input=%d' % (tot_cont_input))
+
+  if cnvg_prefix:
+    train_cnvg = []
+    test_cnvg = []
 
   inputs_ = tf.placeholder(tf.int32, shape=(None, nnz_input))
   outputs_ = tf.placeholder(tf.float32, shape=(None))
@@ -209,6 +215,8 @@ def run_once(data_sets):
         inputs, outputs, disc_inputs, cont_inputs = train_set.next_batch(batch_size)
         ubs_inputs, ubs_outputs, _, _ = valid_set.next_batch(valid_set.data_size)
 
+        ref_inputs, ref_outputs = inputs, outputs
+
         feed_dict = {inputs_: inputs,
                      outputs_: outputs,
                      ubs_inputs_: ubs_inputs,
@@ -235,7 +243,19 @@ def run_once(data_sets):
           if verbose:
             p_data = (t_epoch, t_batch, mae, mse)
             print('epoch=%d batch=%d mae=%.3f mse=%.3f' % p_data)
-          mae_mse_list.append((t_epoch, mae, mse))
+          mae_mse_list.append((mae, mse, t_epoch, t_batch))
+
+          if cnvg_prefix:
+            test_cnvg.append("%s\t%s" % (mae, mse))
+
+            # feed_dict = {inputs_: train_set.inputs,
+            #              outputs_: train_set.outputs}
+            feed_dict = {inputs_: ref_inputs,
+                         outputs_: ref_outputs}
+            mae, mse = sess.run([_mae, _mse], feed_dict=feed_dict)
+            train_cnvg.append("%s\t%s" % (mae, mse))
+            p_data = (mae, mse)
+            print('                  mae=%.3f mse=%.3f' % p_data)
 
           if eval_var:
             _print_eval_var()
@@ -278,17 +298,6 @@ def run_once(data_sets):
 
           if mse_file:
             mse_list.append(mse)
-
-      # if by_epoch and t_epoch % by_epoch == 0:
-      #   feed_dict = {inputs_: test_set.inputs,
-      #                outputs_: test_set.outputs}
-      #   mae, mse = sess.run([_mae, _mse], feed_dict=feed_dict)
-      #   if verbose:
-      #     print('epoch=%d mae=%.3f mse=%.3f' % (t_epoch, mae, mse))
-      #   mae_mse_list.append((t_epoch, mae, mse))
-
-      #   if eval_var:
-      #     _print_eval_var()
     
     if weight_file:
       weight_avg, weight_std = _get_weight_stat(train_set)
@@ -298,33 +307,46 @@ def run_once(data_sets):
     if eval_var:
       _print_eval_var()
 
+  if cnvg_prefix:
+    with open(cnvg_prefix + "_train.tsv", "w") as fout:
+      for line in train_cnvg:
+        fout.write("%s\n" % line)
+    with open(cnvg_prefix + "_test.tsv", "w") as fout:
+      for line in test_cnvg:
+        fout.write("%s\n" % line)
+
   if fine_grain_file:
     with open(fine_grain_file, 'w') as fout:
       for line in fine_grain_list:
         fout.write('%s\n' % (line))
+
   if std_dev_file:
     with open(std_dev_file, 'w') as fout:
       for std_dev in std_dev_list:
         fout.write('%f\n' % (std_dev))
+
   if weight_file:
     with open(weight_file, 'w') as fout:
       for weight_avg in weight_avg_list:
         weight_avg = [str(weight) for weight in weight_avg]
         fout.write('%s\n' % ('\t'.join(weight_avg)))
+
   if mse_file:
     with open(mse_file, 'w') as fout:
       for mse in mse_list:
         fout.write('%f\n' % (mse))
-  mae_mse_list = sorted(mae_mse_list, key=lambda t: (t[2], t[1]))
-  t_epoch, mae, mse = mae_mse_list[0]
+
+  mae_mse_list = sorted(mae_mse_list, key=lambda t: (t[1], t[0]))
+  mae, mse, t_epoch, t_batch = mae_mse_list[0]
   param_str = "inner-lr-" + ut_model.trailing_zero(inner_lr)
   param_str += '_outer-lr-' + ut_model.trailing_zero(outer_lr)
   # param_str += '_' + str(keep_probs).replace(' ', '')
   param_str += '_layer-sizes-' + str(layer_sizes)
+
   if verbose:
     # print('epoch=%d mae=%.3f mse=%.3f %s' % (t_epoch, mae, mse, param_str))
-    p_data = (base_model, meta_model, t_epoch, mae, mse)
-    print('%s %s epoch=%d mae=%.3f mse=%.3f' % p_data)
+    p_data = (base_model, meta_model, mae, mse, t_epoch, t_batch)
+    print('%s %s mae=%.3f mse=%.3f epoch=%d batch=%d' % p_data)
   return mae, mse
 
 def main():
