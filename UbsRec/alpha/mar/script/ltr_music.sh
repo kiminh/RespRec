@@ -20,7 +20,8 @@ opt_type=adagrad
 var_reg=1
 verbose=1
 
-verbose=0
+# verbose=0
+var_reg=0
 n_epoch=6
 by_batch=50
 cnvg_dir=converge

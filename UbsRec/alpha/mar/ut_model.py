@@ -276,8 +276,8 @@ def get_rating(inputs_, outputs_, weights_,
     if weights_ is None:
       loss = 0.5 * tf.reduce_sum(tf.square(errors))
     else:
-      loss = 0.5 * tf.reduce_sum(tf.multiply(weights_, tf.square(errors)))
-      # loss = 0.5 * tf.reduce_sum(tf.divide(tf.square(errors), weights_))
+      # loss = 0.5 * tf.reduce_sum(tf.multiply(weights_, tf.square(errors)))
+      loss = 0.5 * tf.reduce_sum(tf.divide(tf.square(errors), weights_))
     loss += tf_flags.all_reg * (tf.reduce_sum(tf.square(fe)) +
                                 tf.reduce_sum(tf.square(fb)) +
                                 tf.reduce_sum(tf.square(gb)))
@@ -372,6 +372,9 @@ def ltr_param(inputs_, outputs_,
   data_size = valid_set.data_size
 
   ubs_weights = tf.ones([data_size], tf.float32) / float(data_size)
+  ubs_weights = 0.5 * tf.ones([data_size], tf.float32)
+  ubs_weights = tf.ones([data_size], tf.float32)
+
   params, loss, _ = get_rating(inputs_, outputs_, weights,
                   tf_flags, train_set,
                                params=None, reuse=True)
@@ -402,7 +405,7 @@ def ltr_param(inputs_, outputs_,
   ## heuristic weight normalization
   # weights = (0.5 * batch_size) * weights  / tf.reduce_sum(weights)
 
-  return weights, grads_and_vars
+  return weights, grads_and_vars, ubs_loss
 
 def ltr_batch(inputs_, outputs_, 
               ubs_inputs_, ubs_outputs_,

@@ -144,6 +144,9 @@ def run_once(data_sets):
     train_cnvg = []
     test_cnvg = []
 
+    inner_history = []
+    outer_history = []
+
   inputs_ = tf.placeholder(tf.int32, shape=(None, nnz_input))
   outputs_ = tf.placeholder(tf.float32, shape=(None))
   weights_ = tf.placeholder(tf.float32, shape=(None))
@@ -169,7 +172,7 @@ def run_once(data_sets):
       weights, wt_params = ut_model.get_weight(disc_inputs_, cont_inputs_, 
                                                  tf_flags, train_set,
                                                  reuse=False)
-      _weights, grads_and_vars = ut_model.ltr_param(inputs_, outputs_, 
+      _weights, grads_and_vars, wt_loss = ut_model.ltr_param(inputs_, outputs_, 
                                                       ubs_inputs_, ubs_outputs_, 
                                                       disc_inputs_, cont_inputs_,
                                                       weights, wt_params,
@@ -226,13 +229,15 @@ def run_once(data_sets):
         if meta_model == 'batch':
           weights = sess.run(_weights, feed_dict=feed_dict)
         elif (meta_model == 'naive') or (meta_model == 'param'):
-          weights, _ = sess.run([_weights, wt_train_op], feed_dict=feed_dict)
+          weights, _, outer_loss = sess.run([_weights, wt_train_op, wt_loss], feed_dict=feed_dict)
+          outer_loss /= ubs_inputs.shape[0]
         else:
           raise Exception('unknown meta_model %s' % (meta_model))
         feed_dict = {inputs_: inputs,
                      outputs_: outputs,
                      weights_: weights}
-        sess.run(train_op, feed_dict=feed_dict)
+        _, inner_loss = sess.run([train_op, loss], feed_dict=feed_dict)
+        inner_loss /= inputs.shape[0]
 
         t_batch += 1
         if ((by_batch and t_batch % by_batch == 0) or 
@@ -246,16 +251,17 @@ def run_once(data_sets):
           mae_mse_list.append((mae, mse, t_epoch, t_batch))
 
           if cnvg_prefix:
-            test_cnvg.append("%s\t%s" % (mae, mse))
+            # test_cnvg.append("%s\t%s" % (mae, mse))
+            # feed_dict = {inputs_: ref_inputs,
+            #              outputs_: ref_outputs}
+            # mae, mse = sess.run([_mae, _mse], feed_dict=feed_dict)
+            # train_cnvg.append("%s\t%s" % (mae, mse))
+            # p_data = (mae, mse)
+            # print('                  mae=%.3f mse=%.3f' % p_data)
 
-            # feed_dict = {inputs_: train_set.inputs,
-            #              outputs_: train_set.outputs}
-            feed_dict = {inputs_: ref_inputs,
-                         outputs_: ref_outputs}
-            mae, mse = sess.run([_mae, _mse], feed_dict=feed_dict)
-            train_cnvg.append("%s\t%s" % (mae, mse))
-            p_data = (mae, mse)
-            print('                  mae=%.3f mse=%.3f' % p_data)
+            # print("  inner=%.3f outer=%.3f" % (inner_loss, outer_loss))
+            inner_history.append("%s" % inner_loss)
+            outer_history.append("%s" % outer_loss)
 
           if eval_var:
             _print_eval_var()
@@ -308,11 +314,18 @@ def run_once(data_sets):
       _print_eval_var()
 
   if cnvg_prefix:
-    with open(cnvg_prefix + "_train.tsv", "w") as fout:
-      for line in train_cnvg:
+    # with open(cnvg_prefix + "_train.tsv", "w") as fout:
+    #   for line in train_cnvg:
+    #     fout.write("%s\n" % line)
+    # with open(cnvg_prefix + "_test.tsv", "w") as fout:
+    #   for line in test_cnvg:
+    #     fout.write("%s\n" % line)
+
+    with open(cnvg_prefix + "_inner.tsv", "w") as fout:
+      for line in inner_history:
         fout.write("%s\n" % line)
-    with open(cnvg_prefix + "_test.tsv", "w") as fout:
-      for line in test_cnvg:
+    with open(cnvg_prefix + "_outer.tsv", "w") as fout:
+      for line in outer_history:
         fout.write("%s\n" % line)
 
   if fine_grain_file:
