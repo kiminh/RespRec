@@ -49,7 +49,7 @@ ax.legend(loc='upper right', prop={'size': legend_size})
 
 ax.tick_params(axis='both', which='major', labelsize=tick_size)
 ax.set_xlabel('Training epoch', fontsize=label_size)
-ax.set_ylabel("MSE on testing set", fontsize=label_size)
+ax.set_ylabel("Testing MSE", fontsize=label_size)
 
 ax.set_xlim(x.min(), x.max())
 ax.set_xticks(np.arange(0, len(x), len(x) // 5 - 0.1))
