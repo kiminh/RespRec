@@ -25,8 +25,8 @@
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
      inkscape:zoom="0.7"
-     inkscape:cx="547.83914"
-     inkscape:cy="686.42784"
+     inkscape:cx="580.69628"
+     inkscape:cy="172.14213"
      inkscape:document-units="mm"
      inkscape:current-layer="layer1"
      showgrid="false"
@@ -1916,17 +1916,6 @@
          x="359.76086"
          y="-31.201616"
          style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:13.75833321px;font-family:Times;-inkscape-font-specification:'Times Bold';stroke-width:0.26458332">Upper</tspan></text>
-    <text
-       xml:space="preserve"
-       style="font-style:normal;font-weight:normal;font-size:10.58333302px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332"
-       x="359.76086"
-       y="181.49652"
-       id="text12608"><tspan
-         sodipodi:role="line"
-         id="tspan12606"
-         x="359.76086"
-         y="181.49652"
-         style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:13.75833321px;font-family:Times;-inkscape-font-specification:'Times Bold';stroke-width:0.26458332">Inner</tspan></text>
     <image
        y="209.6044"
        x="110"
@@ -2105,5 +2094,16 @@
          x="92.623932"
          y="-38.799183"
          style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:13.75833321px;font-family:Times;-inkscape-font-specification:Times;stroke-width:0.26458332">7. Backward on biased ratings</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-weight:normal;font-size:10.58333302px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332"
+       x="359.73398"
+       y="181.48981"
+       id="text402"><tspan
+         sodipodi:role="line"
+         id="tspan400"
+         x="359.73398"
+         y="181.48981"
+         style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:13.75833321px;font-family:Times;-inkscape-font-specification:'Times Bold';stroke-width:0.26458332">Lower</tspan></text>
   </g>
 </svg>
